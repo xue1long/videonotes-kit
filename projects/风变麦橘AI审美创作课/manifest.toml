@@ -1,0 +1,658 @@
+# 风变麦橘-AI审美创作课 课程清单（videonotes-kit）
+# 源： D:/002-AIGC/002 风变麦橘-AI审美创作课
+# 视频：38 个 mp4（39 源 - 1 重复 31 delogo ≈ 77.5 小时 / 27 GB）
+# 文档：课堂资料 4 项（编剧 txt 1 + 课程资料 pdf 1 + 风格资源 zip 1 + 音效资源 zip 1）
+# 收录策略：
+#   1) 直播课 33 集（1–34 中保留 delogo 版；31 跳过 delogo 仅留普通版）
+#   2) 视频会议 1 集（5麦橘MERJIC）
+#   3) 加餐 1 集（31加餐 3月11日，按时间排在 31 之前）
+#   4) 公开课 3 集（day1/2/3，按编号排末尾）
+# 数据驱动：所有字段由本 manifest 提供，toolkit 不需要改任何代码。
+
+[course]
+name = "风变麦橘AI审美创作课"
+video_root = "D:/002-AIGC/002 风变麦橘-AI审美创作课"
+doc_root = "D:/002-AIGC/002 风变麦橘-AI审美创作课/课堂资料"
+out_root = "D:/000/vidwise/out/风变麦橘AI审美创作课"
+notes_subdir = "steps_pro"
+curated_subdir = "_curated"
+refdoc_subdir = "参考文档"
+assets_subdir = "assets"
+# 文档表引言（manifest 驱动总索引）
+doc_intro = "整理自 D:\\002-AIGC\\002 风变麦橘-AI审美创作课\\课堂资料，按「编剧 / 课程资料 / 风格资源 / 音效资源」四类归档，副本存放于 参考文档/ 子目录（原始目录未改动）。"
+doc_variant_note = "同源变体提示：①直播课 1/3/12/29/34 五期带「（delogo）」后缀——属去水印后重发布的同内容版本，与不带后缀的对应期内容相同（去重后保留这五期 delogo 版）；②31 期有普通版与 delogo 版两个文件，时长内容完全重复，本笔记包仅保留普通版以节省磁盘。"
+
+# 教程导向文案（总索引「如何使用本教程」段）
+learning_path = "本教程是「风变 × 麦橘 MERJIC」联合的 AI 审美创作直播系列（2024-07-18 起，至 2025-04-03 收官），共 33 期正课 + 1 期加餐 + 1 期视频会议 + 3 期公开课。建议：①若时间紧张，先看「公开课 day1–3」建立审美与工具地图；②按时间顺序通读直播课，跟随麦橘老师的实际项目工作流；③重点关注 3 月 11 日加餐、跨期复盘类内容。"
+
+# 系列说明（总索引「系列说明」段）
+series_note = "「直播课」是麦橘 MERJIC 与风变联合的每周直播课，连续 9 个月（2024-07-18 → 2025-04-03），覆盖 AIGC 审美创作的全链路（编剧 / 风格 / 镜头 / 后期 / 调色 / 音效 / 出品）。「视频会议」是 2024-08 麦橘与团队的过程性视频会议。「加餐」是 2025-03-11 在 31 正式课前临时补的一节。「公开课」day1–3 是 2024 年早期面向大众的 3 天集中公开课。"
+
+# 术语对照（待 Tier1 精校完成后回填——本机无 vision/LLM，glossary 必须基于真实转写内容产出，不预编造）
+# [[course.glossary]]
+# term = ""
+# meaning = ""
+
+[draft]
+max_steps = 80
+gap = 45.0
+
+# ---- 视频集 ----
+# seq=序号（保留原始编号语义：01-34 给直播课/会议；31 普通版用 31，31 加餐用 30A 插在 31 之前；公开课 day1-3 用 35-37 排末尾）
+# label=集标签；ep_dir=vidwise 输出目录名；topic=主题（日期+特色，索引可见）；
+# series=系列；level=难度；purpose=一句话定位；keypoints=2-3 个要点
+# source_video=P5 必填，源 mp4 精确路径
+
+[[episodes]]
+seq = "01"
+label = "直播01"
+ep_dir = "直播01.mp4"
+topic = "7月18日直播课（delogo）"
+series = "直播课"
+level = "入门"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/1【风变 x 麦橘】直播课7月18日（周五）（delogo） .mp4"
+purpose = "麦橘 X 风变首期直播课，建立「AI 审美创作」基础认知与工具栈地图。"
+keypoints = [
+  "AI 审美创作的工具地图（Midjourney / SD / ComfyUI）",
+  "风变 × 麦橘课程的整体规划",
+  "首期课程主推方向",
+]
+
+[[episodes]]
+seq = "02"
+label = "直播02"
+ep_dir = "直播02.mp4"
+topic = "7月25日直播课"
+series = "直播课"
+level = "入门"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/2【风变 x 麦橘】直播课7月25日（周五）.mp4"
+purpose = "承接首期，继续深入 AI 审美创作的工具与工作流。"
+keypoints = [
+  "工具细化（生图 / 生视频）",
+  "实际项目演示",
+  "学员问题答疑",
+]
+
+[[episodes]]
+seq = "03"
+label = "直播03"
+ep_dir = "直播03.mp4"
+topic = "8月1日直播课（delogo）"
+series = "直播课"
+level = "入门"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/3【风变 x 麦橘】直播课8月1日（周五）（delogo） .mp4"
+purpose = "8 月首期直播课，进入正式创作阶段。"
+keypoints = [
+  "完整作品案例拆解",
+  "工作流模板化沉淀",
+  "学员实操答疑",
+]
+
+[[episodes]]
+seq = "04"
+label = "直播04"
+ep_dir = "直播04.mp4"
+topic = "8月8日直播课"
+series = "直播课"
+level = "入门"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/4【风变 x 麦橘】直播课8月8日（周五）.mp4"
+purpose = "推进创作工作流，进入更细的步骤级操作。"
+keypoints = [
+  "提示词工程",
+  "风格锁定技巧",
+  "SREF 的引入",
+]
+
+[[episodes]]
+seq = "05"
+label = "直播05"
+ep_dir = "直播05.mp4"
+topic = "麦橘MERJIC视频会议"
+series = "视频会议"
+level = "入门"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/5麦橘MERJIC的视频会议.mp4"
+purpose = "2024-08 麦橘与团队的内部视频会议——过程性内容，可旁听创作背后的决策与讨论。"
+keypoints = [
+  "团队内部对齐",
+  "过程性决策与权衡",
+  "未剪辑原始内容",
+]
+
+[[episodes]]
+seq = "06"
+label = "直播06"
+ep_dir = "直播06.mp4"
+topic = "8月22日直播课"
+series = "直播课"
+level = "入门"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/6【风变 x 麦橘】直播课8月22日（周五）.mp4"
+purpose = "8 月中下旬直播课。"
+keypoints = [
+  "AI 生视频工具实操",
+  "镜头语言",
+  "学员作品点评",
+]
+
+[[episodes]]
+seq = "07"
+label = "直播07"
+ep_dir = "直播07.mp4"
+topic = "8月29日直播课"
+series = "直播课"
+level = "入门"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/7【风变 x 麦橘】直播课8月29日（周五）.mp4"
+purpose = "8 月收官直播课。"
+keypoints = [
+  "月度复盘",
+  "下月计划预告",
+  "学员共创",
+]
+
+[[episodes]]
+seq = "08"
+label = "直播08"
+ep_dir = "直播08.mp4"
+topic = "9月5日直播课"
+series = "直播课"
+level = "入门"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/8【风变 x 麦橘】直播课9月5日（周五）.mp4"
+purpose = "9 月首期直播课。"
+keypoints = [
+  "9 月主题发布",
+  "工具栈更新",
+  "实际创作演示",
+]
+
+[[episodes]]
+seq = "09"
+label = "直播09"
+ep_dir = "直播09.mp4"
+topic = "9月12日直播课"
+series = "直播课"
+level = "入门"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/9【风变 x 麦橘】直播课9月12日（周五）.mp4"
+purpose = "9 月第二期直播课。"
+keypoints = [
+  "提示词迭代方法",
+  "风格控制深化",
+  "学员答疑",
+]
+
+[[episodes]]
+seq = "10"
+label = "直播10"
+ep_dir = "直播10.mp4"
+topic = "9月19日直播课"
+series = "直播课"
+level = "入门"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/10【风变 x 麦橘】直播课9月19日（周五）.mp4"
+purpose = "9 月第三期直播课。"
+keypoints = [
+  "完整短片流程演示",
+  "工具协同",
+  "排错与精修",
+]
+
+[[episodes]]
+seq = "11"
+label = "直播11"
+ep_dir = "直播11.mp4"
+topic = "9月26日直播课"
+series = "直播课"
+level = "入门"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/11【风变 x 麦橘】直播课9月26日（周五）.mp4"
+purpose = "9 月收官直播课。"
+keypoints = [
+  "月度复盘",
+  "下月方向预告",
+  "学员作品集中点评",
+]
+
+[[episodes]]
+seq = "12"
+label = "直播12"
+ep_dir = "直播12.mp4"
+topic = "10月2日直播课（delogo）"
+series = "直播课"
+level = "入门"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/12【风变 x 麦橘】直播课10月2日（周四）（delogo） .mp4"
+purpose = "国庆假期前的直播课（周四）——节奏调整为周四。"
+keypoints = [
+  "周四试播",
+  "工作流模板分享",
+  "学员假期作业建议",
+]
+
+[[episodes]]
+seq = "13"
+label = "直播13"
+ep_dir = "直播13.mp4"
+topic = "10月10日直播课"
+series = "直播课"
+level = "入门"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/13【风变 x 麦橘】直播课10月10日（周五）.mp4"
+purpose = "10 月第二期（恢复周五档）。"
+keypoints = [
+  "工具链更新",
+  "项目案例拆解",
+  "学员实操答疑",
+]
+
+[[episodes]]
+seq = "14"
+label = "直播14"
+ep_dir = "直播14.mp4"
+topic = "10月16日直播课"
+series = "直播课"
+level = "入门"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/14【风变 x 麦橘】直播课10月16日（周四）.mp4"
+purpose = "10 月中旬加场（周四）。"
+keypoints = [
+  "加场补讲",
+  "风格控制进阶",
+  "实操演示",
+]
+
+[[episodes]]
+seq = "15"
+label = "直播15"
+ep_dir = "直播15.mp4"
+topic = "10月24日直播课"
+series = "直播课"
+level = "进阶"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/15【风变 x 麦橘】直播课10月24日（周五）.mp4"
+purpose = "10 月末直播课——进入进阶阶段。"
+keypoints = [
+  "风格一致性控制",
+  "多工具协同",
+  "长流程项目管理",
+]
+
+[[episodes]]
+seq = "16"
+label = "直播16"
+ep_dir = "直播16.mp4"
+topic = "11月7日直播课"
+series = "直播课"
+level = "进阶"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/16【风变 x 麦橘】直播课11月7日（周五）.mp4"
+purpose = "11 月首期直播课。"
+keypoints = [
+  "11 月主题发布",
+  "工具栈深化",
+  "项目展示",
+]
+
+[[episodes]]
+seq = "17"
+label = "直播17"
+ep_dir = "直播17.mp4"
+topic = "11月14日直播课"
+series = "直播课"
+level = "进阶"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/17【风变 x 麦橘】直播课11月14日（周五）.mp4"
+purpose = "11 月第二期直播课。"
+keypoints = [
+  "进阶提示词工程",
+  "风格迁移与融合",
+  "作品精修",
+]
+
+[[episodes]]
+seq = "18"
+label = "直播18"
+ep_dir = "直播18.mp4"
+topic = "11月21日直播课"
+series = "直播课"
+level = "进阶"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/18【风变 x 麦橘】直播课11月21日（周五）.mp4"
+purpose = "11 月第三期直播课。"
+keypoints = [
+  "复杂场景处理",
+  "角色一致性",
+  "多人协作流程",
+]
+
+[[episodes]]
+seq = "19"
+label = "直播19"
+ep_dir = "直播19.mp4"
+topic = "11月28日直播课"
+series = "直播课"
+level = "进阶"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/19【风变 x 麦橘】直播课11月28日（周五）.mp4"
+purpose = "11 月末收官直播课。"
+keypoints = [
+  "月度复盘",
+  "Q4 收官规划",
+  "下月主题预告",
+]
+
+[[episodes]]
+seq = "20"
+label = "直播20"
+ep_dir = "直播20.mp4"
+topic = "12月5日直播课"
+series = "直播课"
+level = "进阶"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/20【风变 x 麦橘】直播课12月05日（周五）.mp4"
+purpose = "12 月首期直播课。"
+keypoints = [
+  "12 月主题",
+  "年终项目启动",
+  "工具栈总结",
+]
+
+[[episodes]]
+seq = "21"
+label = "直播21"
+ep_dir = "直播21.mp4"
+topic = "12月12日直播课"
+series = "直播课"
+level = "进阶"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/21【风变 x 麦橘】直播课12月12日（周五）.mp4"
+purpose = "12 月第二期直播课。"
+keypoints = [
+  "项目进展展示",
+  "技术难点突破",
+  "学员答疑",
+]
+
+[[episodes]]
+seq = "22"
+label = "直播22"
+ep_dir = "直播22.mp4"
+topic = "12月19日直播课"
+series = "直播课"
+level = "进阶"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/22【风变 x 麦橘】直播课12月19日（周五）.mp4"
+purpose = "12 月第三期直播课（年终冲刺）。"
+keypoints = [
+  "年终项目重点推进",
+  "复盘与沉淀",
+  "下年规划",
+]
+
+[[episodes]]
+seq = "23"
+label = "直播23"
+ep_dir = "直播23.mp4"
+topic = "12月26日直播课"
+series = "直播课"
+level = "进阶"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/23【风变 x 麦橘】直播课12月26日（周五）.mp4"
+purpose = "12 月末收官直播课。"
+keypoints = [
+  "年终总结",
+  "Q1 规划",
+  "学员年度作品汇总",
+]
+
+[[episodes]]
+seq = "24"
+label = "直播24"
+ep_dir = "直播24.mp4"
+topic = "1月9日直播课"
+series = "直播课"
+level = "进阶"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/24【风变 x 麦橘】直播课1月9日（周五）.mp4"
+purpose = "2025 年首期直播课。"
+keypoints = [
+  "新年规划",
+  "工具栈新版本",
+  "Q1 主题发布",
+]
+
+[[episodes]]
+seq = "25"
+label = "直播25"
+ep_dir = "直播25.mp4"
+topic = "1月16日直播课"
+series = "直播课"
+level = "进阶"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/25【风变 x 麦橘】直播课1月16日（周五）.mp4"
+purpose = "1 月第二期直播课。"
+keypoints = [
+  "项目实战",
+  "技术深化",
+  "学员共创",
+]
+
+[[episodes]]
+seq = "26"
+label = "直播26"
+ep_dir = "直播26.mp4"
+topic = "1月23日直播课"
+series = "直播课"
+level = "进阶"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/26【风变 x 麦橘】直播课1月23日（周五）.mp4"
+purpose = "1 月第三期直播课。"
+keypoints = [
+  "风格控制成熟期",
+  "流程模板化",
+  "学员答疑",
+]
+
+[[episodes]]
+seq = "27"
+label = "直播27"
+ep_dir = "直播27.mp4"
+topic = "1月30日直播课"
+series = "直播课"
+level = "进阶"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/27【风变 x 麦橘】直播课1月30日（周五）.mp4"
+purpose = "1 月末收官直播课。"
+keypoints = [
+  "月度复盘",
+  "Q1 中期规划",
+  "下月主题预告",
+]
+
+[[episodes]]
+seq = "28"
+label = "直播28"
+ep_dir = "直播28.mp4"
+topic = "2月6日直播课"
+series = "直播课"
+level = "进阶"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/28【风变 x 麦橘】直播课2月6日（周五）.mp4"
+purpose = "2 月首期（春节后）直播课。"
+keypoints = [
+  "春节后启动",
+  "新工具引入",
+  "项目重启",
+]
+
+[[episodes]]
+seq = "29"
+label = "直播29"
+ep_dir = "直播29.mp4"
+topic = "2月27日直播课（delogo）"
+series = "直播课"
+level = "进阶"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/29【风变 x 麦橘】直播课2月27日（周五）（delogo） .mp4"
+purpose = "2 月末直播课（春节后恢复节奏）。"
+keypoints = [
+  "项目推进",
+  "技术沉淀",
+  "学员作品集中点评",
+]
+
+[[episodes]]
+seq = "30"
+label = "直播30"
+ep_dir = "直播30.mp4"
+topic = "3月6日直播课"
+series = "直播课"
+level = "进阶"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/30【风变 x 麦橘】直播课3月6日（周五）.mp4"
+purpose = "3 月首期直播课。"
+keypoints = [
+  "3 月主题发布",
+  "项目收官预热",
+  "工具栈最终化",
+]
+
+[[episodes]]
+seq = "30A"
+label = "加餐_31"
+ep_dir = "加餐_31.mp4"
+topic = "3月11日加餐直播"
+series = "加餐"
+level = "进阶"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/31加餐【风变 x 麦橘】直播课3月11日.mp4"
+purpose = "31 期前的临时加餐——补充关键内容。"
+keypoints = [
+  "加餐补讲",
+  "关键技术要点",
+  "为 31 期做铺垫",
+]
+
+[[episodes]]
+seq = "31"
+label = "直播31"
+ep_dir = "直播31.mp4"
+topic = "3月13日直播课"
+series = "直播课"
+level = "进阶"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/31【风变 x 麦橘】直播课3月13日（周五）.mp4"
+purpose = "3 月中旬直播课。"
+keypoints = [
+  "承接加餐内容",
+  "项目推进",
+  "学员答疑",
+]
+
+[[episodes]]
+seq = "32"
+label = "直播32"
+ep_dir = "直播32.mp4"
+topic = "3月20日直播课"
+series = "直播课"
+level = "进阶"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/32【风变 x 麦橘】直播课3月20日（周五）.mp4"
+purpose = "3 月第三期直播课。"
+keypoints = [
+  "技术深化",
+  "复盘与沉淀",
+  "学员作品点评",
+]
+
+[[episodes]]
+seq = "33"
+label = "直播33"
+ep_dir = "直播33.mp4"
+topic = "3月27日直播课"
+series = "直播课"
+level = "进阶"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/33【风变 x 麦橘】直播课3月27日（周五）.mp4"
+purpose = "3 月末收官直播课。"
+keypoints = [
+  "Q2 收官准备",
+  "项目终稿",
+  "学员答疑",
+]
+
+[[episodes]]
+seq = "34"
+label = "直播34"
+ep_dir = "直播34.mp4"
+topic = "4月3日直播课（delogo）"
+series = "直播课"
+level = "进阶"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/34【风变 x 麦橘】直播课4月3日（周五）（delogo）.mp4"
+purpose = "系列收官直播课（最后一期）。"
+keypoints = [
+  "系列总结",
+  "完结项目展示",
+  "学员长期支持安排",
+]
+
+[[episodes]]
+seq = "35"
+label = "公开课1"
+ep_dir = "公开课1.mp4"
+topic = "风变x麦橘公开课 day1"
+series = "公开课"
+level = "入门"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/风变 x 麦橘公开课 day1.mp4"
+purpose = "面向大众的 3 天公开课 Day 1——AI 审美创作入门与工具地图。"
+keypoints = [
+  "AI 审美创作全景",
+  "工具栈总览（生图/生视频/后期）",
+  "学习路径建议",
+]
+
+[[episodes]]
+seq = "36"
+label = "公开课2"
+ep_dir = "公开课2.mp4"
+topic = "风变x麦橘公开课 day2"
+series = "公开课"
+level = "入门"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/风变 x 麦橘公开课 day2.mp4"
+purpose = "公开课 Day 2——生图工具与风格控制。"
+keypoints = [
+  "Midjourney / SD 实战",
+  "SREF 风格锁定",
+  "提示词工程基础",
+]
+
+[[episodes]]
+seq = "37"
+label = "公开课3"
+ep_dir = "公开课3.mp4"
+topic = "风变x麦橘公开课 day3"
+series = "公开课"
+level = "入门"
+source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/风变 x 麦橘公开课 day3.mp4"
+purpose = "公开课 Day 3——生视频与项目级工作流。"
+keypoints = [
+  "AI 生视频工具",
+  "剪辑与后期",
+  "完整项目从 0 到 1 演示",
+]
+
+# ---- 参考文档 ----
+# code=序号；category=类别（编剧/课程资料/风格资源/音效资源）；src=相对 doc_root；dest=目标文件名
+# note=目录表「说明」一列；detail=文末「补充参考文档说明」逐条正文
+
+[[docs]]
+code = "R01"
+category = "编剧"
+src = "2026山音短片编剧大师.txt"
+dest = "R01_编剧_2026山音短片编剧大师.txt"
+note = "山音叙事短片编剧 Agent：6 步工作流（破题→人物→结构→对白→节奏→成稿），5-10 分钟短片"
+detail = """山音叙事短片编剧 Agent，定位 5-10 分钟短片创作，核心理念：以视觉构建文本，以戏剧动作为单位，富有留白意味的潜台词。6 步工作流：① 破题与核心动作（目标 Goal + 阻碍 Conflict）；② 人物深度与弧光（外在需求 Want vs 内在欲望 Need）；③ 结构大纲（四段式：起因/发展/高潮/结局 + 激励事件 + 一切尽失 All is Lost）；④ 场景与对白（潜台词 / 动作化）；⑤ 节奏与情绪曲线；⑥ 完整成稿与自检表。每步完成后 Agent 暂停等用户「通过/修改/自检」指令，禁止一次性生成。"""
+
+[[docs]]
+code = "R02"
+category = "课程资料"
+src = "麦橘 · 数字女娲计划.pdf"
+dest = "R02_课程资料_麦橘_数字女娲计划.pdf"
+note = "麦橘 · 数字女娲计划（WPS 出 PDF，2026-01-09 创建，原始 WPS 内嵌未抽取）"
+detail = """麦橘发布的「数字女娲计划」方法论 PDF（A4 横版，WPS for Windows 创建），涵盖 AI 创作相关的核心方法/计划内容，需用 PDF 阅读器打开。"""
+
+[[docs]]
+code = "R03"
+category = "风格资源"
+src = "SREF精选图.zip"
+dest = "R03_风格资源_SREF精选图.zip"
+note = "Midjourney SREF（Style Reference）精选参考（约 52MB，ZIP 归档）"
+detail = """精选 SREF 代码集合，ZIP 归档。SREF 是 Midjourney 的「风格参考」参数，可在生图时作为整体视觉风格的快速锚定。本笔记包仅复制归档，不内部分类索引。"""
+
+[[docs]]
+code = "R04"
+category = "音效资源"
+src = "sound.zip"
+dest = "R04_音效资源_sound.zip"
+note = "课程配套音效素材大合集（约 7.9GB，ZIP 归档）"
+detail = """课程配套音效素材 ZIP（7.9GB），本笔记包仅复制归档，未做内部分类索引——按需解压使用。"""
+
+# ---- Tier2 可选本地 LLM 精校（默认关） ----
+[llm]
+enabled = false
+base_url = "http://127.0.0.1:11434"
+model = "qwen2.5:7b"
+api_key_env = ""
+timeout = 60

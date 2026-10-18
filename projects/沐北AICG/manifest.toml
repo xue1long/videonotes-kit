@@ -1,0 +1,308 @@
+# 沐北AICG 课程清单（videonotes-kit）
+# TOML 格式，Python 3.11 tomllib 直接读取，免装 PyYAML。
+# 所有相对路径均相对于 course.out_root / course.doc_root 拼接。
+
+[course]
+name = "沐北AICG"
+video_root = "D:/002-AIGC/沐北AICG"
+doc_root = "D:/002-AIGC/沐北AICG/文档"
+out_root = "D:/000/vidwise/out/沐北AICG"
+notes_subdir = "steps_pro"
+curated_subdir = "_curated"
+refdoc_subdir = "参考文档"
+assets_subdir = "assets"
+# 以下两行为 index 增强文案（原人工写在总索引里的段落，现固化进 manifest，实现「总索引无需手改」）
+doc_intro = "整理自 D:\\002-AIGC\\沐北AICG\\文档，按「编剧 / 分镜 / 资产库 / 资料库」四类归档，副本存放于 参考文档/ 子目录（原始目录未改动）。"
+doc_variant_note = "同源变体提示：①编剧类 R01（FINAL txt）与 R02（R6 SKILL）同源，建议以更新的 R6 为准；②资产库类 R05（顶配 FINAL v4）与 R06（通用版 v2.2）为同一 Skill 的两种取用版本，按需选择。"
+
+# ---- 教程导向文案（index「如何使用本教程」段，manifest 驱动，无需手改） ----
+learning_path = "本教程分两套：①**基础系列**（01–05）打工具与流程认知，零基础先建立「AI 视频零件」概念；②**失焦系列**（06–10）以「失焦」这部 AI 电影为完整案例的进阶实战，美术与镜头语言密度高。**推荐顺序：按序号 01→10 通读**，先基础后失焦；若只看实战可直奔失焦系列，但建议先扫一遍基础_3（机械飞升流）建立「产物皆来自大模型」的创作观。"
+series_note = "「基础」与「失焦」是沐北两套独立课程：基础讲通用零件与流程；失焦以单部 AI 电影（失焦）为贯穿案例，失焦一 / 失焦二 为同一案例的上下篇（一 = 前期剧本分镜美术，二 = 后期资产收尾 / 剪辑 / 调色）。"
+
+# ---- 术语对照（黑话 → 真实含义；index 自动生成「术语对照」段） ----
+[[course.glossary]]
+term = "九宫格 / 九宫阁"
+meaning = "把提示词拆成 3×3 九张分镜图的生图 / 排版法"
+[[course.glossary]]
+term = "垫图"
+meaning = "图生图时先放一张参考图，让结果沿用其构图 / 角色"
+[[course.glossary]]
+term = "转会"
+meaning = "图生图二次生成（基于已有图改细节）"
+[[course.glossary]]
+term = "首尾针"
+meaning = "两段不连贯视频之间补 4–6 秒衔接镜头"
+[[course.glossary]]
+term = "锁针"
+meaning = "生视频时锁定某一参考帧 / 元素不变"
+[[course.glossary]]
+term = "抽卡"
+meaning = "用随机种子批量生成多张图再挑满意的（圈内说法）"
+[[course.glossary]]
+term = "抽脸"
+meaning = "从生成图里提取干净的人物面部"
+[[course.glossary]]
+term = "洗图"
+meaning = "用超分 / 重绘把「脏图」修干净"
+[[course.glossary]]
+term = "定妆照"
+meaning = "人物设定图，用于固定角色外观"
+[[course.glossary]]
+term = "风镜的风诀"
+meaning = "小说转剧本 / 分镜的专属指令"
+[[course.glossary]]
+term = "即梦 / 吉梦"
+meaning = "字节即梦（Seedance 2.0 视频生成）"
+[[course.glossary]]
+term = "Nano Banana（大香蕉）"
+meaning = "Google 图像生成模型（Gemini 系）"
+[[course.glossary]]
+term = "Gemini"
+meaning = "Google 多模态大模型"
+[[course.glossary]]
+term = "Codex"
+meaning = "OpenAI Codex，片中用来改图、写 Skill、出 LUT 提示词"
+[[course.glossary]]
+term = "Meet Journey"
+meaning = "生图工具（Midjourney 类，拼团）"
+[[course.glossary]]
+term = "MiniMax"
+meaning = "TTS 语音合成"
+[[course.glossary]]
+term = "大波罗"
+meaning = "生视频工具（课程黑话，具体产品以视频为准）"
+
+[draft]
+max_steps = 80
+gap = 45.0
+
+# ---- 视频集：seq=序号, label=集标签, ep_dir=vidwise 输出目录名, topic=主题
+# series=所属系列, level=难度, purpose=一句话定位, keypoints=2–3 个要点（index「各集概要」统一体例来源） ----
+[[episodes]]
+seq = "01"
+label = "基础_1"
+ep_dir = "基础_1.mp4"
+topic = "剪映剪辑基础"
+series = "基础"
+level = "入门"
+source_video = "D:/002-AIGC/沐北AICG/基础/1.mp4"
+purpose = "用剪映做「卡点混剪」的入门，建立「先想画面再剪、音效剥离重做」的剪辑直觉。"
+keypoints = [
+  "抽卡阶段先在脑内预想画面组合，再拼片段",
+  "原音效剥离重做（AI 音效 / 人声分离 / 音效库）",
+  "特效转场提升观感 + 对嘴型剪裁 + 高燃配乐",
+]
+
+[[episodes]]
+seq = "02"
+label = "基础_2"
+ep_dir = "基础_2.mp4"
+topic = "小说转AI视频九宫阁流水线"
+series = "基础"
+level = "入门"
+source_video = "D:/002-AIGC/沐北AICG/基础/2.mp4"
+purpose = "把一段小说变成 AI 视频的「抄作业」流水线，重点理解每一步在干什么。"
+keypoints = [
+  "风镜的风诀：小说→剧本→风镜脚本",
+  "九宫阁指令丢 Gemini 出九宫格题词 → 大香蕉出三分镜图",
+  "大波罗生视频（锁针分阙、9:16、加画风指令）",
+]
+
+[[episodes]]
+seq = "03"
+label = "基础_3"
+ep_dir = "基础_3.mp4"
+topic = "机械飞升流AI电影全流程"
+series = "基础"
+level = "入门"
+source_video = "D:/002-AIGC/沐北AICG/基础/3.mp4"
+purpose = "机械飞升流没有固定流程、产物皆来自大模型——建立「给好人设、说清要什么、反复改」的创作观。"
+keypoints = [
+  "大模型写剧本 → 拆 40 个 15s bit 分镜",
+  "提取场景/人物/道具建资产库",
+  "Nano Banana 生图 → 即梦(Seedance 2.0) 抽视频",
+]
+
+[[episodes]]
+seq = "04"
+label = "基础_4"
+ep_dir = "基础_4.mp4"
+topic = "生产组装站位首尾针超清"
+series = "基础"
+level = "入门"
+source_video = "D:/002-AIGC/沐北AICG/基础/4.mp4"
+purpose = "抽视频一次只 15 秒，讲清「生产/组装/站位/首尾针」四类人工控连贯性的手法。"
+keypoints = [
+  "已有图时删题词里多余形象描述，避免与图「打架」",
+  "同场景换位 → 截上一帧艾特「仅参考站位」",
+  "接不好用「首尾针」补 4–6 秒衔接；附「小说转剧本万能版」skill",
+]
+
+[[episodes]]
+seq = "05"
+label = "基础_5"
+ep_dir = "基础_5.mp4"
+topic = "MiniMax女巫配音"
+series = "基础"
+level = "入门"
+source_video = "D:/002-AIGC/沐北AICG/基础/5.mp4"
+purpose = "为角色选 TTS 音色：对比多款后选定 MiniMax 做「尖锐又沙哑的女巫声」。"
+keypoints = [
+  "对话生成声音特质 → 音色设计建模",
+  "语音合成输入台词 + 调节力量感/混响/情绪",
+  "音乐创作页生成片尾曲",
+]
+
+[[episodes]]
+seq = "06"
+label = "失焦一_1"
+ep_dir = "失焦一_1.mp4"
+topic = "剧本分镜抽卡改图"
+series = "失焦一"
+level = "进阶"
+source_video = "D:/002-AIGC/沐北AICG/失焦一/1.mp4"
+purpose = "以「失焦」电影为案例，走通 剧本→分镜→抽卡→改图 的落地链路。"
+keypoints = [
+  "编剧工具(scale)出剧本；读剧本时脑海预演景别机位",
+  "分镜去抽卡（图生图）得分镜图、垫自己场景改细节",
+  "Codex 改图修穿帮；吉梦生视频（720P 质感差、图要清爽）",
+]
+
+[[episodes]]
+seq = "07"
+label = "失焦一_2"
+ep_dir = "失焦一_2.mp4"
+topic = "美术资产库调色LUT分镜衔接"
+series = "失焦一"
+level = "进阶"
+source_video = "D:/002-AIGC/沐北AICG/失焦一/2.mp4"
+purpose = "美术占成品 70%——讲清「固定画风、人物打光、洗图、调色 LUT、分镜衔接」五件事。"
+keypoints = [
+  "画风对标电影（沙丘/降临），资产库 scale 提取全局基调约束全片",
+  "人物打光（男伦勃朗/女蝴蝶光）+ 发丝清爽；脏图用 Nano Banana 洗图",
+  "对标电影影调生成 LUT 统一调色；衔接靠「跨景别换机位」",
+]
+
+[[episodes]]
+seq = "08"
+label = "失焦一_3"
+ep_dir = "失焦一_3.mp4"
+topic = "剪辑实战飞机怪兽"
+series = "失焦一"
+level = "进阶"
+source_video = "D:/002-AIGC/沐北AICG/失焦一/3.mp4"
+purpose = "拿一段已剪好的飞机怪兽戏，逐镜讲「为什么这么剪」——画面好看容易，戏要「演」出来。"
+keypoints = [
+  "音效最高点卡断点制造情绪；希区柯克变焦一句提示词",
+  "Bit 间做匹配图形转场；用镜头（不用人名条）交代人物",
+  "怪兽从黑洞出用低机位仰拍；音乐断点用上升音效衔接",
+]
+
+[[episodes]]
+seq = "09"
+label = "失焦二_1"
+ep_dir = "失焦二_1.mp4"
+topic = "AI电影美术实操"
+series = "失焦二"
+level = "进阶"
+source_video = "D:/002-AIGC/沐北AICG/失焦二/1.mp4"
+purpose = "完整 AI 电影美术实操：从工具准备到剧本、资产库、场景图、人物打光、机位识别。"
+keypoints = [
+  "编剧一体化 Skill 写剧本（大纲→改→第二阶段出本）→ 读剧本赋灵魂",
+  "资产库对标影调（沙丘/太空神性）；Meet Journey 出场景图（House Style 怪异化、影调一致）",
+  "人物图打光（灰棚+三光+哑光、男硬女柔）；抽脸洗图；机位识别",
+]
+
+[[episodes]]
+seq = "10"
+label = "失焦二_2"
+ep_dir = "失焦二_2.mp4"
+topic = "美术收尾写Skill镜头衔接调色LUT"
+series = "失焦二"
+level = "进阶"
+source_video = "D:/002-AIGC/沐北AICG/失焦二/2.mp4"
+purpose = "美术收尾：巨物生图、写资产库 Skill、分镜提示词结构、剪辑衔接、一镜到底、调色 LUT。"
+keypoints = [
+  "巨物生图（极低角仰拍+参照物+血肉感）；资产库 Skill 写成集合体（人物/场景/道具/巨物）",
+  "分镜提示词固定结构（风格+场景+主体+站位秒数+运镜，禁 BGM/字幕）",
+  "衔接靠跨景别跨机位/站位参考图；LUT 由电影截图→提示词→.cube 固定影调",
+]
+
+# ---- 参考文档：code=序号, category=类别, src=相对 doc_root, dest=目标文件名
+# note = 目录表「说明」一列；detail = 文末「补充参考文档说明」逐条正文（缺省回退 note）
+# 两者均由 manifest 驱动，index 自动生成，无需手改总索引。 ----
+[[docs]]
+code = "R01"
+category = "编剧"
+src = "# 顶级结构化电影编剧执行指令.txt"
+dest = "R01_编剧_顶级结构化电影编剧执行指令.txt"
+note = "电影编剧执行 Skill（FINAL 硬执行版）：大纲→剧本一体，强约束不润色用户锁定内容"
+detail = """纯 txt 版编剧 Skill，强调「百分百无遗漏硬执行」——用户锁定的设定/台词/结局等一律不擅改，直接产出可拍、可拆分镜的结构化剧本。"""
+
+[[docs]]
+code = "R02"
+category = "编剧"
+src = "skill/电影编剧一体版_R6_SKILL.md"
+dest = "R02_编剧_电影编剧一体版_R6_SKILL.md"
+note = "编剧室一体版 R6（frontmatter `film-writers-room-unified`），较 R01 更新的合并版"
+detail = """把「大纲开发」与「编剧室执行」合并为一的 R6 版，frontmatter `name: film-writers-room-unified`。分两阶段：阶段一交付大纲交接包后停车，收到「剧本开始」进入阶段二逐批写正文。较 R01 更完整、机制更细（优先级裁决、风格引擎、网感引擎），**建议以本版为准**。"""
+
+[[docs]]
+code = "R03"
+category = "分镜"
+src = "分镜焚决.txt"
+dest = "R03_分镜_分镜焚决.txt"
+note = "分镜焚诀：剧本→Seedance 2.0 分镜提示词，按 15s / Beat 拆分"
+detail = """课程「焚诀」配套，把剧本/梗概整理成 Seedance 2.0 可直接执行的视频分镜提示词；严格「不修改剧本/台词/顺序」，按 15 秒一个 Beat 拆分，输出含风格/场景/画面/声音。"""
+
+[[docs]]
+code = "R04"
+category = "分镜"
+src = "skill/分镜师_30秒版_SKILL完整版.md"
+dest = "R04_分镜_分镜师_30秒版_SKILL完整版.md"
+note = "分镜师 Skill（`storyboard-director`）：30s 电影级 Beat 提示词，多智能体分工"
+detail = """frontmatter `name: storyboard-director`，多智能体（Story Lock / Drama Function / Director / 摄影 / 表演 / 连续性 / AI 翻译）协作产出 30 秒电影级 Beat 提示词，分 `风格 / 导演意图 / 光影 / 镜头调度 / 画面内容 / 声音 / 禁止项` 字段。"""
+
+[[docs]]
+code = "R05"
+category = "资产库"
+src = "顶级真人剧 AI 资产库架构师总指令.txt"
+dest = "R05_资产库_顶级真人剧AI资产库架构师总指令.txt"
+note = "资产库架构师总指令 FINAL v4（顶配版，剧本+分镜双源扫描）"
+detail = """顶配版，剧本+分镜双源扫描，把内容拆成可直接用于 AI 生图/图生图/视频参考的真人剧资产库提示词（人物/场景/道具/巨物等）。"""
+
+[[docs]]
+code = "R06"
+category = "资产库"
+src = "skill/顶级真人剧 AI 资产库架构师总指令通用版。.txt"
+dest = "R06_资产库_顶级真人剧AI资产库架构师总指令_通用版.txt"
+note = "同上通用版 v2.2（同 Skill 另一取用版，非重复文件）"
+detail = """同一 Skill 的通用取用版，适用面更广（未锁定具体片型），与 R05 择一即可。"""
+
+[[docs]]
+code = "R07"
+category = "资料库"
+src = "焚诀课件文档.xlsx"
+dest = "R07_资料库_焚诀课件文档.xlsx"
+note = "焚诀配套课件：九宫格图生成、关键帧 GEM/GEN 开局指令、生图加文字指令"
+detail = """分镜焚诀的课件/指令集，含九宫格图生成、关键帧 GEM 开局指令、关键帧生成图片 GEN 开局指令、生图加文字指令等。"""
+
+[[docs]]
+code = "R08"
+category = "资料库"
+src = "镜头语言资料库.xlsx"
+dest = "R08_资料库_镜头语言资料库.xlsx"
+note = "镜头语言资料库：全系景别中英文术语、技术定义、经典片例"
+detail = """镜头语言参考表，列全系景别（大远景/全景/中景/近景/特写…）的中英文术语、画面界线与技术定义、核心叙事功能与心理暗示、经典电影实战应用（Case Study）。"""
+
+# ---- Tier2 可选本地 LLM 精校（默认关，不影响纯本地链路） ----
+# 仅当本机接入本地对话/视觉模型（如 Ollama 暴露 OpenAI 兼容接口）时启用。
+# enabled=false 时 curate 不调用任何网络，draft 半成品保持原样待人工润色。
+# 启用后：notes curate 会对每步正文调用 base_url 的 /v1/chat/completions 做润色；
+# 调用失败或超时自动回退原文，不阻断管线。
+[llm]
+enabled = false
+base_url = "http://127.0.0.1:11434"
+model = "qwen2.5:7b"
+api_key_env = ""
+timeout = 60

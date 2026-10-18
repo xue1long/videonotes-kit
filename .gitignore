@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.venv/
+venv/
+
+# 测试
+.pytest_cache/
+.coverage
+.mypy_cache/
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# 临时文件（AGENT.md §3.1 沙箱约定）
+*.tmp
+*.bak
+_*.py
+_*.txt
+_*.log
+/__pycache__/
+**/__pycache__/
+
+# 产物（每次 build 都能重建，体积大不入仓）
+# out/ 含 10 集精校笔记 + 8 文档 + 92 帧 + 4.8GB 源 mp4 + play.html
+# 收件人通过 `python notes.py <课程> build` 自重建
+out/
