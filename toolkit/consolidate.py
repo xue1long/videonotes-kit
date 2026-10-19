@@ -319,10 +319,12 @@ def gen_play_page(mf, notes_root=None):
 
 
 def build_all(mf, notes_root=None):
-    """build 全流程：docs → source → notes → index → play page。"""
-    from . import docs as D, index as I
+    """build 全流程：docs → source → notes → index → play page → notes_view (三栏笔记浏览器)。"""
+    from . import docs as D, index as I, notes_view as V
     D.import_docs(mf, notes_root)
     copy_source(mf, notes_root)
     collect(mf, notes_root)
     I.build_index(mf, notes_root)
     gen_play_page(mf, notes_root)
+    # 三栏笔记浏览器（NV.1）：所有笔记预渲染内联，零 fetch/双击 file:// 可用
+    V.build_notes_view(mf, notes_root)

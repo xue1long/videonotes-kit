@@ -239,6 +239,24 @@ def cmd_verify(mf, args):
         else:
             print(f"  play.html 存在，含 {len(mf['episodes'])} 集 label")
 
+    # ---- P8 校验：notes.html 三栏笔记浏览器存在 + 含全部集 label + 无外部 CDN ----
+    view_path = os.path.join(live, "notes.html")
+    view_ok = os.path.isfile(view_path) and os.path.getsize(view_path) > 0
+    if not view_ok:
+        source_ok = False
+        print("  MISSING notes.html（跑 notes build 生成）")
+    else:
+        body = open(view_path, encoding="utf-8").read()
+        missing_eps = [ep["label"] for ep in mf["episodes"] if ep["label"] not in body]
+        if missing_eps:
+            source_ok = False
+            print("  notes.html 缺集 label:", missing_eps)
+        elif "fetch(" in body:
+            source_ok = False
+            print("  notes.html 含 fetch( —— 会破坏 file:// 双击可用性")
+        else:
+            print(f"  notes.html 存在（{os.path.getsize(view_path)//1024} KB），含 {len(mf['episodes'])} 集 label")
+
     ok = draft_ok and sub_ok and not issues and asset_missing == 0 and fragile == 0 and source_ok
     print("VERIFY", "PASS" if ok else "FAIL（详见上方）")
 

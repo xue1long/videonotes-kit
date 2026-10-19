@@ -42,7 +42,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > 本段为本仓 (videonotes-kit) 整改历史。日期格式 `YYYY-MM-DD`；子节按主题分块。
 >
-> 关键时间锚：P1=骨架去硬编码；P2=图片自包含；P3=精校提效；P4=教程化；P5=视频+时间轴；P6=模板真接代码；P7=路径迁移。
+> 关键时间锚：P1=骨架去硬编码；P2=图片自包含；P3=精校提效；P4=教程化；P5=视频+时间轴；P6=模板真接代码；P7=路径迁移；P8=三栏笔记浏览器。
+
+## [2026-10-19 · 三栏笔记浏览器 notes.html (P8)]
+
+**动机**：直接看 `steps_pro/*.md` 要人肉在 19 篇之间切换、点不开图片与时间轴链接。做一个双击即可用的本地笔记阅读页。
+
+### Added
+
+- 新建 `toolkit/notes_view.py`（零第三方依赖，标准库 `re`）：
+  - 自写 mini markdown → HTML 渲染器：标题 / 段落 / 有序无序列表（**2 空格缩进嵌套**）/ 表格（跳过 `---` 分隔行）/ 代码块 / 引用块 / 分割线 / 图片 / 链接 / 行内 `**粗体**` 与 `` `代码` ``
+  - `[▶ m:ss](play.html?ep=…&t=N)` 时间轴链接识别（兼容半角/全角冒号），渲染为 `.play-link` 按钮
+  - `build_notes_view(mf)`：把全部笔记 + 总索引**预渲染内联**为单个 `notes.html`（~450–500 KB），切换笔记为纯 DOM 显隐，**零 fetch / 零 CDN**，双击 `file://` 可用
+  - 三栏布局：左 = 总索引入口 + 按 `series` 分组的集列表（当前集高亮）；中 = 当前笔记正文；右 = 当前笔记的时间轴跳转按钮列表
+- `toolkit/consolidate.build_all()` 末尾调用 `notes_view.build_notes_view()`——`notes build` 一条命令同时产出 `notes.html`
+- `AGENT.md` §2 交付物树 + §6 模块地图补 `notes_view.py`
+- `README.notes.md` §12 产物结构补 `notes.html`；新增 §14「三栏笔记浏览器」说明
+
+### Fixed（实现过程中）
+
+- 行内 `**bold**` / `` `code` `` 未渲染：`render_inline` 改为「raw 输入 + 逐段自身 escape」，避免上游预 escape 破坏 `&t=` 匹配
+- 表格被拆散：`flush_table()` 在表格分支入口被误调用，导致每行单独成表
+- 嵌套列表被拆成多个 `<ol>`/`<ul>`：改为按块收集 + 递归渲染，输出合法 `<ol><li>…<ul><li>…</li></ul></li></ol>`
+
+### 验收
+
+- AI短剧赛道：20 个 article（1 总索引 + 19 笔记）、185 个 `.play-link`、185 张图、141 张表、19 个代码块、213 个引用、1192 处 `<strong>`；`**` 字面残留 0
+- 无外部 CDN / 无 `fetch(` / 无模板占位符残留；`file://` 直接可开
+
+### Iteration（用户反馈迭代）
+
+1. **分割条可拖动**：三栏 `grid` 改 `var(--w-left) 4px 1fr 4px var(--w-right)`，两个 `.splitter` 支持拖拽调宽（左 150–460 / 右 200–560），`localStorage` 持久化，双击复位 240/280。
+2. **右栏顶部内嵌播放器 + 时间轴内嵌播放（弃二级页）**：`<video src="source/<系列>/<原名>.mp4">`（包内副本）；时间轴从 `<a target="_blank">跳 play.html` 改 `<button data-t>`：点击 `currentTime = t; play()`，当前条目高亮；`loadedmetadata` 后再 seek。正文内 `▶ m:ss` 跳 play.html 链接按原设计保留。
+3. **时间轴条目加标题**：`_extract_titles()` 从图链 `![步骤 N 截图 XmYYs · 描述](…)` 取 `·` 后半段，按 `XmYYs` 时间戳匹配（首次出现优先），无描述显示灰色 `—`。**183/183 全部命中**（首轮正则 `(\d+)m(\d{2})s` 被 `步骤 1` 编号干扰只命中 4，改为「先抓整个 alt 再锚定 `XmYYs`」修复）。
+
+### 流程固化（三门课通用）
+
+| 环节 | 行为 |
+|---|---|
+| `notes build` | `build_all()` 末尾必产 `notes.html`（与 `play.html` 同级） |
+| `notes verify` | 校验存在 + 含全部集 label + 无 `fetch(` |
+| `notes release_check` | 产物清单含 `notes.html`，缺失 WARN |
+| 新增课程 | 无需额外配置，build 自动带出 |
 
 ## [2026-10-19 · 代码-文档同步 + 模板真接代码 (P6) + 路径迁移 (P7)]
 

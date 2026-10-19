@@ -154,7 +154,7 @@ timeout = 60
 2. 把源视频放到对应 `ep_dir`（先用 vidwise 本地 `--no-guide` 跑转写，得到 transcript.json + frames/）。
 3. `python notes.py <新课> draft` → 生成 `steps_v2.md`。
 4. `python notes.py <新课> curate` → 生成骨架；人工润色成 `steps_pro.md`。
-5. `python notes.py <新课> build` → 出自包含图文笔记包。
+5. `python notes.py <新课> build` → 出自包含图文笔记包（**同时自动生成 `play.html` 播放器 + `notes.html` 三栏笔记浏览器**，无需额外配置）。
 
 **全程不碰 `toolkit/` 任何代码。**
 
@@ -239,8 +239,9 @@ subtitle = "字幕/1.md"       # 相对 video_root；绝对路径也行。声明
 
 ```
 <notes_subdir>/
+├── notes.html            # ★ 三栏笔记浏览器（左导航 / 中正文 / 右时间轴；双击即用）
 ├── play.html             # 单页播放器（HTML5 video + JS 解析 URL 参数）
-├── total_index.md
+├── 总索引.md
 ├── 01_…_剪映剪辑基础.md  # 笔记内截图后追加 [▶ m:ss](play.html?ep=...&t=N)
 ├── 02_…_…
 ├── …
@@ -254,7 +255,7 @@ subtitle = "字幕/1.md"       # 相对 video_root；绝对路径也行。声明
 
 ### manifest 字段
 
-`[[episodes]]` 每集加 `source_video`（绝对路径）：
+`[[episodes]]` 每集加 `source_video`（**绝对路径，或相对 `course.video_root` 的相对路径**——两者都支持；推荐相对路径，换机器只改 `video_root`）：
 
 ```toml
 [[episodes]]
@@ -299,10 +300,57 @@ source_video = "D:/002-AIGC/沐北AICG/基础/1.mp4"   # 必填
 - **痛点**：`templates/steps_pro.md` 与 `templates/index.md` 在文档（AGENT.md / README.notes.md / VIDEONOTES-KIT_ROADMAP.md）里被列为项目骨架，但代码从未读它们——curate / index 全用 Python 字符串直接拼。改产物外观必须改 .py。
 - **改造**：新建 `toolkit/templates.py`（标准库 `string.Template`，零第三方依赖），把 curate 骨架与 index 总索引改为「读 templates/*.md + safe_substitute 填占位符」。控制流（if/for）仍由 Python for 循环预拼成块整体替换。
 - **效果**：改产物外观 = 改 templates/*.md，无需碰 toolkit/。
-- **配套**：`toolkit/release.py` 增加 2 项检查（`_check_templates_runtime` + `_check_p5_redlines`），同步点从 6 → 8。模板契约详见 `templates/README.md`。
+- **配套**：`toolkit/release.py` 增加 2 项检查（`_check_templates_runtime` + `_check_p5_redlines`），同步点从 6 → 8（另加 `_check_source_video_paths` 后共 9 项）。模板契约详见 `templates/README.md`。
 - **约束**：
   - 占位符 `$name`（全英文），禁止反引号包裹 `$xxx`（会被替换）
   - `templates/steps_pro_tutorial.md`（P5 体例）当前**未连接代码**，留作历史参考与未来切档
   - `release_check` 警告 ≠ 阻塞，但模板层 FAIL 必须修
 
 > 注意：`source/` 是**冗余副本**（4.8 GB）。如需减重，删除 `source/` 后 `play.html` 仍会工作但视频无法播放——笔记可读、跳转链接仍可点（浏览器会报"无法加载视频"）。
+
+---
+
+## 14. 三栏笔记浏览器 `notes.html`
+
+`build` 末尾自动生成 `<notes_subdir>/notes.html`——**双击即可在浏览器里读全部笔记**，不需要起 HTTP 服务。
+
+### 三栏布局
+
+| 栏 | 内容 |
+|---|---|
+| **左** | 总索引入口 + 各集按 `series` 分组；当前集高亮 |
+| **中** | 渲染后的笔记正文：标题 / 表格 / 代码块 / 引用 / 嵌套列表 / 截图；`**粗体**` 与 `` `行内代码` `` 正常显示 |
+| **右** | **顶部内嵌 `<video>` 播放器** + **时间轴按钮列表**（每条带标题）：点击 → 播放器直接 seek 到该秒播放，不跳二级页 |
+
+### 交互特性
+
+- **分割条可拖动**：左右两条 `grid` 分割条支持鼠标拖拽调宽（左 150–460px / 右 200–560px），宽度写 `localStorage` 持久化，**双击分割条恢复默认**（240 / 280）。
+- **右栏内嵌播放器**：`src="source/<系列>/<原名>.mp4"`（包内自包含副本，相对路径 `file://` 可用）；点时间轴 `▶ 9:56` 按钮 → `video.currentTime = 596; play()`，当前条目高亮 `.playing`；首次点击若元数据未加载则等 `loadedmetadata` 再 seek。
+- **时间轴标题**：从笔记图链 `![步骤 N 截图 XmYYs · 描述](…)` 的 `·` 后半段描述提取，按时间戳匹配（取首次出现）；无描述显示灰色 `—`。
+- 正文内 `▶ m:ss` 跳 `play.html` 的链接**按原设计保留**（只有右栏改为内嵌播放）。
+
+### 实现要点（`toolkit/notes_view.py`）
+
+- **预渲染 + 内联**：全部笔记 + 总索引的 HTML 在生成时一次内联进单文件（约 450–500 KB）。切换笔记是纯 DOM 显隐，**零网络请求**——所以 `file://` 双击可用（浏览器对 `fetch(file://)` 会拦截，这是选预渲染的原因）。
+- **零第三方依赖**：markdown 渲染是自写 mini renderer（标准库 `re`）：标题 / 段落 / 有序列 / 无序列（含 2 空格缩进嵌套）/ 表格（跳过 `---` 分隔行）/ 代码块 / 引用块 / 分割线 / 图片 / 链接 / 行内粗体与代码。
+- **时间轴链接识别**：`[▶ m:ss](play.html?ep=…&t=N)` 兼容半角/全角冒号，渲染为 `.play-link` 按钮，同时在右栏聚合。
+- **图片**：`assets/<集标签>/frame_x.png` 相对路径引用，与笔记同目录，随包移动不丢。
+
+### 流程固化（三门课通用）
+
+| 环节 | 行为 |
+|---|---|
+| `notes build` | `consolidate.build_all()` 末尾调用 `notes_view.build_notes_view()`，**必然**产出 `notes.html`（与 `play.html` 同级） |
+| `notes verify` | 校验 notes.html 存在 + 含全部集 label + 无 `fetch(`（防破坏 file:// 可用性） |
+| `notes release_check` | 产物清单含 `notes.html`，缺失报 WARN |
+| 新增课程 | **无需额外配置**，`build` 自动带出该课的 notes.html |
+
+### 用法
+
+```bash
+python notes.py <课程> build     # 生成 notes.html（含在内）
+# 然后直接双击 out/<课程>/<notes_subdir>/notes.html
+```
+
+> 已知限制：只有 `steps_pro/` 内已存在的笔记会被收录（依赖 build 先跑 `collect`）；某集缺金标准时该集在左侧不可见——与「10 集金标准」一致。
+

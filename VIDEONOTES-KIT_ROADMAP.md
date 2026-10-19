@@ -181,6 +181,8 @@ D:/000/vidwise/                         # 工具链根（旧位置；当前工�
 | **P4** 笔记教程化升级 | ✅ 完成 | 01_基础_1 由 11 步 → 7 步 + 3 阶段 + 三段式闭环（学习目标/前置/术语 → 阶段分组 → 做对了/易错）；模板 + curate 半成品骨架已升级 |
 | **P5** 视频打包 + 时间轴跳转 | ✅ 完成 | 源 mp4 自动复制到 `steps_pro/source/<系列>/`（10 集共 4.8 GB），每步截图后追加 `▶ m:ss` 时间轴链接（10 集共 112 处），`play.html` 单页播放器生成 |
 | **P6** 模板真正接入代码 | ✅ 完成 | 新建 `toolkit/templates.py`（标准库 `string.Template`，零第三方依赖）；`curate.py` 骨架与 `index.py` 总索引都改由 `templates/steps_pro.md` / `templates/index.md` 渲染；改产物外观 = 改 .md，无需碰 toolkit。`release_check` 增加 2 项（8 项同步点检查） |
+| **P7** 路径迁移 | ✅ 完成 | 3 个 manifest `out_root` 统一到 `E:/002-Pr/videonotes-kit/out/<课>`；67 集 `source_video` 改为相对 `video_root`（换机器只改一行）；`pyproject.toml` 把 anthropic/openai 移入 optional `[guide]`；`play.html` 去硬编码课程名；`cli.py` `BASE` 自动推导 |
+| **P8** 三栏笔记浏览器 | ✅ 完成 | 新建 `toolkit/notes_view.py`（零第三方，标准库 mini markdown 渲染器）：三栏 SPA、**分割条可拖动**（localStorage 持久化 + 双击复位）、**右栏顶部内嵌 `<video>` 播放器**（时间轴点击直接 seek 播放，弃二级页）、**时间轴每条带标题**（183/183 全命中）。`build` 必产 `notes.html`，`verify` + `release_check` 已纳入门禁 |
 
 ### P3 交付清单
 

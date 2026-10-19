@@ -67,7 +67,7 @@ def _check_verify_coverage(mf, base):
     if not body:
         return [("FAIL", path, "toolkit/cli.py 不存在")]
     # 已知产物表
-    products = ["source", "play.html", "assets"]
+    products = ["source", "play.html", "assets", "notes.html"]
     for prod in products:
         if prod not in body:
             issues.append(("WARN", path, "cmd_verify 未校验产物：" + prod))
