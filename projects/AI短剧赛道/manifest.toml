@@ -18,6 +18,9 @@ series_note = "源视频为「即梦AI视频创作」的《全80集 AI短剧赛�
 
 [draft]
 max_steps = 80
+# P9 按需抽帧（可选字段，缺省 on_demand）
+frame_mode = "on_demand"   # on_demand | full（full 走旧 L0 vidwise 路径）
+frame_follow_up = 0        # 0 = 只抽 t；2 = 额外抽 t+2 作为备选
 
 [[episodes]]
 seq = "01"

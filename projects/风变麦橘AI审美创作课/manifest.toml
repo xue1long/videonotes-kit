@@ -36,6 +36,9 @@ series_note = "「直播课」是麦橘 MERJIC 与风变联合的每周直播课
 [draft]
 max_steps = 80
 gap = 45.0
+# P9 按需抽帧（可选字段，缺省 on_demand）
+frame_mode = "on_demand"
+frame_follow_up = 0
 
 # ---- 视频集 ----
 # seq=序号（保留原始编号语义：01-34 给直播课/会议；31 普通版用 31，31 加餐用 30A 插在 31 之前；公开课 day1-3 用 35-37 排末尾）

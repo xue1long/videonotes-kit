@@ -233,6 +233,45 @@ def _check_templates_runtime(mf, base):
     return issues
 
 
+def _check_frames_mode(mf, base):
+    """P9 抽帧契约：
+      1) 当 frame_mode=on_demand 时，frames/ 帧数应 ≈ 步骤数；
+         远超（>3× 步骤数）= 残留旧全量帧，提醒清空。
+      2) toolkit/frames.py 应该是**唯一** import subprocess 的模块。
+    """
+    issues = []
+    out_root = mf["course"].get("out_root", "")
+    if mf["draft"].get("frame_mode", "on_demand") == "on_demand" and out_root:
+        total_frames = 0
+        total_steps = 0
+        for ep in mf["episodes"]:
+            ep_dir = os.path.join(out_root, ep.get("ep_dir", ""))
+            fdir = os.path.join(ep_dir, "frames")
+            if os.path.isdir(fdir):
+                total_frames += sum(1 for f in os.listdir(fdir) if f.endswith(".png"))
+            v2 = os.path.join(ep_dir, "steps_v2.md")
+            if os.path.isfile(v2):
+                total_steps += len(re.findall(r"^###\s*步骤", open(v2, encoding="utf-8").read(), re.M))
+        if total_frames > 3 * max(total_steps, 1) and total_frames > 50:
+            issues.append(("WARN", "frames/",
+                f"P9 on_demand 模式下 frames/ 帧数 {total_frames} ≫ 步骤数 {total_steps}（>{3*total_steps}），"
+                f"疑似残留旧全量抽帧；可手删 {out_root}/<ep>/frames/ 后重 build"))
+    # 检查 subprocess 隔离
+    toolkit_dir = os.path.join(base, "toolkit")
+    offenders = []
+    for fname in os.listdir(toolkit_dir):
+        if not fname.endswith(".py") or fname == "frames.py":
+            continue
+        body = _read(os.path.join(toolkit_dir, fname))
+        if re.search(r"^\s*import\s+subprocess|^\s*from\s+subprocess\s+import", body, re.M):
+            offenders.append(fname)
+    if offenders:
+        issues.append(("FAIL", "toolkit/",
+            f"P9 架构约束：subprocess 只应在 toolkit/frames.py 使用，"
+            f"违规：{', '.join(offenders)}"))
+    return issues
+
+
 def _check_source_video_paths(mf, base):
     """校验 manifest [[episodes]].source_video 路径是否真实存在。
 
@@ -278,6 +317,7 @@ def run(mf, base=None):
         ("source_video 路径存在", _check_source_video_paths),
         ("templates/ 真接代码", _check_templates_runtime),
         ("P5 教程体红线", _check_p5_redlines),
+        ("P9 抽帧契约", _check_frames_mode),
     ]
     for name, fn in checks:
         try:

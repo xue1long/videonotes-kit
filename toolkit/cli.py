@@ -78,11 +78,26 @@ def _check_subtitle(mf, ep):
     return True, ""
 
 
+def _ensure_frames(mf, ep):
+    """P9 编排点：draft.build 之前确保 frames/ 已就位。失败仅 WARN。"""
+    from . import frames as F
+    if mf["draft"].get("frame_mode", "on_demand") != "on_demand":
+        return                              # 兼容：full 模式由 L0 负责
+    stat = F.ensure(mf, ep, follow_up=mf["draft"].get("frame_follow_up", 0))
+    if "skipped" in stat:
+        print(f"  FRAMES skip {ep['ep_dir']}: {stat['skipped']}")
+        return
+    print(f"  FRAMES {ep['ep_dir']}: "
+          f"times={stat.get('times', 0)} made={stat.get('made', 0)} "
+          f"fail={stat.get('fail', 0)} <- {os.path.basename(stat.get('video', ''))}")
+
+
 def _draft_all(mf):
     for ep in mf["episodes"]:
         _sync_subtitle(mf, ep)
         out = os.path.join(mf["course"]["out_root"], ep["ep_dir"])
         if os.path.isfile(os.path.join(out, "transcript.json")):
+            _ensure_frames(mf, ep)                # P9: frames.ensure 在 draft 前
             draft.build(out, max_steps=mf["draft"].get("max_steps", 80))
         else:
             print("SKIP (无 transcript.json):", ep["ep_dir"])

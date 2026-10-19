@@ -85,6 +85,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | `notes release_check` | 产物清单含 `notes.html`，缺失 WARN |
 | 新增课程 | 无需额外配置，build 自动带出 |
 
+## [2026-10-19 · 按需抽帧 P9（落地 v2）]
+
+**动机**：全量抽帧每集 `fps=1/2` 产出 459 张、最终只引用约 10 张（利用率 2%）。实测 `ffmpeg -ss` 精确抽帧快 19.5×、小 44×，且更准。详见 [`docs/P9-on-demand-frames.md`](../docs/P9-on-demand-frames.md)。
+
+### Added
+
+- **L0.5 抽帧层 `toolkit/frames.py`**（~140 行，零第三方 Python 依赖，仅 `subprocess`）
+  - `available()`：检测 ffmpeg 在 PATH
+  - `resolve_video(mf, ep)`：优先包内 `steps_pro/source/<series>/<名>.mp4`，再 manifest 路径
+  - `step_times(transcript)`：复用 `draft.derive_steps()`，**与 build 严格同源**（D10）
+  - `extract_at(video, t, dst_dir)`：单帧精确抽，幂等
+  - `ensure(mf, ep, follow_up=0)`：编排入口，WARN-on-fail
+- `toolkit/draft.py` 抽出公开纯函数 `derive_steps(segs, max_steps)`；`build()` 内部调用它（**签名不变、语义不变**）
+- `toolkit/cli.py` 新增 `_ensure_frames(mf, ep)`；在 `_draft_all` 中 `draft.build` **之前**调用
+- `projects/*/manifest.toml` 新增 `[draft] frame_mode`（默认 `"on_demand"`）/ `frame_follow_up`（默认 `0`）—— 可选字段，老 manifest 不填也不报错
+- `toolkit/release.py` 新增 `_check_frames_mode`：① frames/ 帧数 ≫ 步骤数 → WARN（回归检测）；② **其他模块 import subprocess → FAIL**（架构约束兜底）
+
+### 架构约束（重要）
+
+- **subprocess 仅允许在 `toolkit/frames.py`**——`release_check` 检查所有 toolkit/*.py，发现违规即 FAIL
+- **`draft.build()` 仍是纯函数**（对 frames/ 只读）—— verify 回归逻辑零改动
+- **`frames/` 保留不删**（不「用完即删」），保证 verify 可重放 + 无 ffmpeg 环境可 build
+- **缺 ffmpeg → 静默 WARN + 跳过**：老课 frames/ 已存在，build 仍能成功
+
+### 验收
+
+- 单集抽帧（10 个时间点）实测 **8.8 s** vs 现状 171 s（19.5× 快）
+- 19 集外推 54 min → 2.8 min（**省 51 分钟**）
+- 抽帧磁盘 5.8 GB → 166 MB（**省 5.6 GB**）
+- `release_check` 3 门课 0 FAIL（含新增的 P9 抽帧契约检查）
+- 抽帧时间点与笔记引用点**严格同源**（同一 `derive_steps` 函数）
+
 ## [2026-10-19 · 代码-文档同步 + 模板真接代码 (P6) + 路径迁移 (P7)]
 
 ### 体检（用户提问"代码和文档是同步的吗"）

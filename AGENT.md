@@ -170,6 +170,7 @@ timeout  = 60
 | `toolkit/branding.py` | **项目级品牌文单一引用源**（NAME/TAGLINE/INDEX_BANNER 等）。下次更名只改本文件 + build 即可全工程更新 | 常量 |
 | `toolkit/release.py` | release_check 子命令：检查项目内 9 处"我忘了同步"点（整改方案 P* / verify 产物覆盖 / 总索引 banner / README banner / AGENT 模块地图 / manifest 必填字段 / **source_video 路径存在** / **templates 真接代码** / **P5 教程体红线**） | `run(mf, base)` / `main(args)` |
 | `toolkit/templates.py` | **模板渲染层**（零第三方依赖，仅 `string.Template`）。`curate` + `index` 都通过它读 `templates/*.md`；改模板外观 = 改 .md，无需碰代码 | `render(name, **kw)` / `path(name)` |
+| `toolkit/frames.py` | **L0.5 按需抽帧层**（P9，唯一允许调 `ffmpeg`/`subprocess` 的模块）。`draft.derive_steps` 给出步骤时间点 → 对每个 t 精确 `-ss` 抽帧。`draft.build` **签名不变**（纯函数）；`release_check` 兜底「subprocess 隔离」+「frames/ 帧数 ≫ 步骤数」 | `ensure(mf, ep, follow_up=0)` / `extract_at(video, t, dst_dir)` / `available()` / `resolve_video(mf, ep)` |
 | `toolkit/notes_view.py` | **三栏笔记浏览器**（左导航 / 中正文 / 右时间轴）。把全部笔记 + 总索引预渲染内联成单个 `notes.html`，零 fetch / 零 CDN，双击 `file://` 可用；`build` 末尾自动调用 | `build_notes_view(mf)` / `render_md(text)` / `extract_play_links(text, label)` |
 | `toolkit/cli.py` | 入口路由 + verify 非破坏回归 + P5 校验 | `cmd_draft/cmd_build/cmd_verify/cmd_curate/...` |
 
@@ -219,7 +220,7 @@ timeout  = 60
 - **双 README** — `README.md`（上游未改）+ `README.notes.md`（项目手册） + `AGENT.md`（本文件）
 - **Tier2 默认关** — 本机无对话生成模型，开了也用不到；纯本地链路不依赖
 - **模板用标准库 `string.Template`，不引入 jinja2** — `toolkit/templates.py` 仅 ~50 行；保留"零第三方依赖"承诺；占位符 `$name` 约定，详见 `templates/README.md`
-- **全量抽帧是待还的技术债（P9）** — 现状每集 `fps=1/2` 抽 459 张、只用约 10 张（利用率 2%）。实测按需 `-ss` 精确抽帧快 19.5×、小 44×。方案见 `docs/P9-on-demand-frames.md`（尚未实施，`draft.build(video=None)` 仍走旧全量路径）
+- **全量抽帧是待还的技术债（P9）** — 现状每集 `fps=1/2` 抽 459 张、只用约 10 张（利用率 2%）。实测按需 `-ss` 精确抽帧快 19.5×、小 44×。方案见 `docs/P9-on-demand-frames.md`（**已落地 v2**：新增 L0.5 `toolkit/frames.py` 抽帧层，`draft.build` 签名不变仍是纯函数；详见 P9 文档 §1.5 架构调研）
 
 ## 12. 紧急联络
 

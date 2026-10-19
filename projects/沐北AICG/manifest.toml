@@ -74,6 +74,9 @@ meaning = "生视频工具（课程黑话，具体产品以视频为准）"
 
 [draft]
 max_steps = 80
+# P9 按需抽帧（可选字段，缺省 on_demand）
+frame_mode = "on_demand"
+frame_follow_up = 0
 gap = 45.0
 
 # ---- 视频集：seq=序号, label=集标签, ep_dir=vidwise 输出目录名, topic=主题

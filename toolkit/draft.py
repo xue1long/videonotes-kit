@@ -123,10 +123,15 @@ def _jac(a, b):
     return len(A & B) / len(A | B)
 
 
-def build(out_dir, max_steps=80, out_name="steps_v2.md"):
-    segs = load_transcript(out_dir)
-    frames = scan_frames(out_dir)
+def derive_steps(segs, max_steps=80):
+    """从 transcript segments 推导最终步骤（纯函数，无 IO）。
 
+    复用 build() 内部的「动作句 → 分组 → 去重 → 截断」算法。
+    公开给 toolkit/frames.py 在按需抽帧时复用，保证「抽帧的时间点」与
+    「笔记引用的时间点」同源（见 docs/P9-on-demand-frames.md D10）。
+
+    返回 [dict(t=int_seconds, title=str, body=str, end=int_seconds), ...]
+    """
     raw = []
     cur = None
     for seg in segs:
@@ -158,16 +163,24 @@ def build(out_dir, max_steps=80, out_name="steps_v2.md"):
         groups.append({"t": st["t"], "end": st["t"], "title": st["title"],
                        "body": st["body"], "last_body": st["body"]})
 
-    out_steps = []
+    out = []
     kept = []
     for g in groups:
         if any(_jac(g["body"], k) > 0.55 for k in kept):
             continue
-        g["frame"] = nearest_frame(frames, g["t"])
-        out_steps.append(g)
+        out.append({"t": g["t"], "end": g["end"], "title": g["title"], "body": g["body"]})
         kept.append(g["body"])
-        if len(out_steps) >= max_steps:
+        if len(out) >= max_steps:
             break
+    return out
+
+
+def build(out_dir, max_steps=80, out_name="steps_v2.md"):
+    segs = load_transcript(out_dir)
+    frames = scan_frames(out_dir)
+    out_steps = derive_steps(segs, max_steps)
+    for g in out_steps:
+        g["frame"] = nearest_frame(frames, g["t"])
 
     title = os.path.basename(out_dir)
     L = []
@@ -175,7 +188,7 @@ def build(out_dir, max_steps=80, out_name="steps_v2.md"):
     L.append("")
     L.append(f"> 生成时间：{datetime.now():%Y-%m-%d %H:%M}  ")
     L.append(f"> 管线：vidwise 本地素材 + draft（无 API key） ｜ 全量帧对齐 + 步骤聚合 + 简繁统一")
-    L.append(f"> 聚合步骤数：{len(out_steps)}（原始动作句 {len(raw)}）")
+    L.append(f"> 聚合步骤数：{len(out_steps)}")
     L.append("")
     L.append("## 操作步骤")
     L.append("")
@@ -191,7 +204,7 @@ def build(out_dir, max_steps=80, out_name="steps_v2.md"):
         L.append("")
     out_md = os.path.join(out_dir, out_name)
     open(out_md, "w", encoding="utf-8").write("\n".join(L))
-    print(f"[OK] {out_md}  聚合步数={len(out_steps)} / 原始动作句={len(raw)}")
+    print(f"[OK] {out_md}  聚合步数={len(out_steps)}")
     return len(out_steps)
 
 
