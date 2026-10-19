@@ -183,7 +183,7 @@ D:/000/vidwise/                         # 工具链根（旧位置；当前工�
 | **P6** 模板真正接入代码 | ✅ 完成 | 新建 `toolkit/templates.py`（标准库 `string.Template`，零第三方依赖）；`curate.py` 骨架与 `index.py` 总索引都改由 `templates/steps_pro.md` / `templates/index.md` 渲染；改产物外观 = 改 .md，无需碰 toolkit。`release_check` 增加 2 项（8 项同步点检查） |
 | **P7** 路径迁移 | ✅ 完成 | 3 个 manifest `out_root` 统一到 `E:/002-Pr/videonotes-kit/out/<课>`；67 集 `source_video` 改为相对 `video_root`（换机器只改一行）；`pyproject.toml` 把 anthropic/openai 移入 optional `[guide]`；`play.html` 去硬编码课程名；`cli.py` `BASE` 自动推导 |
 | **P8** 三栏笔记浏览器 | ✅ 完成 | 新建 `toolkit/notes_view.py`（零第三方，标准库 mini markdown 渲染器）：三栏 SPA、**分割条可拖动**（localStorage 持久化 + 双击复位）、**右栏顶部内嵌 `<video>` 播放器**（时间轴点击直接 seek 播放，弃二级页）、**时间轴每条带标题**（183/183 全命中）。`build` 必产 `notes.html`，`verify` + `release_check` 已纳入门禁 |
-| **P9** 按需抽帧 | 📋 方案已定，待实施 | 现状每集全量抽 459 张（171 s / 305 MB），最终只引用约 10 张（利用率 2%）。改为「先由字幕算出 draft 步骤时间点 → 只对这些点 `ffmpeg -ss` 精确抽帧」，单集 12 s（14.6× 快）、19 集省 50 min + 5.6 GB。**关键纠正**：粒度必须下移到「步骤」（250 个），不能按字幕条（5,517 条，反而慢 1.5×）。详见 [`docs/P9-on-demand-frames.md`](docs/P9-on-demand-frames.md) |
+| **P9** 按需抽帧 | 📋 方案已定（v2），待实施 | 现状每集全量抽 459 张（171 s / 305 MB），最终只引用约 10 张（利用率 2%）。改为「字幕 → draft 步骤时间点 → 只对这些点 `ffmpeg -ss` 精确抽帧」，单集 12 s（14.6× 快）、19 集省 50 min + 5.6 GB。**两条关键纠正**：① 粒度须为「步骤」（250 个）而非字幕条（5,517 条，反而慢 1.5×）；② 抽帧须**独立成 L0.5 层 `toolkit/frames.py`**，不能塞进 `draft.build()`（会让纯函数变副作用，破坏 verify 回归）。详见 [`docs/P9-on-demand-frames.md`](docs/P9-on-demand-frames.md) |
 
 ### P3 交付清单
 
