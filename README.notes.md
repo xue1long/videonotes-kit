@@ -27,6 +27,8 @@ E:/002-Pr/videonotes-kit/                # 工具链根
 ├── notes.py            # 唯一入口：notes <课程> <子命令>
 ├── README.md           # 上游 vidwise 文档（未改）
 ├── README.notes.md     # 本文（项目手册）
+├── docs/               # 阶段性方案/设计文档（索引见 docs/README.md）
+│   └── P9-on-demand-frames.md   #   按需抽帧方案（替代全量抽帧）
 ├── toolkit/            # 本地管线（零硬编码，全部读 manifest）
 │   ├── cli.py          #   CLI 路由 + verify 非破坏回归
 │   ├── manifest.py     #   读 projects/<课>/manifest.toml
