@@ -133,15 +133,22 @@ def build_index(mf, notes_root=None):
             L.append("")
         L.append(f"> 笔记：[{fn[:-3]}]({fn})\n")
 
-    # ---- 术语对照（黑话 → 真实含义） ----
+    # ---- 术语对照（黑话 → 真实含义）：全文另存 术语总表.md，索引只做入口 ----
     gl = mf["course"].get("glossary") or []
     if gl:
         L.append("## 术语对照（黑话 → 真实含义）\n")
-        L.append("| 黑话 | 含义 |")
-        L.append("|------|------|")
-        for g in gl:
-            L.append(f"| {g.get('term', '')} | {g.get('meaning', '')} |")
-        L.append("")
+        L.append(f"共 **{len(gl)}** 条，完整表格见 **[术语总表.md](术语总表.md)**；"
+                 "每集自己的关键术语见各篇笔记的「关键术语」段。\n")
+        top = sorted(gl, key=lambda g: (not g.get("term", "")[:1].isascii(),
+                                        g.get("term", "").lower()))
+        rows = ["# 术语总表\n", f"> 共 {len(gl)} 条，由 manifest `course.glossary` 生成（源：各集精校笔记「关键术语」段）\n",
+                "| 术语 | 含义 |", "|------|------|"]
+        for g in top:
+            rows.append(f"| {g.get('term', '')} | {g.get('meaning', '')} |")
+        rows.append("")
+        gp = os.path.join(notes_root, "术语总表.md")
+        open(gp, "w", encoding="utf-8").write("\n".join(rows))
+        print("glossary ->", gp)
 
     # ---- 补充参考文档说明（按类别分组） ----
     L.append("## 补充参考文档说明\n")

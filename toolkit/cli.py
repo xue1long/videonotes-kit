@@ -94,7 +94,7 @@ def cmd_draft(mf, args):
 
 def cmd_build(mf, args):
     _draft_all(mf)
-    consolidate.build_all(mf)
+    consolidate.build_all(mf, auto_clean=getattr(args, "auto_clean", False))
 
 
 def cmd_verify(mf, args):
@@ -248,6 +248,8 @@ def main():
     ap.add_argument("course")
     ap.add_argument("cmd", choices=["draft", "build", "verify", "docs", "index", "consolidate", "curate", "release_check"])
     ap.add_argument("--overwrite", action="store_true", help="curate：强制重写已存在的骨架（不破坏 steps_pro.md 金标准，仅重写 .skeleton）")
+    ap.add_argument("--auto-clean", action="store_true", help="build：完成后自动清 P3 中间产物（video.mp4/audio.wav/frames.__staging__/frames.old/_staging）— A5")
+    ap.add_argument("--dry-run-clean", action="store_true", help="build --auto-clean：只 dry-run 不实际删")
     args = ap.parse_args()
     mf = M.load(find_manifest(args.course))
     dispatch = {

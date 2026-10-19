@@ -15,7 +15,49 @@ import os
 import re
 import shutil
 import urllib.parse
+from pathlib import Path
 from . import manifest as M, branding
+
+
+# N11：可选 JPEG 压缩（如果 PIL 可用）
+try:
+    from PIL import Image
+    _HAS_PIL = True
+except ImportError:
+    _HAS_PIL = False
+
+
+def _maybe_compress_jpeg(png_path: str, quality: int = 85) -> bool:
+    """N11：将 PNG 帧副本转成 JPEG 同名（覆盖 .png），节省 ~50% 空间。
+    - 仅当 PIL 可用；
+    - 仅当 PNG > 50KB（小子图不压缩避免损失）；
+    - 删除原 .png 写 .jpg；同名引用兼容（见 gen_play_page）。
+
+    Returns:
+        bool: True=已转成 .jpg；False=保留 .png（条件不满足/失败）
+    """
+    if not _HAS_PIL or not os.path.isfile(png_path):
+        return False
+    if not png_path.lower().endswith(".png"):
+        return False
+    try:
+        sz = os.path.getsize(png_path)
+        if sz < 50_000:
+            return False
+        jpg_path = png_path[:-4] + ".jpg"
+        with Image.open(png_path) as im:
+            if im.mode not in ("RGB", "L"):
+                im = im.convert("RGB")
+            im.save(jpg_path, "JPEG", quality=quality, optimize=True)
+        new_sz = os.path.getsize(jpg_path)
+        if new_sz < sz:
+            os.remove(png_path)
+            return True
+        else:
+            os.remove(jpg_path)  # 不缩反增，不保留
+            return False
+    except Exception as e:
+        return False
 
 
 def ensure_curated(mf):
@@ -87,18 +129,22 @@ def collect(mf, notes_root=None):
             fname = m.group(1)
             mm, ss = m.group(2), m.group(3)
             t = _to_seconds(mm, ss)
-            # 复制帧到 assets/<label>/
+            # 复制帧到 assets/<label>/（P3 修复：清空旧 assets 避免累积；N11：转 JPEG 节省 50% 空间）
             src_img = os.path.join(mf["course"]["out_root"], ep["ep_dir"], "frames", fname)
             dst_dir = os.path.join(assets_root, ep["label"])
             os.makedirs(dst_dir, exist_ok=True)
             dst_img = os.path.join(dst_dir, fname)
+            actual_fname = fname  # 默认 PNG
             if os.path.isfile(src_img):
                 shutil.copy2(src_img, dst_img)
+                # N11：可选 JPEG 压缩（如果 PIL 可用 + 文件够大）—— 改用实际扩展名
+                if _maybe_compress_jpeg(dst_img, quality=85):
+                    actual_fname = fname[:-4] + ".jpg"
             else:
                 print("  WARN 缺帧（跳过复制）:", src_img)
             # P5：图链改为"双链接"——图片本身 + 时间轴跳转链接
-            # 渲染：![步骤 1 截图 0m00s](assets/.../frame_0m00s.png) [▶ 0:00](play.html?ep=...&t=0)
-            return "](" + ("assets/%s/%s" % (ep["label"], fname)) + ") [▶ %s:%02d](play.html?ep=%s&t=%d)" % (
+            # 渲染：![步骤 1 截图 0m00s](assets/.../frame_0m00s.jpg) [▶ 0:00](play.html?ep=...&t=0)
+            return "](" + ("assets/%s/%s" % (ep["label"], actual_fname)) + ") [▶ %s:%02d](play.html?ep=%s&t=%d)" % (
                 mm, int(ss), urllib.parse.quote(ep["label"]), t
             )
 
@@ -125,10 +171,13 @@ def collect(mf, notes_root=None):
 
 
 def copy_source(mf, notes_root=None):
-    """P5：把源 mp4 复制到 steps_pro/source/<series>/<原名>.mp4，幂等（size 一致则跳过）。"""
+    """P5：把源 mp4 复制到 steps_pro/source/<series>/<原名>.mp4。
+    A3 修复：幂等加强 — size + mtime 两项校验（防止「同名文件被替换」时漏更新）。
+    """
     notes_root = notes_root or M.notes_root(mf)
     source_root = os.path.join(notes_root, "source")
     copied = 0
+    skipped = 0
     for ep in mf["episodes"]:
         sv = ep.get("source_video", "")
         if not sv:
@@ -139,18 +188,123 @@ def copy_source(mf, notes_root=None):
         dst_dir = os.path.join(source_root, series)
         os.makedirs(dst_dir, exist_ok=True)
         dst = os.path.join(dst_dir, os.path.basename(sv))
-        # 幂等：size 一致则跳过；否则覆盖
-        if os.path.isfile(dst) and os.path.getsize(dst) == os.path.getsize(sv):
-            print("  source skip (size 一致):", ep["label"], "->", os.path.relpath(dst, notes_root))
-            continue
+        # A3 幂等：size + mtime 都一致才跳过；任一不同都覆盖（避免源文件被替换后漏更新）
+        if os.path.isfile(dst):
+            src_sz = os.path.getsize(sv)
+            dst_sz = os.path.getsize(dst)
+            src_mt = os.path.getmtime(sv)
+            dst_mt = os.path.getmtime(dst)
+            if src_sz == dst_sz and abs(src_mt - dst_mt) < 2.0:
+                skipped += 1
+                print("  source skip (size+mtime 一致):", ep["label"], "->", os.path.relpath(dst, notes_root))
+                continue
         shutil.copy2(sv, dst)
         copied += 1
         print("  source copy:", ep["label"], "->", os.path.relpath(dst, notes_root))
-    print(f"source -> {copied} 个 mp4 已复制到 {os.path.relpath(source_root, notes_root)}/")
+    print(f"source -> {copied} 复制, {skipped} 跳过 (size+mtime 一致)，根目录 {os.path.relpath(source_root, notes_root)}/")
     return source_root
 
 
-def _play_html(episodes, source_root_rel: str) -> str:
+def clean_intermediates(mf, notes_root=None, keep_frames_for_curated: bool = True, dry_run: bool = False) -> dict:
+    """A5：build 后自动清 P3 中间产物。
+
+    删除规则：
+      1) out/<ep>/video.mp4            (P3 复制源 mp4 的副本，每集 1-2GB，build 不依赖)
+      2) out/<ep>/audio.wav            (P3 抽音轨，每集 30-100MB，build 不依赖)
+      3) out/<ep>/frames.__staging__/   (rename 中间目录，遗留品)
+      4) out/<ep>/frames.old/           (rename 重抽前的旧目录)
+
+    保留：
+      - transcript.json / transcript.txt / transcript.srt / key_frames.json / extracted.json
+      - frames/（如果 keep_frames_for_curated=True 且该集有 _curated 笔记；否则也清）
+
+    沙箱安全：单文件 os.remove 单次仅 1 op；>=50 文件目录走 cleanup.staging_rename 模式。
+    """
+    notes_root = notes_root or M.notes_root(mf)
+    out_root = mf["course"]["out_root"]
+    cur_root = M.curated_root(mf)
+    summary = {"videos": 0, "audios": 0, "staging": 0, "frames_old": 0, "frames_kept": 0, "bytes_freed": 0}
+
+    for ep in mf["episodes"]:
+        ep_dir = os.path.join(out_root, ep["ep_dir"])
+        if not os.path.isdir(ep_dir):
+            continue
+
+        # 1) 视频副本
+        vp = os.path.join(ep_dir, "video.mp4")
+        if os.path.isfile(vp):
+            summary["bytes_freed"] += os.path.getsize(vp)
+            if not dry_run:
+                os.remove(vp)
+            summary["videos"] += 1
+
+        # 2) 音频副本
+        ap = os.path.join(ep_dir, "audio.wav")
+        if os.path.isfile(ap):
+            summary["bytes_freed"] += os.path.getsize(ap)
+            if not dry_run:
+                os.remove(ap)
+            summary["audios"] += 1
+
+        # 3) frames.__staging__/ (rename 中间残留)
+        st = os.path.join(ep_dir, "frames.__staging__")
+        if os.path.isdir(st):
+            sz = sum(os.path.getsize(os.path.join(r, f))
+                     for r, _, fs in os.walk(st) for f in fs)
+            summary["bytes_freed"] += sz
+            summary["staging"] += 1
+            if not dry_run:
+                # 委托 cleanup.staging_rmtree 走「rename + 后台 rmtree」模式
+                from . import cleanup as CL
+                CL.safe_rmtree(Path(st))
+
+        # 4) frames.old/ (旧帧备份)
+        fo = os.path.join(ep_dir, "frames.old")
+        if os.path.isdir(fo):
+            sz = sum(os.path.getsize(os.path.join(r, f))
+                     for r, _, fs in os.walk(fo) for f in fs)
+            summary["bytes_freed"] += sz
+            summary["frames_old"] += 1
+            if not dry_run:
+                from . import cleanup as CL
+                CL.safe_rmtree(Path(fo))
+
+        # 5) frames/ (精校完成且 keep=True 才保留)
+        if not keep_frames_for_curated:
+            fr = os.path.join(ep_dir, "frames")
+            if os.path.isdir(fr):
+                sz = sum(os.path.getsize(os.path.join(r, f))
+                         for r, _, fs in os.walk(fr) for f in fs)
+                # 检查该集是否已精校（_curated/<ep>/steps_pro.md 存在）
+                md = os.path.join(cur_root, ep["ep_dir"], "steps_pro.md")
+                if os.path.isfile(md):
+                    summary["bytes_freed"] += sz
+                    if not dry_run:
+                        from . import cleanup as CL
+                        CL.safe_rmtree(Path(fr))
+                else:
+                    summary["frames_kept"] += 1
+        else:
+            fr = os.path.join(ep_dir, "frames")
+            if os.path.isdir(fr):
+                summary["frames_kept"] += 1
+
+    # 6) _staging/ (verify 临时目录)
+    st_global = os.path.join(out_root, "_staging")
+    if os.path.isdir(st_global):
+        from . import cleanup as CL
+        CL.safe_rmtree(Path(st_global))
+        summary["staging"] += 1
+
+    summary["bytes_freed_MB"] = round(summary["bytes_freed"] / 1024 / 1024)
+    if not dry_run:
+        print(f"clean_intermediates: videos={summary['videos']} audios={summary['audios']} "
+              f"staging={summary['staging']} frames_old={summary['frames_old']} "
+              f"frames_kept={summary['frames_kept']} freed={summary['bytes_freed_MB']}MB")
+    return summary
+
+
+def _play_html(episodes, source_root_rel: str, course_name: str = "课程") -> str:
     """生成 play.html：单页播放器，支持 ?ep=<label>&t=<秒>。"""
     # 把每集 label / series / source 路径（相对 notes_root）注册到 JS
     ep_map = []
@@ -173,7 +327,7 @@ def _play_html(episodes, source_root_rel: str) -> str:
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>沐北AICG · 视频播放器</title>
+<title>__COURSE_NAME__ · 视频播放器</title>
 <style>
   :root { color-scheme: light; }
   body { font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
@@ -203,7 +357,7 @@ def _play_html(episodes, source_root_rel: str) -> str:
 </head>
 <body>
 <header>
-  <h1>沐北AICG · 视频播放器</h1>
+  <h1>__COURSE_NAME__ · 视频播放器</h1>
   <div class="sub">__BRANDING_INDEX_BANNER_PLAY__</div>
 </header>
 <main>
@@ -283,13 +437,13 @@ window.addEventListener('load', function() {
 </body>
 </html>
 """
-    return html.replace("__EPS_JSON__", ep_json)
+    return html.replace("__EPS_JSON__", ep_json).replace("__COURSE_NAME__", course_name)
 
 
 def gen_play_page(mf, notes_root=None):
     """P5：生成 steps_pro/play.html 单页播放器（含集列表与跳转逻辑）。"""
     notes_root = notes_root or M.notes_root(mf)
-    html = _play_html(mf["episodes"], "source")
+    html = _play_html(mf["episodes"], "source", mf["course"]["name"])
     # 替换品牌占位符（统一从 toolkit/branding.py 读）
     html = html.replace("__BRANDING_INDEX_BANNER_PLAY__", branding.INDEX_BANNER_PLAY)
     out = os.path.join(notes_root, "play.html")
@@ -298,11 +452,17 @@ def gen_play_page(mf, notes_root=None):
     return out
 
 
-def build_all(mf, notes_root=None):
-    """build 全流程：docs → source → notes → index → play page。"""
+def build_all(mf, notes_root=None, auto_clean: bool = False, dry_run_clean: bool = False):
+    """build 全流程：docs → source → notes → index → play page。
+
+    A5 增强：auto_clean=True 时在 build 末尾自动调 clean_intermediates 清 P3 中间产物
+    （默认 False — 现有调用者不走这一步以避免破坏流程；scripts/post_build.sh 可显式开）。
+    """
     from . import docs as D, index as I
     D.import_docs(mf, notes_root)
     copy_source(mf, notes_root)
     collect(mf, notes_root)
     I.build_index(mf, notes_root)
     gen_play_page(mf, notes_root)
+    if auto_clean:
+        clean_intermediates(mf, notes_root=notes_root, dry_run=dry_run_clean)
