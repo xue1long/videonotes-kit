@@ -148,6 +148,122 @@ def _check_manifest_required(mf, base):
     return issues
 
 
+# ---- P5 红线校验（仅校验可机器检测的硬约束，NLP/视觉类的靠人）----
+
+_STEP_TITLE_RE = re.compile(r"^###\s*步骤\s*\d+\s*[:：]", re.M)
+_FRAME_RE      = re.compile(r"\]\(frames/(frame_(\d+)m(\d+)s\.png)\)")
+_DONE_MARK_RE  = re.compile(r"\*\*做对了的表现\*\*")
+
+
+def _check_p5_redlines(mf, base):
+    """P5 模板（templates/steps_pro_tutorial.md R1-R10）的可机器校验项。
+
+    覆盖：
+      R3-ish 步骤标题格式（强建议）：### 步骤 N：xxx（H3 + `步骤 N` + 冒号）
+      R6-ish 图链格式：](frames/frame_NNmSSs.png)（consolidate 也用这条正则匹配）
+      R4-ish 每步自检标：**做对了的表现**：
+
+    不可机器校验项（NLP/视觉）：R1/R2/R5/R7/R8/R9/R10 —— 留给人工/polish 阶段。
+    """
+    issues = []
+    cur_root = os.path.join(mf["course"]["out_root"], mf["course"]["curated_subdir"])
+    if not os.path.isdir(cur_root):
+        return []  # 还没 curate；不强制
+    for ep in mf.get("episodes", []):
+        ep_dir = ep.get("ep_dir", "")
+        if not ep_dir:
+            continue
+        skel = os.path.join(cur_root, ep_dir, "steps_pro.md")
+        if not os.path.isfile(skel):
+            continue
+        body = _read(skel)
+        # 步骤标题格式：每条 ### 步骤 N: xxx 必须严格
+        bad_titles = [
+            line for line in body.splitlines()
+            if line.startswith("###") and "步骤" in line and not _STEP_TITLE_RE.match(line)
+        ]
+        if bad_titles:
+            issues.append(("WARN", skel,
+                f"步骤标题不规范（{len(bad_titles)} 处不是 `### 步骤 N：xxx`），build 步数统计会漏计：\n      " +
+                "\n      ".join(bad_titles[:3])))
+        # 图链格式：]（frames/frame_NmSSs.png）（consolidate 正则）
+        all_frames = re.findall(r"\]\(([^)]+)\)", body)
+        bad_imgs = [u for u in all_frames if "frames/frame_" in u and not _FRAME_RE.search("](" + u + ")")]
+        if bad_imgs:
+            issues.append(("WARN", skel,
+                f"图链命名不规范（{len(bad_imgs)} 处不匹配 frame_NmSSs 格式），build 不会复制到 assets/：\n      " +
+                "\n      ".join(bad_imgs[:3])))
+        # 自检标记（**做对了的表现**：）必须出现至少 1 次
+        if _STEP_TITLE_RE.search(body) and not _DONE_MARK_RE.search(body):
+            issues.append(("WARN", skel,
+                "缺「做对了的表现：」自检标记（P5 R4 红线）"))
+    return issues
+
+
+def _check_templates_runtime(mf, base):
+    """模板是否被代码实际使用（验证 templates/ 不是 dead code）。
+
+    校验：toolkit/templates.py 存在 + curate.py + index.py 都 import 该模块。
+    """
+    issues = []
+    tp = os.path.join(base, "toolkit", "templates.py")
+    if not os.path.isfile(tp):
+        issues.append(("FAIL", tp, "toolkit/templates.py 不存在（缺少模板渲染层）"))
+        return issues
+
+    def _imported(body: str) -> bool:
+        # 多种合法 import 形式：from . import templates / from . import templates as T
+        # / from . import manifest as M, branding, templates as T  / from toolkit import templates
+        import re as _re
+        return bool(
+            _re.search(r"\bfrom\s+\.\s+import\s+[^#\n]*\btemplates\b", body)
+            or _re.search(r"\bfrom\s+toolkit\s+import\s+[^#\n]*\btemplates\b", body)
+            or _re.search(r"\bimport\s+templates\b", body)
+        )
+
+    for mod in ("curate.py", "index.py"):
+        body = _read(os.path.join(base, "toolkit", mod))
+        if not _imported(body):
+            issues.append(("FAIL", f"toolkit/{mod}", "未导入 toolkit/templates（模板未真正接 curate/index）"))
+    # 模板目录至少要有 steps_pro.md 和 index.md
+    for name in ("steps_pro.md", "index.md"):
+        p = os.path.join(base, "templates", name)
+        if not os.path.isfile(p):
+            issues.append(("FAIL", p, f"templates/{name} 不存在"))
+    return issues
+
+
+def _check_source_video_paths(mf, base):
+    """校验 manifest [[episodes]].source_video 路径是否真实存在。
+
+    解析约定：绝对路径直接用；相对路径相对 course.video_root（与 cli.py / consolidate.py 一致）。
+    校验规则：
+      - 未声明：跳过
+      - video_root 未声明但用了相对路径：WARN（无法解析相对基准）
+      - 解析后路径不存在：WARN（不阻断 release_check；build 时会同样报 WARN）
+    """
+    issues = []
+    video_root = mf.get("course", {}).get("video_root", "")
+    missing_count = 0
+    for ep in mf.get("episodes", []):
+        sv = (ep.get("source_video") or "").strip()
+        if not sv:
+            continue
+        if not os.path.isabs(sv):
+            if not video_root:
+                issues.append(("WARN", f"manifest",
+                    f"episodes[{ep.get('seq','?')}] source_video 是相对路径但 course.video_root 未声明"))
+                continue
+            sv = os.path.join(video_root, sv)
+        if not os.path.isfile(sv):
+            missing_count += 1
+    if missing_count:
+        course_name = mf.get("course", {}).get("name", "?")
+        issues.append(("WARN", "manifest",
+            f"{course_name} 有 {missing_count} 集 source_video 路径不存在（build 会复制失败；可能是 video_root 历史路径迁移，请核对或下回重新下载）"))
+    return issues
+
+
 def run(mf, base=None):
     """主入口：跑全部检查，返回 (issues, summary)。"""
     base = base or BASE
@@ -159,6 +275,9 @@ def run(mf, base=None):
         ("README.md 入口 banner", _check_readme_banner),
         ("AGENT.md 模块地图", _check_agent_module_map),
         ("manifest 必填字段", _check_manifest_required),
+        ("source_video 路径存在", _check_source_video_paths),
+        ("templates/ 真接代码", _check_templates_runtime),
+        ("P5 教程体红线", _check_p5_redlines),
     ]
     for name, fn in checks:
         try:
@@ -187,7 +306,7 @@ def main(args=None):
     issues = run(mf, BASE)
 
     if not issues:
-        print("RELEASE-CHECK PASS（6 项检查全 OK，无遗漏同步点）")
+        print("RELEASE-CHECK PASS（9 项检查全 OK，无遗漏同步点）")
         sys.exit(0)
 
     # 按级别分组打印

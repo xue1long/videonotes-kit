@@ -13,7 +13,7 @@
 name = "风变麦橘AI审美创作课"
 video_root = "D:/002-AIGC/002 风变麦橘-AI审美创作课"
 doc_root = "D:/002-AIGC/002 风变麦橘-AI审美创作课/课堂资料"
-out_root = "D:/000/vidwise/out/风变麦橘AI审美创作课"
+out_root = "E:/002-Pr/videonotes-kit/out/风变麦橘AI审美创作课"
 notes_subdir = "steps_pro"
 curated_subdir = "_curated"
 refdoc_subdir = "参考文档"
@@ -50,7 +50,7 @@ ep_dir = "直播01.mp4"
 topic = "7月18日直播课（delogo）"
 series = "直播课"
 level = "入门"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/1【风变 x 麦橘】直播课7月18日（周五）（delogo） .mp4"
+source_video = "1【风变 x 麦橘】直播课7月18日（周五）（delogo） .mp4"
 purpose = "麦橘 X 风变首期直播课，建立「AI 审美创作」基础认知与工具栈地图。"
 keypoints = [
   "AI 审美创作的工具地图（Midjourney / SD / ComfyUI）",
@@ -65,7 +65,7 @@ ep_dir = "直播02.mp4"
 topic = "7月25日直播课"
 series = "直播课"
 level = "入门"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/2【风变 x 麦橘】直播课7月25日（周五）.mp4"
+source_video = "2【风变 x 麦橘】直播课7月25日（周五）.mp4"
 purpose = "承接首期，继续深入 AI 审美创作的工具与工作流。"
 keypoints = [
   "工具细化（生图 / 生视频）",
@@ -80,7 +80,7 @@ ep_dir = "直播03.mp4"
 topic = "8月1日直播课（delogo）"
 series = "直播课"
 level = "入门"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/3【风变 x 麦橘】直播课8月1日（周五）（delogo） .mp4"
+source_video = "3【风变 x 麦橘】直播课8月1日（周五）（delogo） .mp4"
 purpose = "8 月首期直播课，进入正式创作阶段。"
 keypoints = [
   "完整作品案例拆解",
@@ -95,7 +95,7 @@ ep_dir = "直播04.mp4"
 topic = "8月8日直播课"
 series = "直播课"
 level = "入门"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/4【风变 x 麦橘】直播课8月8日（周五）.mp4"
+source_video = "4【风变 x 麦橘】直播课8月8日（周五）.mp4"
 purpose = "推进创作工作流，进入更细的步骤级操作。"
 keypoints = [
   "提示词工程",
@@ -110,7 +110,7 @@ ep_dir = "直播05.mp4"
 topic = "麦橘MERJIC视频会议"
 series = "视频会议"
 level = "入门"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/5麦橘MERJIC的视频会议.mp4"
+source_video = "5麦橘MERJIC的视频会议.mp4"
 purpose = "2024-08 麦橘与团队的内部视频会议——过程性内容，可旁听创作背后的决策与讨论。"
 keypoints = [
   "团队内部对齐",
@@ -125,7 +125,7 @@ ep_dir = "直播06.mp4"
 topic = "8月22日直播课"
 series = "直播课"
 level = "入门"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/6【风变 x 麦橘】直播课8月22日（周五）.mp4"
+source_video = "6【风变 x 麦橘】直播课8月22日（周五）.mp4"
 purpose = "8 月中下旬直播课。"
 keypoints = [
   "AI 生视频工具实操",
@@ -140,7 +140,7 @@ ep_dir = "直播07.mp4"
 topic = "8月29日直播课"
 series = "直播课"
 level = "入门"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/7【风变 x 麦橘】直播课8月29日（周五）.mp4"
+source_video = "7【风变 x 麦橘】直播课8月29日（周五）.mp4"
 purpose = "8 月收官直播课。"
 keypoints = [
   "月度复盘",
@@ -155,7 +155,7 @@ ep_dir = "直播08.mp4"
 topic = "9月5日直播课"
 series = "直播课"
 level = "入门"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/8【风变 x 麦橘】直播课9月5日（周五）.mp4"
+source_video = "8【风变 x 麦橘】直播课9月5日（周五）.mp4"
 purpose = "9 月首期直播课。"
 keypoints = [
   "9 月主题发布",
@@ -170,7 +170,7 @@ ep_dir = "直播09.mp4"
 topic = "9月12日直播课"
 series = "直播课"
 level = "入门"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/9【风变 x 麦橘】直播课9月12日（周五）.mp4"
+source_video = "9【风变 x 麦橘】直播课9月12日（周五）.mp4"
 purpose = "9 月第二期直播课。"
 keypoints = [
   "提示词迭代方法",
@@ -185,7 +185,7 @@ ep_dir = "直播10.mp4"
 topic = "9月19日直播课"
 series = "直播课"
 level = "入门"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/10【风变 x 麦橘】直播课9月19日（周五）.mp4"
+source_video = "10【风变 x 麦橘】直播课9月19日（周五）.mp4"
 purpose = "9 月第三期直播课。"
 keypoints = [
   "完整短片流程演示",
@@ -200,7 +200,7 @@ ep_dir = "直播11.mp4"
 topic = "9月26日直播课"
 series = "直播课"
 level = "入门"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/11【风变 x 麦橘】直播课9月26日（周五）.mp4"
+source_video = "11【风变 x 麦橘】直播课9月26日（周五）.mp4"
 purpose = "9 月收官直播课。"
 keypoints = [
   "月度复盘",
@@ -215,7 +215,7 @@ ep_dir = "直播12.mp4"
 topic = "10月2日直播课（delogo）"
 series = "直播课"
 level = "入门"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/12【风变 x 麦橘】直播课10月2日（周四）（delogo） .mp4"
+source_video = "12【风变 x 麦橘】直播课10月2日（周四）（delogo） .mp4"
 purpose = "国庆假期前的直播课（周四）——节奏调整为周四。"
 keypoints = [
   "周四试播",
@@ -230,7 +230,7 @@ ep_dir = "直播13.mp4"
 topic = "10月10日直播课"
 series = "直播课"
 level = "入门"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/13【风变 x 麦橘】直播课10月10日（周五）.mp4"
+source_video = "13【风变 x 麦橘】直播课10月10日（周五）.mp4"
 purpose = "10 月第二期（恢复周五档）。"
 keypoints = [
   "工具链更新",
@@ -245,7 +245,7 @@ ep_dir = "直播14.mp4"
 topic = "10月16日直播课"
 series = "直播课"
 level = "入门"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/14【风变 x 麦橘】直播课10月16日（周四）.mp4"
+source_video = "14【风变 x 麦橘】直播课10月16日（周四）.mp4"
 purpose = "10 月中旬加场（周四）。"
 keypoints = [
   "加场补讲",
@@ -260,7 +260,7 @@ ep_dir = "直播15.mp4"
 topic = "10月24日直播课"
 series = "直播课"
 level = "进阶"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/15【风变 x 麦橘】直播课10月24日（周五）.mp4"
+source_video = "15【风变 x 麦橘】直播课10月24日（周五）.mp4"
 purpose = "10 月末直播课——进入进阶阶段。"
 keypoints = [
   "风格一致性控制",
@@ -275,7 +275,7 @@ ep_dir = "直播16.mp4"
 topic = "11月7日直播课"
 series = "直播课"
 level = "进阶"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/16【风变 x 麦橘】直播课11月7日（周五）.mp4"
+source_video = "16【风变 x 麦橘】直播课11月7日（周五）.mp4"
 purpose = "11 月首期直播课。"
 keypoints = [
   "11 月主题发布",
@@ -290,7 +290,7 @@ ep_dir = "直播17.mp4"
 topic = "11月14日直播课"
 series = "直播课"
 level = "进阶"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/17【风变 x 麦橘】直播课11月14日（周五）.mp4"
+source_video = "17【风变 x 麦橘】直播课11月14日（周五）.mp4"
 purpose = "11 月第二期直播课。"
 keypoints = [
   "进阶提示词工程",
@@ -305,7 +305,7 @@ ep_dir = "直播18.mp4"
 topic = "11月21日直播课"
 series = "直播课"
 level = "进阶"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/18【风变 x 麦橘】直播课11月21日（周五）.mp4"
+source_video = "18【风变 x 麦橘】直播课11月21日（周五）.mp4"
 purpose = "11 月第三期直播课。"
 keypoints = [
   "复杂场景处理",
@@ -320,7 +320,7 @@ ep_dir = "直播19.mp4"
 topic = "11月28日直播课"
 series = "直播课"
 level = "进阶"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/19【风变 x 麦橘】直播课11月28日（周五）.mp4"
+source_video = "19【风变 x 麦橘】直播课11月28日（周五）.mp4"
 purpose = "11 月末收官直播课。"
 keypoints = [
   "月度复盘",
@@ -335,7 +335,7 @@ ep_dir = "直播20.mp4"
 topic = "12月5日直播课"
 series = "直播课"
 level = "进阶"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/20【风变 x 麦橘】直播课12月05日（周五）.mp4"
+source_video = "20【风变 x 麦橘】直播课12月05日（周五）.mp4"
 purpose = "12 月首期直播课。"
 keypoints = [
   "12 月主题",
@@ -350,7 +350,7 @@ ep_dir = "直播21.mp4"
 topic = "12月12日直播课"
 series = "直播课"
 level = "进阶"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/21【风变 x 麦橘】直播课12月12日（周五）.mp4"
+source_video = "21【风变 x 麦橘】直播课12月12日（周五）.mp4"
 purpose = "12 月第二期直播课。"
 keypoints = [
   "项目进展展示",
@@ -365,7 +365,7 @@ ep_dir = "直播22.mp4"
 topic = "12月19日直播课"
 series = "直播课"
 level = "进阶"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/22【风变 x 麦橘】直播课12月19日（周五）.mp4"
+source_video = "22【风变 x 麦橘】直播课12月19日（周五）.mp4"
 purpose = "12 月第三期直播课（年终冲刺）。"
 keypoints = [
   "年终项目重点推进",
@@ -380,7 +380,7 @@ ep_dir = "直播23.mp4"
 topic = "12月26日直播课"
 series = "直播课"
 level = "进阶"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/23【风变 x 麦橘】直播课12月26日（周五）.mp4"
+source_video = "23【风变 x 麦橘】直播课12月26日（周五）.mp4"
 purpose = "12 月末收官直播课。"
 keypoints = [
   "年终总结",
@@ -395,7 +395,7 @@ ep_dir = "直播24.mp4"
 topic = "1月9日直播课"
 series = "直播课"
 level = "进阶"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/24【风变 x 麦橘】直播课1月9日（周五）.mp4"
+source_video = "24【风变 x 麦橘】直播课1月9日（周五）.mp4"
 purpose = "2025 年首期直播课。"
 keypoints = [
   "新年规划",
@@ -410,7 +410,7 @@ ep_dir = "直播25.mp4"
 topic = "1月16日直播课"
 series = "直播课"
 level = "进阶"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/25【风变 x 麦橘】直播课1月16日（周五）.mp4"
+source_video = "25【风变 x 麦橘】直播课1月16日（周五）.mp4"
 purpose = "1 月第二期直播课。"
 keypoints = [
   "项目实战",
@@ -425,7 +425,7 @@ ep_dir = "直播26.mp4"
 topic = "1月23日直播课"
 series = "直播课"
 level = "进阶"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/26【风变 x 麦橘】直播课1月23日（周五）.mp4"
+source_video = "26【风变 x 麦橘】直播课1月23日（周五）.mp4"
 purpose = "1 月第三期直播课。"
 keypoints = [
   "风格控制成熟期",
@@ -440,7 +440,7 @@ ep_dir = "直播27.mp4"
 topic = "1月30日直播课"
 series = "直播课"
 level = "进阶"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/27【风变 x 麦橘】直播课1月30日（周五）.mp4"
+source_video = "27【风变 x 麦橘】直播课1月30日（周五）.mp4"
 purpose = "1 月末收官直播课。"
 keypoints = [
   "月度复盘",
@@ -455,7 +455,7 @@ ep_dir = "直播28.mp4"
 topic = "2月6日直播课"
 series = "直播课"
 level = "进阶"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/28【风变 x 麦橘】直播课2月6日（周五）.mp4"
+source_video = "28【风变 x 麦橘】直播课2月6日（周五）.mp4"
 purpose = "2 月首期（春节后）直播课。"
 keypoints = [
   "春节后启动",
@@ -470,7 +470,7 @@ ep_dir = "直播29.mp4"
 topic = "2月27日直播课（delogo）"
 series = "直播课"
 level = "进阶"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/29【风变 x 麦橘】直播课2月27日（周五）（delogo） .mp4"
+source_video = "29【风变 x 麦橘】直播课2月27日（周五）（delogo） .mp4"
 purpose = "2 月末直播课（春节后恢复节奏）。"
 keypoints = [
   "项目推进",
@@ -485,7 +485,7 @@ ep_dir = "直播30.mp4"
 topic = "3月6日直播课"
 series = "直播课"
 level = "进阶"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/30【风变 x 麦橘】直播课3月6日（周五）.mp4"
+source_video = "30【风变 x 麦橘】直播课3月6日（周五）.mp4"
 purpose = "3 月首期直播课。"
 keypoints = [
   "3 月主题发布",
@@ -500,7 +500,7 @@ ep_dir = "加餐_31.mp4"
 topic = "3月11日加餐直播"
 series = "加餐"
 level = "进阶"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/31加餐【风变 x 麦橘】直播课3月11日.mp4"
+source_video = "31加餐【风变 x 麦橘】直播课3月11日.mp4"
 purpose = "31 期前的临时加餐——补充关键内容。"
 keypoints = [
   "加餐补讲",
@@ -515,7 +515,7 @@ ep_dir = "直播31.mp4"
 topic = "3月13日直播课"
 series = "直播课"
 level = "进阶"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/31【风变 x 麦橘】直播课3月13日（周五）.mp4"
+source_video = "31【风变 x 麦橘】直播课3月13日（周五）.mp4"
 purpose = "3 月中旬直播课。"
 keypoints = [
   "承接加餐内容",
@@ -530,7 +530,7 @@ ep_dir = "直播32.mp4"
 topic = "3月20日直播课"
 series = "直播课"
 level = "进阶"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/32【风变 x 麦橘】直播课3月20日（周五）.mp4"
+source_video = "32【风变 x 麦橘】直播课3月20日（周五）.mp4"
 purpose = "3 月第三期直播课。"
 keypoints = [
   "技术深化",
@@ -545,7 +545,7 @@ ep_dir = "直播33.mp4"
 topic = "3月27日直播课"
 series = "直播课"
 level = "进阶"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/33【风变 x 麦橘】直播课3月27日（周五）.mp4"
+source_video = "33【风变 x 麦橘】直播课3月27日（周五）.mp4"
 purpose = "3 月末收官直播课。"
 keypoints = [
   "Q2 收官准备",
@@ -560,7 +560,7 @@ ep_dir = "直播34.mp4"
 topic = "4月3日直播课（delogo）"
 series = "直播课"
 level = "进阶"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/34【风变 x 麦橘】直播课4月3日（周五）（delogo）.mp4"
+source_video = "34【风变 x 麦橘】直播课4月3日（周五）（delogo）.mp4"
 purpose = "系列收官直播课（最后一期）。"
 keypoints = [
   "系列总结",
@@ -575,7 +575,7 @@ ep_dir = "公开课1.mp4"
 topic = "风变x麦橘公开课 day1"
 series = "公开课"
 level = "入门"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/风变 x 麦橘公开课 day1.mp4"
+source_video = "风变 x 麦橘公开课 day1.mp4"
 purpose = "面向大众的 3 天公开课 Day 1——AI 审美创作入门与工具地图。"
 keypoints = [
   "AI 审美创作全景",
@@ -590,7 +590,7 @@ ep_dir = "公开课2.mp4"
 topic = "风变x麦橘公开课 day2"
 series = "公开课"
 level = "入门"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/风变 x 麦橘公开课 day2.mp4"
+source_video = "风变 x 麦橘公开课 day2.mp4"
 purpose = "公开课 Day 2——生图工具与风格控制。"
 keypoints = [
   "Midjourney / SD 实战",
@@ -605,7 +605,7 @@ ep_dir = "公开课3.mp4"
 topic = "风变x麦橘公开课 day3"
 series = "公开课"
 level = "入门"
-source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/风变 x 麦橘公开课 day3.mp4"
+source_video = "风变 x 麦橘公开课 day3.mp4"
 purpose = "公开课 Day 3——生视频与项目级工作流。"
 keypoints = [
   "AI 生视频工具",

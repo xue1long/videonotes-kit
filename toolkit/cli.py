@@ -17,7 +17,7 @@ import argparse
 import filecmp
 import shutil
 
-BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # D:/000/vidwise
+BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # 工具链根（自动推导 = <项目根>）
 PROJECTS = os.path.join(BASE, "projects")
 sys.path.insert(0, BASE)
 

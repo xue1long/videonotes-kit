@@ -99,6 +99,14 @@ def llm_refine_step(title, body, mf):
 
 
 # ---- P4：阶段分组启发式 ----
+def _safe_int(s, fallback: int = 1) -> int:
+    """安全 int 转换（seq 如 '01'/'30A'/'加餐_31' 等都安全）。"""
+    try:
+        return int(s)
+    except (ValueError, TypeError):
+        return fallback
+
+
 def _auto_groups(n: int) -> list:
     """按总步数自动划分 2–3 阶段。目标：每阶段 2–4 步。
     总步 ≤4：不分（单阶段）。
@@ -162,87 +170,86 @@ def gen_skeleton(mf, ep, overwrite=False):
     purpose = ep.get("purpose", "")
     keypoints = ep.get("keypoints") or []
 
-    L = []
-    L.append(f"# 教程步骤笔记（精校版）· {ep['label']}：{ep['topic']}")
-    L.append("")
-    L.append("> 来源：vidwise 本地 medium 转写 + draft 半成品（Tier0 自动生成，待人工润色 / 可选 Tier2 本地 LLM 精校）")
-    L.append(f"> 集目录：{ep['ep_dir']} ｜ 配套截图在 ``{ep['ep_dir']}/frames/``")
-    if series or level:
-        L.append(f"> 系列：{series} · 难度：{level}")
-    L.append("")
-
-    # ---- 元信息区（manifest 已填的预填，缺的标 TODO）----
-    L.append("## 学习目标")
-    L.append("")
+    # ---- 1) 拼装元信息块（供模板填充）----
+    # 学习目标：prefill from manifest.purpose + keypoints[:2]; 缺则给 TODO
     if purpose:
-        # 把 manifest purpose 拆成 3 条预填
-        L.append(f"<!-- 以下根据 manifest purpose 自动预填，请润色或保留 -->")
-        L.append(f"- {purpose}")
+        purpose_lines = [
+            "<!-- 以下根据 manifest purpose 自动预填，请润色或保留 -->",
+            f"- {purpose}",
+        ]
         for kp in keypoints[:2]:
-            L.append(f"- {kp}")
+            purpose_lines.append(f"- {kp}")
+        purpose_block = "\n".join(purpose_lines)
     else:
-        L.append("<!-- TODO: 学完本集后你能做到（建议 3 条以内）：-->")
-        L.append("- 会判断：……")
-        L.append("- 会做：……")
-        L.append("- 带走一个观：……")
-    L.append("")
+        purpose_block = "\n".join([
+            "<!-- TODO: 学完本集后你能做到（建议 3 条以内） -->",
+            "- 会判断：……",
+            "- 会做：……",
+            "- 带走一个观：……",
+        ])
 
-    L.append("## 前置你会什么")
-    L.append("")
-    L.append("<!-- TODO: 列已会的能力（降低陌生感；不需要列不会的） -->")
-    L.append("- ……")
-    L.append("> 不需要：……")
-    L.append("")
+    # 前置你会什么（manifest 暂无字段）→ TODO 占位
+    prereq_block = "\n".join([
+        "<!-- TODO: 列已会的能力（降低陌生感；不需要列不会的） -->",
+        "- ……",
+        "> 不需要：……",
+    ])
 
-    L.append("## 关键术语")
-    L.append("")
-    L.append("<!-- TODO: 本集黑话 → 真实含义（3–6 条；与总索引术语表呼应） -->")
-    L.append("- **xxx**：xxx")
-    L.append("")
-    L.append("---")
-    L.append("")
+    # 关键术语（manifest 暂无字段，与总索引 glossary 关联项）→ TODO 占位
+    glossary_block = "\n".join([
+        "<!-- TODO: 本集黑话 → 真实含义（3–6 条；与总索引术语表呼应） -->",
+        "- **xxx**：xxx",
+    ])
 
-    # ---- 阶段分组 ----
+    # ---- 2) 拼装阶段分组 + 每步详解（替换模板中的 $stages）----
     groups = _auto_groups(len(steps))
-    step_idx = 0
+    stages_lines = []
     for gname, idxs in groups:
-        L.append(f"## {gname}")
-        L.append("")
-        L.append("<!-- TODO: 这一阶段在解决什么核心问题（1 句话，必须是「问题」而非「动作」） -->")
-        L.append("")
-        for j, i in enumerate(idxs):
+        stages_lines.append(f"## {gname}")
+        stages_lines.append("")
+        stages_lines.append("<!-- TODO: 这一阶段在解决什么核心问题（1 句话，必须是「问题」而非「动作」） -->")
+        stages_lines.append("")
+        for i in idxs:
             st = steps[i - 1]
-            L.append(f"### 步骤 {i}：{st['title']}")
-            L.append("")
-            L.append("<!-- TODO 润色：修 ASR 错字、精简口语冗余、把标题改得更像「动作+结果」。"
-                     "可选：在 manifest [llm] 设 enabled=true 启用本地 LLM 自动润色。 -->")
+            stages_lines.append(f"### 步骤 {i}：{st['title']}")
+            stages_lines.append("")
+            stages_lines.append("<!-- TODO 润色：修 ASR 错字、精简口语冗余、把标题改得更像「动作+结果」。"
+                                "可选：在 manifest [llm] 设 enabled=true 启用本地 LLM 自动润色。 -->")
             body = st["body"]
             if llm_cfg.get("enabled"):
                 body = llm_refine_step(st["title"], body, mf)
-            L.append(body)
-            L.append("")
-            L.append("**做对了的表现**：<!-- TODO: 1 句可观察/可量化的判定（不要写「通顺」「干净」这类无标尺词） -->")
-            L.append("")
-            L.append("> 经验 / 易错：<!-- TODO: 半句话，写最有价值的那一条 -->")
-            L.append("")
+            stages_lines.append(body)
+            stages_lines.append("")
+            stages_lines.append("**做对了的表现**：<!-- TODO: 1 句可观察/可量化的判定（不要写「通顺」「干净」这类无标尺词） -->")
+            stages_lines.append("")
+            stages_lines.append("> 经验 / 易错：<!-- TODO: 半句话，写最有价值的那一条 -->")
+            stages_lines.append("")
             if st["frame"]:
-                L.append(f"![步骤 {i} 截图]({st['frame']})")
-                L.append("")
-            L.append("---")
-            L.append("")
-            step_idx += 1
+                stages_lines.append(f"![步骤 {i} 截图]({st['frame']})")
+                stages_lines.append("")
+            stages_lines.append("---")
+            stages_lines.append("")
+    stages_block = "\n".join(stages_lines)
 
-    # ---- 易错总结占位 ----
-    L.append("## 易错总结（看完再回看本集）")
-    L.append("")
-    L.append("<!-- TODO: 1 张表，把本集最容易踩的 3–5 个坑收束（错点 / 后果 / 改法） -->")
-    L.append("")
-    L.append("| 错点 | 后果 | 改法 |")
-    L.append("|------|------|------|")
-    L.append("| …… | …… | …… |")
-    L.append("")
+    # ---- 3) 用模板渲染骨架 ----
+    from . import templates as T
+    banner_text = (
+        f"来源：{mf['course']['name']} {series or ''}第 {_safe_int(ep.get('seq',''), 1)} 集"
+        f" ｜ 集目录：{ep['ep_dir']}"
+        f" ｜ 转写：vidwise 本地 medium + draft 半成品（Tier0 自动生成，待人工润色 / 可选 Tier2 本地 LLM 精校）"
+    )
+    skel_text = T.render(
+        "steps_pro",
+        label=ep["label"],
+        topic=ep["topic"],
+        banner=banner_text,
+        purpose_block=purpose_block,
+        prereq_block=prereq_block,
+        glossary_block=glossary_block,
+        stages=stages_block,
+    )
 
-    open(skel, "w", encoding="utf-8").write("\n".join(L))
+    open(skel, "w", encoding="utf-8").write(skel_text)
     print("curate ->", skel, "steps:", len(steps), "groups:", len(groups))
 
 

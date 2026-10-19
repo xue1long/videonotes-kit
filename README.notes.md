@@ -1,6 +1,6 @@
 # videonotes-kit · 使用手册
 
-> 本文是 `D:/000/vidwise` 下「视频 + 文档 → 图文笔记」管线的使用手册。
+> 本文是 `E:/002-Pr/videonotes-kit` 下「视频 + 文档 → 图文笔记」管线的使用手册。
 > 上游 vidwise 本体文档见同目录 `README.md`（未改动）。
 > 本手册面向：**把本地课程视频 + 配套文档，整理成可独立分发、图片不丢、带总索引的图文笔记包**。
 
@@ -23,7 +23,7 @@
 ## 2. 目录结构
 
 ```
-D:/000/vidwise/                         # 工具链根
+E:/002-Pr/videonotes-kit/                # 工具链根
 ├── notes.py            # 唯一入口：notes <课程> <子命令>
 ├── README.md           # 上游 vidwise 文档（未改）
 ├── README.notes.md     # 本文（项目手册）
@@ -31,14 +31,16 @@ D:/000/vidwise/                         # 工具链根
 │   ├── cli.py          #   CLI 路由 + verify 非破坏回归
 │   ├── manifest.py     #   读 projects/<课>/manifest.toml
 │   ├── draft.py        #   = v2tutorial：全量帧对齐 + 聚合 + 简繁 → steps_v2.md
-│   ├── curate.py       #   Tier1：draft → steps_pro.skeleton.md 骨架 + Tier2 LLM 接口
+│   ├── curate.py       #   Tier1：draft → steps_pro.skeleton.md 骨架 + Tier2 LLM 接口（改由 templates/steps_pro.md 渲染）
 │   ├── consolidate.py  #   汇集笔记 + 复制被引帧到 assets/ + 改写图链（自包含）
 │   ├── docs.py         #   读 manifest 归档参考文档
-│   └── index.py        #   扫描 notes/ 自动生成 总索引.md
+│   ├── index.py        #   扫描 notes/ 自动生成 总索引.md（改由 templates/index.md 渲染）
+│   ├── templates.py    #   模板渲染层（标准库 string.Template；零第三方依赖）
+│   └── release.py      #   release_check 子命令（8 项同步点检查：P* / verify / 总索引 / README / AGENT / manifest / 模板真接 / P5 红线）
 ├── projects/           # 一门课一个文件夹（数据驱动）
 │   └── 沐北AICG/
 │       └── manifest.toml   # 课程/集/文档清单 + 索引增强文案 + [llm] 开关
-├── templates/          # steps_pro.md 模板（含半成品说明）
+├── templates/          # steps_pro.md / index.md 模板（由 toolkit/templates.py 渲染；详见 templates/README.md）
 ├── out/<课程>/         # 产物（vidwise 原始产物 + _curated + <notes_subdir>/）
 │   ├── <集>.mp4/       #   vidwise 原始产物：transcript.json + frames/ + steps_v2.md
 │   ├── _curated/<集>/  #   人工精校金标准 steps_pro.md（curate 生成的骨架为 .skeleton.md）
@@ -59,13 +61,14 @@ D:/000/vidwise/                         # 工具链根
 - **无第三方依赖**：Tier2 LLM 接口用标准库 `urllib`，不引入 `requests`。
 - **无需 API key**：默认 Tier0（draft）+ Tier1（人工精校）。Tier2 本地 LLM 默认关闭。
 - vidwise 本地转写依赖本机已缓存的 faster-whisper medium 模型（`HF_HUB_OFFLINE=1` 强制离线）。
+- **依赖安装**：`pip install -e .` 仅装工具链必需的 5 个（click / openai-whisper / yt-dlp / numpy / pillow）。`anthropic` / `openai` 已移到 `[project.optional-dependencies].guide` extras；上游 `--guide` 路径要用就 `pip install -e ".[guide]"`。本工具链不需要。
 
 ---
 
 ## 4. 快速开始（以现有沐北AICG 为例）
 
 ```bash
-cd D:/000/vidwise
+cd E:/002-Pr/videonotes-kit
 
 # ① 重新生成各集 draft 草稿（确定性，可复现）
 python notes.py 沐北AICG draft
@@ -99,6 +102,7 @@ python notes.py 沐北AICG verify
 | `docs` | 仅归档参考文档 | 读 manifest docs 段 |
 | `index` | 仅重新生成总索引 | 全部文案由 manifest 驱动 |
 | `consolidate` | 仅汇集视频笔记 | 不含文档/索引 |
+| `release_check` | 8 项同步点自动检查 | P* 阶段覆盖 / verify 产物覆盖 / 总索引 banner / README banner / AGENT 模块地图 / manifest 必填字段 / **模板真接代码** / **P5 教程体红线** |
 
 ---
 
@@ -109,7 +113,7 @@ python notes.py 沐北AICG verify
 name = "沐北AICG"                 # 课程名（用于总索引标题）
 video_root = "D:/002-AIGC/..."    # 源视频根（仅记录，vidwise 已跑过）
 doc_root   = "D:/002-AIGC/.../文档"  # 源文档根
-out_root   = "D:/000/vidwise/out/沐北AICG"  # 产物根
+out_root   = "E:/002-Pr/videonotes-kit/out/沐北AICG"  # 产物根
 notes_subdir   = "steps_pro"     # 最终交付子目录名
 curated_subdir = "_curated"      # 人工金标准源
 refdoc_subdir  = "参考文档"       # 文档归档子目录
@@ -200,6 +204,7 @@ subtitle = "字幕/1.md"       # 相对 video_root；绝对路径也行。声明
 - 长视频转写耗时：medium 模型跑 8 小时音视频需数小时，断点续跑已支持。
 - `manifest` 的 `topic` 需人工定（或从 draft 推断候选）。
 - 旧散脚本 `v2tutorial.py` / `consolidate_steps.py` / `consolidate_docs.py` / `v2notes_builder.py` / `v2step_builder.py` / `run_series.py` 已于 2026-10 清理（被本 toolkit 完全取代）。算法思路保留在 `toolkit/draft.py` 注释中。
+- **模板真接代码**：`templates/steps_pro.md` 由 `toolkit/curate.py` 通过 `toolkit/templates.py` 渲染；`templates/index.md` 由 `toolkit/index.py` 同路渲染。改模板外观 = 改 .md，无需碰 toolkit/。详见 `templates/README.md`。
 
 ---
 
@@ -284,5 +289,20 @@ source_video = "D:/002-AIGC/沐北AICG/基础/1.mp4"   # 必填
 1. 解压 `steps_pro/` 任意目录
 2. 双击 `play.html` → 默认浏览器打开 → 选集 → 播放
 3. 在任何笔记里点 `▶ 0:00` 链接 → 自动跳到该步骤
+
+---
+
+## 13. P6 模板真正接入代码
+
+2026-10-19 整改：
+
+- **痛点**：`templates/steps_pro.md` 与 `templates/index.md` 在文档（AGENT.md / README.notes.md / VIDEONOTES-KIT_ROADMAP.md）里被列为项目骨架，但代码从未读它们——curate / index 全用 Python 字符串直接拼。改产物外观必须改 .py。
+- **改造**：新建 `toolkit/templates.py`（标准库 `string.Template`，零第三方依赖），把 curate 骨架与 index 总索引改为「读 templates/*.md + safe_substitute 填占位符」。控制流（if/for）仍由 Python for 循环预拼成块整体替换。
+- **效果**：改产物外观 = 改 templates/*.md，无需碰 toolkit/。
+- **配套**：`toolkit/release.py` 增加 2 项检查（`_check_templates_runtime` + `_check_p5_redlines`），同步点从 6 → 8。模板契约详见 `templates/README.md`。
+- **约束**：
+  - 占位符 `$name`（全英文），禁止反引号包裹 `$xxx`（会被替换）
+  - `templates/steps_pro_tutorial.md`（P5 体例）当前**未连接代码**，留作历史参考与未来切档
+  - `release_check` 警告 ≠ 阻塞，但模板层 FAIL 必须修
 
 > 注意：`source/` 是**冗余副本**（4.8 GB）。如需减重，删除 `source/` 后 `play.html` 仍会工作但视频无法播放——笔记可读、跳转链接仍可点（浏览器会报"无法加载视频"）。
