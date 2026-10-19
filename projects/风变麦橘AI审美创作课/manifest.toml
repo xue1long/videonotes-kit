@@ -28,10 +28,1285 @@ learning_path = "本教程是「风变 × 麦橘 MERJIC」联合的 AI 审美创
 # 系列说明（总索引「系列说明」段）
 series_note = "「直播课」是麦橘 MERJIC 与风变联合的每周直播课，连续 9 个月（2024-07-18 → 2025-04-03），覆盖 AIGC 审美创作的全链路（编剧 / 风格 / 镜头 / 后期 / 调色 / 音效 / 出品）。「视频会议」是 2024-08 麦橘与团队的过程性视频会议。「加餐」是 2025-03-11 在 31 正式课前临时补的一节。「公开课」day1–3 是 2024 年早期面向大众的 3 天集中公开课。"
 
-# 术语对照（待 Tier1 精校完成后回填——本机无 vision/LLM，glossary 必须基于真实转写内容产出，不预编造）
-# [[course.glossary]]
-# term = ""
-# meaning = ""
+# 术语对照（由 scripts/rebuild_glossary.py 从 _curated/<集>/steps_pro.md 全量重建）
+[[course.glossary]]
+term = "魔搭社区（ModelScope）"
+meaning = "阿里旗下的 AI 社区，AIGC 专区可以在线训练模型，本集全程免费"
+[[course.glossary]]
+term = "麦橘超然"
+meaning = "麦橘自己的人像模型，基于 Flux，课上称它最擅长人像、皮肤质感最好"
+[[course.glossary]]
+term = "Flux"
+meaning = "本集使用的底模体系，基本生成尺寸是 1024×1024"
+[[course.glossary]]
+term = "LoRA"
+meaning = "叠加在底模上的小模型，本集练的脸模就是一个 LoRA"
+[[course.glossary]]
+term = "训练集"
+meaning = "用来训练模型的图片集合，本集建议 10–20 张"
+[[course.glossary]]
+term = "打标"
+meaning = "给每张训练图生成英文描述，让模型把文字与画面对应"
+[[course.glossary]]
+term = "JoyCaption"
+meaning = "打标模型名，课上选列表里的第二个"
+[[course.glossary]]
+term = "底模"
+meaning = "训练时选的基础模型，决定整体能力与质感"
+[[course.glossary]]
+term = "重绘幅度"
+meaning = "图生图时允许改动原图的比例，本集用 0.5–0.6"
+[[course.glossary]]
+term = "提示词反推"
+meaning = "让工具根据上传图自动写出描述词"
+[[course.glossary]]
+term = "图生图"
+meaning = "上传一张图作为参考再生成，本集用来换脸"
+[[course.glossary]]
+term = "泛化"
+meaning = "模型对不同角度、场景、装扮的适应能力"
+[[course.glossary]]
+term = "图层蒙版"
+meaning = "PS 中遮住图层局部的功能，黑笔遮、白笔显"
+[[course.glossary]]
+term = "即梦"
+meaning = "本集用来生成换脸底图的生图工具，转写常作「吉梦／极梦」"
+[[course.glossary]]
+term = "底图"
+meaning = "换脸时被替换的那张原图，决定脸能不能贴稳、像不像。"
+[[course.glossary]]
+term = "电图"
+meaning = "Midjourney 里用参考图影响生成结果的方式，用来把色调和风格带进画面。"
+[[course.glossary]]
+term = "主体 / 场景"
+meaning = "主体是要描述的人或物；场景是主体所在的环境。"
+[[course.glossary]]
+term = "视角"
+meaning = "机位相对人物的高低关系，分仰视、平视、俯视。"
+[[course.glossary]]
+term = "景别"
+meaning = "人物在画面中的占比，从远景、全景、中景、近景到特写。"
+[[course.glossary]]
+term = "陪体"
+meaning = "陪在主体旁边、类似道具的人或物，用来补信息。"
+[[course.glossary]]
+term = "三原色"
+meaning = "红、黄、蓝，不能再分解，最纯也最艳。"
+[[course.glossary]]
+term = "间色"
+meaning = "两种原色等量混合得到的橙、绿、紫。"
+[[course.glossary]]
+term = "复色"
+meaning = "原色与间色再混合的颜色，饱和度低、含蓄；加灰接近莫兰迪。"
+[[course.glossary]]
+term = "同类色 / 临近色"
+meaning = "色环上挨得很近的是同类色，相距约 60 度的是临近色。"
+[[course.glossary]]
+term = "对比色 / 互补色"
+meaning = "相距 120 度左右为对比色，正对面 180 度为互补色。"
+[[course.glossary]]
+term = "分割光"
+meaning = "把脸分成明暗两块的硬光，用来做深沉、神秘的情绪。"
+[[course.glossary]]
+term = "炼模型"
+meaning = "用一批图训练出可复用的风格或人物模型，视频里也叫「炼丹」。"
+[[course.glossary]]
+term = "风格娃娃机"
+meaning = "社团练习法 —— 每天换一种色调，同一风格套不同主题，把一组图拼在一起看。"
+[[course.glossary]]
+term = "个性化参数（P）"
+meaning = "Midjourney 的 personalization，把出图拉向个人偏好。"
+[[course.glossary]]
+term = "风格种子"
+meaning = "`--sref` 后面那串数字，代表一个已经存在的风格编码，不是随机数"
+[[course.glossary]]
+term = "`--sref random`"
+meaning = "让 Midjourney 随机给一个风格参考，出图后 random 会被替换成一串数字"
+[[course.glossary]]
+term = "混风格（混种）"
+meaning = "把两到三串风格种子同时写进提示词，取两边的中间值"
+[[course.glossary]]
+term = "权重（`::`）"
+meaning = "写在种子后面，如 `3583893463::2`，数字越大该风格占比越高"
+[[course.glossary]]
+term = "chaos（C 值）"
+meaning = "控制四张图之间的差异，默认 0，给到 20 差异就很大"
+[[course.glossary]]
+term = "风格化（S 值）"
+meaning = "控制画面「审美风格」的强度，对应面板上的 Stylization"
+[[course.glossary]]
+term = "个性化（Personalize）"
+meaning = "用 profile 训练出属于你的审美档案，麦橘认为这是 MJ 最重要的功能"
+[[course.glossary]]
+term = "EXP"
+meaning = "MJ 官方的实验性审美参数，加 10 或 20，可加可不加"
+[[course.glossary]]
+term = "心流"
+meaning = "挑战与技能相匹配时的状态，做图最顺、最容易忘记时间"
+[[course.glossary]]
+term = "表达 / 突破 / 释放"
+meaning = "麦局循环里的三种创作状态，分别对应共鸣、扩张、清空"
+[[course.glossary]]
+term = "做减法"
+meaning = "细节给太多反而没有冲击，要敢删"
+[[course.glossary]]
+term = "伦勃朗光"
+meaning = "一侧主光、另一侧留暗部的布光，麦橘偏爱的暗调层次靠它"
+[[course.glossary]]
+term = "一单一世界"
+meaning = "一个模型或一个 LoRA 就是一个世界观，里面的人物、生物、场景都统一"
+[[course.glossary]]
+term = "首尾帧"
+meaning = "给定第一帧和最后一帧，让模型补中间的运动（转写里的「手尾针」）"
+[[course.glossary]]
+term = "转会"
+meaning = "拿一段现成视频做视频转绘，保留原视频的动作（转写里的「转会 / 转汇」）"
+[[course.glossary]]
+term = "线性蒙版"
+meaning = "在画面上拉一条渐变遮罩，用来藏住两段素材的接缝"
+[[course.glossary]]
+term = "关键帧"
+meaning = "给蒙版的位置、缩放打点，让参数随时间变化"
+[[course.glossary]]
+term = "遮挡物转场"
+meaning = "让树、墓碑、冰雕等前景扫过镜头，用遮挡的瞬间完成切换"
+[[course.glossary]]
+term = "动接动、远接远、方接方"
+meaning = "上下镜头的运动状态、景别、形状尽量一致，接起来才不跳"
+[[course.glossary]]
+term = "罐头笑声"
+meaning = "情景喜剧式的背景笑声，用来把气氛拉回搞笑"
+[[course.glossary]]
+term = "智能多帧"
+meaning = "即梦里按镜头 1、镜头 2……逐段写提示词、逐段衔接的生成方式"
+[[course.glossary]]
+term = "关键帧图"
+meaning = "喂给视频模型的首帧图，决定这一段会不会动（转写里的「竞争图」）"
+[[course.glossary]]
+term = "动态模糊"
+meaning = "画面里的拖影，等于告诉模型\"这一帧正在运动\""
+[[course.glossary]]
+term = "3x3 分镜网格"
+meaning = "用一句提示词让 AI 出一张 3×3 的电影分镜图，自动选机位和构图"
+[[course.glossary]]
+term = "拔高立意"
+meaning = "把\"回家\"这类小故事，接到文物回家、一家人的公共情绪上"
+[[course.glossary]]
+term = "商单"
+meaning = "客户付钱的定制片，时长、内容、细节取舍由甲方决定"
+[[course.glossary]]
+term = "3D 电影截图质感"
+meaning = "Banana 出图时用的一句质感描述，用来统一整条片的画面质感"
+[[course.glossary]]
+term = "2.5D"
+meaning = "偏立体但不全写实 —— 平面 + 一点空间感。本集核心辨析对象（不是 2D 也不完全是 3D）"
+[[course.glossary]]
+term = "卡牌"
+meaning = "MBTI 比赛的角色图最终会印在卡牌上，所以\"放在卡牌上有浮雕感\"是 2.5D 的设计目标"
+[[course.glossary]]
+term = "Raw 模型"
+meaning = "Midjourney V7 的写实 / 电影质感模式（\"接近相机 Raw\"），出图更\"听话\""
+[[course.glossary]]
+term = "Stylize (`--s`)"
+meaning = "风格化强度，默认 100；写在 prompt 里的数字优先级最高（`--s 200` 就算 UI 调到 1000 也按 200 算）"
+[[course.glossary]]
+term = "Weird (`--w`)"
+meaning = "怪异值，默认 0；调到 100 出\"阴间怪图\"，本集建议尽量不碰"
+[[course.glossary]]
+term = "Chaos (`--c`)"
+meaning = "多样性，决定 4 张图之间的差异；10–20 是舒适区"
+[[course.glossary]]
+term = "Profile (`--p`)"
+meaning = "个人审美预设（麦橘老师自己的 P 可以直接抄去用）"
+[[course.glossary]]
+term = "SREF / `--sref <数字>`"
+meaning = "Style Reference，贴一张风格图作为整体视觉锚点"
+[[course.glossary]]
+term = "沉浸式翻译"
+meaning = "浏览器插件，中英对照翻译提示词 —— 麦橘的 Midjourney 教学标配"
+[[course.glossary]]
+term = "智谱"
+meaning = "国内大模型公司，2024 年找麦橘合作\"虚拟数字伴侣\"产品"
+[[course.glossary]]
+term = "数字伴侣 / 数字人"
+meaning = "可交互的虚拟角色（用户可以\"摸\"角色，角色有反应）"
+[[course.glossary]]
+term = "Keir / 马男 / 奶狗"
+meaning = "麦橘为该产品设计的三个男性角色（\"静浴系\"/\"渣男\"/\"温暖\"）"
+[[course.glossary]]
+term = "记忆点"
+meaning = "上半身最显眼的视觉特征 —— 锁骨、锁骨终点、厚度、肤色等"
+[[course.glossary]]
+term = "鼻额角"
+meaning = "鼻子和额头之间的折叠角（折叠度越大 = 越立体 / 越犀利）"
+[[course.glossary]]
+term = "鼻唇角"
+meaning = "鼻子和嘴唇之间的角度（影响侧脸好看度）"
+[[course.glossary]]
+term = "鼻基底"
+meaning = "鼻子的\"地基\"——凹陷的鼻基底 = 没立体感（鼻基底做不好，鼻子再挺也白搭）"
+[[course.glossary]]
+term = "双 C 线"
+meaning = "面部轮廓的高光曲线（双 C 曲线）"
+[[course.glossary]]
+term = "M 唇 / 微笑唇"
+meaning = "唇部形态分类"
+[[course.glossary]]
+term = "颏唇沟"
+meaning = "嘴唇和下巴之间的沟（太浅会\"地包天\"，侧脸美的人都明显）"
+[[course.glossary]]
+term = "下颌角"
+meaning = "下巴拐角角度（男一/女三 —— 男性偏刚硬 / 女性偏柔）"
+[[course.glossary]]
+term = "面部折叠度"
+meaning = "多个角度 + 折叠的总和 = 立体感；想立体 → 角度变小；想柔和 → 角度变圆润"
+[[course.glossary]]
+term = "理想侧脸"
+meaning = "鼻尖 / 嘴唇 / 下巴能触碰同一条直线的\"四点到一线\"（参考标准，不是金标准）"
+[[course.glossary]]
+term = "厂商审美"
+meaning = "模型默认风格（即梦 3.1 偏二维、Midjourney 默认偏电影感）—— 出图会被\"认出是哪个工具\""
+[[course.glossary]]
+term = "个人审美"
+meaning = "用 `--p`（个人 Profile）预设 / 自练 LoRA / 自己的种子—— 让\"一眼看出是你\""
+[[course.glossary]]
+term = "氛围"
+meaning = "技术 = 构图 + 表情 + 故事；氛围好的图\"看了想知道这人是谁、发生过什么\""
+[[course.glossary]]
+term = "故事感"
+meaning = "人物\"身上有故事\"——表情 / 服装 / 背景细节共同支撑，不是单纯漂亮"
+[[course.glossary]]
+term = "特写静景"
+meaning = "人像头部特写、皮肤质感是\"是不是真人\"的关键判定"
+[[course.glossary]]
+term = "Flux Crea"
+meaning = "黑森林 + 原 Talk 公司开源的新模型（麦橘本集在练的）"
+[[course.glossary]]
+term = "facefac / magiflux"
+meaning = "放大模型（SD 生态），专门做面部 / 整体放大"
+[[course.glossary]]
+term = "图没抠干净"
+meaning = "用 SD 局部重绘时蒙版没贴准，导致 AI 改到不该改的地方"
+[[course.glossary]]
+term = "IP 化"
+meaning = "起一个\"好记\"的名字 + 配套头像 + 长期风格输出，让观众/评委记住你是谁"
+[[course.glossary]]
+term = "造生图像 / 噪声图像"
+meaning = "高斯噪声构成的彩色一坨 —— 早期 MJ 出图时你能看到\"从这坨变清晰\""
+[[course.glossary]]
+term = "无条件生成"
+meaning = "模型只从训练数据里随机生成图片（\"画一条狗\"vs\"画布正中央有条狗\"）"
+[[course.glossary]]
+term = "有条件生成"
+meaning = "在无条件基础上**加条件** —— 提示词 / 风格参考 / 长宽比 / P 值 / 风格迁移"
+[[course.glossary]]
+term = "扩散模型（Diffusion）"
+meaning = "造生图像逐步去噪声的过程（即\"米开朗基罗刻刀\"）"
+[[course.glossary]]
+term = "米开朗基罗刻刀比喻"
+meaning = "模型 = 刻刀；造生图像 = 大理石；条件 = \"要雕大卫像\""
+[[course.glossary]]
+term = "Sora"
+meaning = "2024 年 OpenAI 发布的视频生成模型，开启了\"AI 视频生成\"新阶段"
+[[course.glossary]]
+term = "世界模型"
+meaning = "能理解物理世界（重力 / 物体运动 / 因果）的 AI 模型（Sora / Google / Meta 在做）"
+[[course.glossary]]
+term = "视频生成的两类基础"
+meaning = "① 图像基础（图生视频，预测下一帧像素）② 文字基础（文生视频）"
+[[course.glossary]]
+term = "VO3"
+meaning = "视频生成模型，\"最特别\"的特点是流模型（更连贯）"
+[[course.glossary]]
+term = "首尾针"
+meaning = "视频生成时给两个关键帧（起点 + 落点），让模型\"中间部分自动生成\""
+[[course.glossary]]
+term = "Vidu / 吉梦"
+meaning = "国产视频生成工具 —— Vidu 多图参考强；吉梦性价比 + 速度快"
+[[course.glossary]]
+term = "吉梦（集梦 / 即梦）"
+meaning = "字节系生图 / 生视频工具，本集主讲工具"
+[[course.glossary]]
+term = "Android"
+meaning = "另一款生图工具，「修图太麻烦」所以本集切换到吉梦"
+[[course.glossary]]
+term = "反推"
+meaning = "用 LLM（或反推模型）从已生成的图反向读出提示词描述"
+[[course.glossary]]
+term = "后图 / 2.5D 词"
+meaning = "让画面带「半立体但不全写实」质感的提示词（本集核心风格控制手段）"
+[[course.glossary]]
+term = "抽卡"
+meaning = "AI 圈说法，「用同一提示词反复出图、挑到满意为止」"
+[[course.glossary]]
+term = "画崩"
+meaning = "AI 出图出现的人物畸形 / 手指错乱 / 透视错误；本集处理方式是「直接删画崩的那条提示词」"
+[[course.glossary]]
+term = "构图张力"
+meaning = "用对角线 / 仰视 / 辐射 / 半身特写等手段让画面有冲击力（比人物直立站着更耐看）"
+[[course.glossary]]
+term = "Personalize (P 值)"
+meaning = "MJ 的个人审美预设（基于你二选一 Ranking 凝练的代码）"
+[[course.glossary]]
+term = "Ranking"
+meaning = "在 Personalize 界面二选一/三选一一次 = 一次 Ranking"
+[[course.glossary]]
+term = "不跳 P"
+meaning = "训练时**不选\"跳过\"**（不选 3）—— 强制每张都选 1 或 2"
+[[course.glossary]]
+term = "营养均衡"
+meaning = "不跳 P 的核心原理 —— 强制 AI 记录\"不喜欢\"的图 = 增强 P 的泛化性"
+[[course.glossary]]
+term = "核能词"
+meaning = "能强烈触发 AI 出某种风格的关键词（从 deepseek / 优秀作品中抽取）"
+[[course.glossary]]
+term = "反推词策略"
+meaning = "用 MJ / 工具反推参考图后，**只取需要的信息**（构图 / 风格 / 色彩）"
+[[course.glossary]]
+term = "4 大核心参数"
+meaning = "提示词 + P 值 + Swift 种子 + 电图（麦橘出图工作流 4 件套）"
+[[course.glossary]]
+term = "6 题材维度"
+meaning = "女孩 / 男人 / 植物 / 动物 / 怪物 / 环境（受卖局老师影响，存 P 的标准分类）"
+[[course.glossary]]
+term = "6 大景别"
+meaning = "ELS（Extreme Long Shot 大远景）/ LS（Long Shot 远景）/ MS（Medium Shot 中景）/ MCU（Medium Close Up 中近景）/ CU（Close Up 近景特写）/ ECU（Extreme Close Up 极端特写）"
+[[course.glossary]]
+term = "全景 vs 远景"
+meaning = "**全景 = Panoramic**（手机横扫全景模式），**远景 = Long Shot**（人物全身在画幅内）—— 容易混"
+[[course.glossary]]
+term = "鸟看镜头"
+meaning = "高机位俯视（无人机视角）"
+[[course.glossary]]
+term = "4 大镜头角度"
+meaning = "eye level（平视）/ 仰角（worm's eye）/ 俯角（bird's eye）/ 荷兰角（Dutch angle，倾斜）"
+[[course.glossary]]
+term = "平视"
+meaning = "最自然，叙事感强，但情感弱"
+[[course.glossary]]
+term = "仰角"
+meaning = "权威感、恐惧感（来自进化论——被扑倒的祖先记忆）"
+[[course.glossary]]
+term = "俯角"
+meaning = "弱势感、被审视感"
+[[course.glossary]]
+term = "荷兰角"
+meaning = "倾斜构图，紧张 / 不安"
+[[course.glossary]]
+term = "运镜 4 类"
+meaning = "摇（pan）/ 推（push）/ 拖（pull/dolly out）/ 移（tracking）"
+[[course.glossary]]
+term = "MCU 警告"
+meaning = "在 Midjourney 里写 `MCU` 会被识别成**漫威电影宇宙**（Marvel Cinematic Universe）—— 用 `Medium Close Up` 或直接写中文"
+[[course.glossary]]
+term = "空间感"
+meaning = "镜头语言的核心 —— 通过景别 / 角度 / 运镜营造\"有深度\"的画面"
+[[course.glossary]]
+term = "点图（InPainting）"
+meaning = "MJ 局部重绘功能 —— 在原图上点一个区域 + 加提示词"
+[[course.glossary]]
+term = "iw"
+meaning = "MJ 参数，控制\"参考图权重\"（`iw 1.0` = 强参考；`iw 0` = 弱参考）"
+[[course.glossary]]
+term = "种子（Swift）"
+meaning = "MJ 每次生成的\"种子码\"—— 决定构图 / 风格 / 元素的随机起点"
+[[course.glossary]]
+term = "调性种子"
+meaning = "选\"有特定调性\"的种子（如\"黑白格子 + 都市感\"）"
+[[course.glossary]]
+term = "加 P 加种子"
+meaning = "先加个人审美预设（P），再叠加多个种子调构图 / 风格"
+[[course.glossary]]
+term = "多 SW 叠加"
+meaning = "3-4 个 SW（Style Weight）一起加，每个调不同方向"
+[[course.glossary]]
+term = "主角权重（`::2`）"
+meaning = "用 `::2` 把主角描述的权重提到 2 倍（在多主体 prompt 中突出）"
+[[course.glossary]]
+term = "废种子"
+meaning = "选 60 个种子后被淘汰的；偶尔可\"加回来\"测试"
+[[course.glossary]]
+term = "调子 / 调性"
+meaning = "图片的\"色彩 + 氛围\"基础（暖调 / 冷调 / 高饱和 / 黑白 等）"
+[[course.glossary]]
+term = "7 大镜头手法"
+meaning = "推 / 拉 / 摇 / 移 / 跟 / 升 / 降（\"推拉摇移跟升降\"——7 字口诀）"
+[[course.glossary]]
+term = "推"
+meaning = "放大主体（焦距推 / 摄像机前进），突出角色 / 表现性格 / 突出内心"
+[[course.glossary]]
+term = "拉"
+meaning = "缩小主体，强调主要场景（\"你以为发生在这里，实际是后面\"）"
+[[course.glossary]]
+term = "摇"
+meaning = "水平 / 垂直旋转，**正反打**、跟随主体、切换对话"
+[[course.glossary]]
+term = "移（平移）"
+meaning = "摄像机平移，强调空间关系"
+[[course.glossary]]
+term = "跟"
+meaning = "截拍运动主体（镜头跟着主体走），突出速度感"
+[[course.glossary]]
+term = "升 / 降"
+meaning = "垂直位移（俯视 / 仰视变化）"
+[[course.glossary]]
+term = "特殊视角"
+meaning = "俯视（角色弱小）/ 仰视（压迫感）/ 平视（叙事）/ 荷兰角（不安）"
+[[course.glossary]]
+term = "俯视判别"
+meaning = "看身体下半部分是否\"缩小\"—— 缩小了就是俯视"
+[[course.glossary]]
+term = "过间镜头"
+meaning = "角色之间用空镜 / 转场镜头隔开（AI 视频很难做）"
+[[course.glossary]]
+term = "拼接"
+meaning = "把多个 AI 视频片段拼起来（避免 AI 一次生成长视频崩坏）"
+[[course.glossary]]
+term = "V2AGI B 站"
+meaning = "V2AGI 平台的 B 站号（AI 视频教程参考）"
+[[course.glossary]]
+term = "风格迁移"
+meaning = "把一个工具（如 MJ）的好风格\"搬到\"另一个工具（如 SD）"
+[[course.glossary]]
+term = "主角 LoRA"
+meaning = "训练主角的 LoRA（如\"薛亮风格的男性主角\"）"
+[[course.glossary]]
+term = "配角 LoRA"
+meaning = "训练配角的 LoRA（4 个配角），让主角有\"辅助角色\"配合"
+[[course.glossary]]
+term = "曙光"
+meaning = "麦橘自己练的 LoRA 名字（指某种光影效果）"
+[[course.glossary]]
+term = "素材集"
+meaning = "训练 LoRA 用的图片集（本集 68 个素材 / 筛到 50+）"
+[[course.glossary]]
+term = "多 LoRA 组合"
+meaning = "5-7 个 LoRA 一起加，每个调不同权重"
+[[course.glossary]]
+term = "平台捆绑"
+meaning = "平台方审美对你的影响（小红书 / 抖音 / B 站的\"推荐风格\"）"
+[[course.glossary]]
+term = "个人标签化审美"
+meaning = "让自己的\"风格\"成为识别度（比赛脱颖而出关键）"
+[[course.glossary]]
+term = "权重 0.5-0.7"
+meaning = "LoRA 权重常用范围（太高会\"过拟合\" / 太低没效果）"
+[[course.glossary]]
+term = "短片"
+meaning = "30s-3min 视频（区别于短视频/长视频）"
+[[course.glossary]]
+term = "选题"
+meaning = "用\"切入点\"找主题（\"再见\" / \"挖掘机操作\" / \"跳楼\" 等）"
+[[course.glossary]]
+term = "AI 工具调研"
+meaning = "每个工具能做什么（生图 / 生视频 / 一键分镜）"
+[[course.glossary]]
+term = "一键生成分镜"
+meaning = "用 AI 自动出分镜脚本 + 配图"
+[[course.glossary]]
+term = "PS 分镜"
+meaning = "用 Photoshop 手动做分镜"
+[[course.glossary]]
+term = "爽点"
+meaning = "视频让人\"看起来爽\"的瞬间（动作 / 节奏 / 视听冲击）"
+[[course.glossary]]
+term = "卡点"
+meaning = "音乐节拍和画面切换对齐"
+[[course.glossary]]
+term = "蒙版"
+meaning = "Photoshop 蒙版 = 局部区域"
+[[course.glossary]]
+term = "叠画"
+meaning = "多张图叠加 + 透明度切换"
+[[course.glossary]]
+term = "AI 短片 vs 传统短片"
+meaning = "AI 出图/视频 + 人工拼接 vs 全人工拍摄"
+[[course.glossary]]
+term = "审美娃娃机"
+meaning = "社团运营概念—— 每天发\"好图 + 反推 prompt + 加 P 出图\" 练审美"
+[[course.glossary]]
+term = "挖测点"
+meaning = "在平台上找到\"测试功能 / 隐藏功能\""
+[[course.glossary]]
+term = "集梦"
+meaning = "即梦的另一种叫法（字节系）"
+[[course.glossary]]
+term = "艺术家 / AMJ"
+meaning = "Midjourney 的\"艺术家人群\"版（\"Artist MJ\"）"
+[[course.glossary]]
+term = "SREF 数字 / 色调码"
+meaning = "SREF 风格指纹（参考直播01/06）"
+[[course.glossary]]
+term = "拼图作业"
+meaning = "学员用 4 张图拼成一张大图的练习"
+[[course.glossary]]
+term = "加 P 调色调"
+meaning = "在 SREF 基础上加 P 让色调符合个人审美"
+[[course.glossary]]
+term = "魔搭（ModelScope）"
+meaning = "阿里系模型社区，AIGC 专区可练 LoRA，免费额度要求公开分享"
+[[course.glossary]]
+term = "LiblibAI（力补）"
+meaning = "国内模型平台，LoRA 训练入口和可调参数更细"
+[[course.glossary]]
+term = "数据集"
+meaning = "训练用的图片加一一对应的标注文本"
+[[course.glossary]]
+term = "打标（标注）"
+meaning = "给每张图写文字描述，告诉 AI 画面里有什么"
+[[course.glossary]]
+term = "智能打标"
+meaning = "平台自动生成标注，也叫「机打」"
+[[course.glossary]]
+term = "打标预值"
+meaning = "打标器的置信度门槛，Lib 默认 0.30"
+[[course.glossary]]
+term = "过拟合"
+meaning = "学过头，线条糊成色块、人物姿势走样"
+[[course.glossary]]
+term = "轮数 / 单张次数"
+meaning = "整个数据集跑几遍 / 每张图每轮重复几次"
+[[course.glossary]]
+term = "学习率"
+meaning = "每步更新幅度，常用 1e-4，过大容易「炒焦」"
+[[course.glossary]]
+term = "定值（Dim）/ Alpha"
+meaning = "LoRA 网络维度与缩放系数，常用 32 或 64"
+[[course.glossary]]
+term = "权重"
+meaning = "调用 LoRA 的强度，1.0 为完全调用"
+[[course.glossary]]
+term = "XY 对比生图"
+meaning = "用横纵两个变量批量出图做对比"
+[[course.glossary]]
+term = "分桶"
+meaning = "Lib 按图片尺寸分组训练，减少裁剪"
+[[course.glossary]]
+term = "触发词"
+meaning = "调用 LoRA 时写在提示词里的专属词"
+[[course.glossary]]
+term = "做 M 大赛"
+meaning = "用视频画面拼出字母 M 的作业比赛，评选看创意、构图、画面三点"
+[[course.glossary]]
+term = "构图偏离"
+meaning = "运动过程中 M 的形状不再成立，画面\"不再是那个 M\""
+[[course.glossary]]
+term = "灰度图叠加"
+meaning = "把 M 的灰度图盖在成片上，逐帧检查轮廓有没有贴合"
+[[course.glossary]]
+term = "摇镜"
+meaning = "机位不动、镜头左右转，用来把侧面转成背面"
+[[course.glossary]]
+term = "希区柯克变焦"
+meaning = "推拉镜头的同时反向变焦，用来制造眩晕和恐慌感"
+[[course.glossary]]
+term = "导出末帧"
+meaning = "把上一段视频的最后一帧导出，当作下一段的首帧继续生成（老师口播作\"导出进针\"）"
+[[course.glossary]]
+term = "多图参考"
+meaning = "用多张角色图锁人物一致性；Vidu 的多图参考会削弱景别与运镜控制"
+[[course.glossary]]
+term = "切镜"
+meaning = "同一空间里换机位和视角，本集推荐即梦切镜、Veo3"
+[[course.glossary]]
+term = "哑巴对口型"
+meaning = "多人同框只让一个角色动嘴、其余角色闭嘴的土办法"
+[[course.glossary]]
+term = "拉片"
+meaning = "逐镜头拆一部片，记录景别、运动、剪辑逻辑"
+[[course.glossary]]
+term = "Nano Banana"
+meaning = "即梦 4.0 背后的图像算法，擅长改图换脸，不擅长光影"
+[[course.glossary]]
+term = "DubbingX（智声云配）"
+meaning = "中文配音与音色转换工具，中文质量好"
+[[course.glossary]]
+term = "ElevenLabs"
+meaning = "英文配音与音色转换工具"
+[[course.glossary]]
+term = "AIMV"
+meaning = "AI 音乐视频，用 AI 生成画面去配合一首歌的短片形式"
+[[course.glossary]]
+term = "Suno AI"
+meaning = "文生音乐工具，填风格提示词加歌词即可出歌（口播里念作「苏诺」）"
+[[course.glossary]]
+term = "Style 栏"
+meaning = "Suno 里填曲风、编曲、人声质感提示词的位置"
+[[course.glossary]]
+term = "cover"
+meaning = "保留原曲框架、换一种演绎的翻唱／改编，本集第二条片子拿民歌的舞曲版做 cover"
+[[course.glossary]]
+term = "Gemini"
+meaning = "本集用来把参考曲特点和视频用途，整理成 Suno 可用的提示词与歌词"
+[[course.glossary]]
+term = "vintage collage art"
+meaning = "复古拼贴画，本集「怪诞」画风最初的锚点，即动物拼贴复古画"
+[[course.glossary]]
+term = "omni reference"
+meaning = "Midjourney 的参考图功能，用来让角色长相贴近本人；权重常同时测 200 与 700"
+[[course.glossary]]
+term = "对口型"
+meaning = "让数字人的嘴型对上人声，本集用即梦完成"
+[[course.glossary]]
+term = "曲线变速"
+meaning = "在素材某一段做非线性加减速，跟重音和情绪走"
+[[course.glossary]]
+term = "怪诞美学"
+meaning = "本集美术方向，复古怪诞、拼贴、木偶、马戏团元素混在一起"
+[[course.glossary]]
+term = "15 拍"
+meaning = "好莱坞商业片的 15 个节拍，用来卡节奏；PPT 里的表格可以直接截图套用"
+[[course.glossary]]
+term = "三幕式"
+meaning = "布置 / 对抗 / 解决的大结构；第 5 拍进第二幕，第 13 拍进第三幕"
+[[course.glossary]]
+term = "救猫咪（Save the Cat）"
+meaning = "让主角做一件讨喜的事，快速换取观众好感；反英雄可以推迟到中后段"
+[[course.glossary]]
+term = "反英雄"
+meaning = "有缺陷、先让人反感再翻正的主角，如丘吉尔、毒液、死射"
+[[course.glossary]]
+term = "荷兰角（Dutch shot）"
+meaning = "摄影机倾斜拍摄，制造不安、诡异、失稳"
+[[course.glossary]]
+term = "蓝调时刻（Blue Hour）"
+meaning = "整体蓝冷的画面里保留一点暖光，用来留住希望"
+[[course.glossary]]
+term = "视线引导剪辑"
+meaning = "人物抬头或转头，下一镜切到他看的方向"
+[[course.glossary]]
+term = "正反打"
+meaning = "对话双方视角相对切换；切之前先确认两人的位置关系"
+[[course.glossary]]
+term = "匹配剪辑"
+meaning = "前后镜头构图或动作对齐，让剪点消失"
+[[course.glossary]]
+term = "J-cut（声音先行）"
+meaning = "台词或音效先出，画面后切"
+[[course.glossary]]
+term = "情绪剪"
+meaning = "每几个镜头停下来检查观众的情绪是否到位"
+[[course.glossary]]
+term = "拟音"
+meaning = "用道具现场做出脚步、开门等音效素材"
+[[course.glossary]]
+term = "粗剪"
+meaning = "按剧本顺序把素材铺满轨道，只解决叙事"
+[[course.glossary]]
+term = "Video Battle"
+meaning = "社区短片赛，给主题后把多个镜头剪成一个故事"
+[[course.glossary]]
+term = "Prompt Battle"
+meaning = "社区出图赛，看题限时写提示词；早间场七点、两轮"
+[[course.glossary]]
+term = "主体参考"
+meaning = "海螺上线的参考功能，用真人照片锁住主角长相"
+[[course.glossary]]
+term = "多参考（多参）"
+meaning = "给多张参考图约束主角与场景的方式"
+[[course.glossary]]
+term = "一致性"
+meaning = "同一主角在各镜头里长相、发型、服装保持统一"
+[[course.glossary]]
+term = "彩虹式禅意"
+meaning = "Recraft 里的风格，日系画家笔触，《灵觉》2D 部分用它"
+[[course.glossary]]
+term = "跑马灯"
+meaning = "濒死体验叙述里一生画面快速回放的段落"
+[[course.glossary]]
+term = "转绘"
+meaning = "把已有图放进工具、配同样提示词再生成，用来统一画风"
+[[course.glossary]]
+term = "3D 动画舒适区"
+meaning = "商单优先推的皮克斯/迪士尼式 3D，对真人写实要求低"
+[[course.glossary]]
+term = "预期管理"
+meaning = "先给测试图和动态，让甲方知道 AI 现在能做到什么"
+[[course.glossary]]
+term = "反 PUA"
+meaning = "用崩坏素材、特效公司报价把甲方预期拉回现实"
+[[course.glossary]]
+term = "创意种子库"
+meaning = "把随手记的怪想法打标签存起来，创作时调用"
+[[course.glossary]]
+term = "圣地巡礼"
+meaning = "观众因看过片子专程去取景地打卡"
+[[course.glossary]]
+term = "细狗"
+meaning = "本次作业主题，\"又菜又爱装\"，转写作\"戏狗\""
+[[course.glossary]]
+term = "Gemini 3"
+meaning = "Google 刚发布的模型，重点是自动化、推理与上下文、多模态理解三项能力"
+[[course.glossary]]
+term = "Nano Banana Pro"
+meaning = "Google 同期上线的图像模型，强项是中文长文本、多图融合、精确编辑和高分辨率输出"
+[[course.glossary]]
+term = "Agent"
+meaning = "Gemini 3 的自动化能力，可自主执行多步任务；老师本集只做了解释，没有展开演示"
+[[course.glossary]]
+term = "Caption（打标）"
+meaning = "给图片或视频写内容描述，常用于训练数据；老师提到有厂商用 Gemini 2.5 做这一环"
+[[course.glossary]]
+term = "上下文窗口"
+meaning = "模型一次能记住多少对话内容，用 token 衡量；本集案例聊到 17 万 token"
+[[course.glossary]]
+term = "token"
+meaning = "模型计费与记忆的单位，可粗略理解为\"记忆窗口\"的刻度"
+[[course.glossary]]
+term = "VJ"
+meaning = "Video Jockey，在演出中随音乐实时切换屏幕画面的人；本集指老师做的 RetroJ 工具"
+[[course.glossary]]
+term = "VHS"
+meaning = "复古录像带风格，包含噪点、扫描线、色彩偏移、画面扭曲等元素"
+[[course.glossary]]
+term = "RGB 位移"
+meaning = "把红绿蓝三个通道错开，做出故障或复古偏色；工具里的 RGB Offset 就是它"
+[[course.glossary]]
+term = "低频 / 中频 / 高频"
+meaning = "把音乐分成三段，分别驱动亮度与缩放、颜色变化、故障效果"
+[[course.glossary]]
+term = "Threshold / Gain"
+meaning = "阈值与增益；前者决定多大音量才触发特效，后者决定触发后的放大量"
+[[course.glossary]]
+term = "控制变量法"
+meaning = "每次只改一个因素，用同一视频、同一音频对比新旧版本，判断改动是否真的有效"
+[[course.glossary]]
+term = "作者短片"
+meaning = "为自己爽、表达自我而做，不必考虑评委。"
+[[course.glossary]]
+term = "比赛短片"
+meaning = "以征服评委、拿奖为目标，要按评委的口味设计。"
+[[course.glossary]]
+term = "完成度"
+meaning = "声音、图片、视频、分镜、人脸和场景一致性、动作不崩等硬指标，占 30%。"
+[[course.glossary]]
+term = "可看性"
+meaning = "剪辑的连贯性，前后镜头能不能让人看懂，占 20%。"
+[[course.glossary]]
+term = "独特性"
+meaning = "剧本加风格，占 50%，最能拉开差距。"
+[[course.glossary]]
+term = "垫图"
+meaning = "拿一张图当参考再生成，把它的风格、构图带到新图里。"
+[[course.glossary]]
+term = "灵感触发"
+meaning = "拿赛道去问多个智能体，只取一句话或一个词，不让 AI 直接交剧本。"
+[[course.glossary]]
+term = "结构式提示词"
+meaning = "按固定模板逐项填空（本性、核心动力、价值排序等），用价值排序制造高低差。"
+[[course.glossary]]
+term = "共鸣式提示词"
+meaning = "先给身份，再给具体场景、动作和情绪，让 AI 写出有人味的细节。"
+[[course.glossary]]
+term = "种子"
+meaning = "一句能打动你的话、一个结尾或一个画面，反复喂回 AI 让它长出故事。"
+[[course.glossary]]
+term = "人工修正"
+meaning = "AI 出稿后自己删浮夸、拉踩、说教，换真细节，重写结尾。"
+[[course.glossary]]
+term = "红海 / 蓝海"
+meaning = "投稿多、大佬扎堆的赛道 / 投稿少、容易出头的赛道。"
+[[course.glossary]]
+term = "拆题"
+meaning = "查清比赛的目的、评委、主办方和赛道要求，再决定做什么。"
+[[course.glossary]]
+term = "帧（Frame）"
+meaning = "动画的最小单位，一张静止画面"
+[[course.glossary]]
+term = "帧率（FPS）"
+meaning = "每秒播放多少帧，帧数 ÷ 时长 就是它"
+[[course.glossary]]
+term = "雪碧图（Sprite Sheet）"
+meaning = "把多帧平铺到一张大图上的表格，也叫精灵图、序列帧"
+[[course.glossary]]
+term = "Sprite Remixer"
+meaning = "课上用的网页小工具，Slice 负责切图、Play 负责拼回动画"
+[[course.glossary]]
+term = "Slice"
+meaning = "切图页，上传 GIF 后自动逐帧切片平铺"
+[[course.glossary]]
+term = "Play"
+meaning = "播放页，按列数、行数、FPS 把雪碧图转成动画"
+[[course.glossary]]
+term = "Frame Info"
+meaning = "切图后显示的帧数、时长、单帧尺寸（本集为 13 Frames / 1.29s / 88×134）"
+[[course.glossary]]
+term = "支点"
+meaning = "逐帧对齐时的参照点，通常取落脚点，保证人物不滑步"
+[[course.glossary]]
+term = "补帧"
+meaning = "在已有帧之间插入新帧，提高帧率但不改变播放时长"
+[[course.glossary]]
+term = "Merge"
+meaning = "自动框选把一个人物识别成两块时，合并成一个框"
+[[course.glossary]]
+term = "2K / 1K"
+meaning = "生成分辨率档位；单张角色图用 1K 省积分，整张雪碧图用 2K 保细节"
+[[course.glossary]]
+term = "商务制片"
+meaning = "对接客户、管理客户预期、规划交付流程的角色"
+[[course.glossary]]
+term = "执行预估"
+meaning = "用导演或剪辑思维，在开拍前把每个画面的效果先预演一遍"
+[[course.glossary]]
+term = "分镜表"
+meaning = "把脚本拆成镜号、画面、备注、参考图、静帧、视频的执行表"
+[[course.glossary]]
+term = "静帧"
+meaning = "分镜表里按文字描述生成、等待确认的单张画面"
+[[course.glossary]]
+term = "首帧 / 尾帧"
+meaning = "图生视频的起始画面和结束画面，用来控制镜头走向与落点"
+[[course.glossary]]
+term = "UK garage"
+meaning = "四四拍但鼓点很碎的电子音乐风格，本集配乐的参考起点"
+[[course.glossary]]
+term = "DnB"
+meaning = "Drum and Bass，比 UK garage 更快、鼓和贝斯更重的风格"
+[[course.glossary]]
+term = "采样"
+meaning = "把一段现成声音（比如敲桌子）嵌进音乐里当乐器用"
+[[course.glossary]]
+term = "8 个 8 拍"
+meaning = "用八个八拍完成一个叙事段落的剪辑单位"
+[[course.glossary]]
+term = "三次方缓入 / 缓出"
+meaning = "剪映关键帧的预设曲线，让位移或模糊慢慢起步、慢慢停住"
+[[course.glossary]]
+term = "低通"
+meaning = "砍掉高频的音效处理，用来模拟戴上耳机后环境声突然变闷"
+[[course.glossary]]
+term = "尾板"
+meaning = "片尾品牌落版，本集是 Futura 字体、产品名、上市信息和 slogan"
+[[course.glossary]]
+term = "影调"
+meaning = "画面的明暗气质与调性，如低饱和明亮、强明暗对比"
+[[course.glossary]]
+term = "P"
+meaning = "Midjourney 的个性化参数，课上用多个 P 测写实与风格化"
+[[course.glossary]]
+term = "气口"
+meaning = "两句台词之间的停顿，让角色闭嘴换气，也是剪辑的衔接点"
+[[course.glossary]]
+term = "声画直出"
+meaning = "生成画面时同步生成对白音频，不用后期对口型"
+[[course.glossary]]
+term = "克隆音色"
+meaning = "用 10 秒左右的音频复刻音色，批量替换同角色台词"
+[[course.glossary]]
+term = "蒙太奇"
+meaning = "通过镜头组合、调序、交叉并置来服务叙事"
+[[course.glossary]]
+term = "安全区"
+meaning = "字幕避开平台按钮、头像、评论条的画面区域"
+[[course.glossary]]
+term = "角色定制"
+meaning = "万相 2.6 里上传人物视频当角色参考的模式，全片复用同一张脸"
+[[course.glossary]]
+term = "角色视频"
+meaning = "5-10 秒的人物动态素材，用来锁定长相和服装"
+[[course.glossary]]
+term = "智能多镜"
+meaning = "图生视频里的开关，打开后一条视频自动切出多个分镜"
+[[course.glossary]]
+term = "分镜"
+meaning = "按景别或机位切开的单条镜头"
+[[course.glossary]]
+term = "首帧 / 首尾帧"
+meaning = "控制视频起点的图；2.6 只有首帧"
+[[course.glossary]]
+term = "默剧"
+meaning = "写进风格里的关键词，让角色不说话只做动作"
+[[course.glossary]]
+term = "高燃快剪"
+meaning = "大量 1-2 秒短镜头快速切换的节奏"
+[[course.glossary]]
+term = "国漫 3D"
+meaning = "三维动画质感的国漫风格"
+[[course.glossary]]
+term = "灵感值"
+meaning = "平台加速生成的额度，不用就排队"
+[[course.glossary]]
+term = "尾版视频"
+meaning = "主办方提供的片尾模板"
+[[course.glossary]]
+term = "内容声明"
+meaning = "发布时勾选的 AI 生成说明"
+[[course.glossary]]
+term = "数字女娃计划"
+meaning = "把人脸量化成编码、统一甲乙双方沟通语言的一套体系，只针对 AI 数字人"
+[[course.glossary]]
+term = "骨 / 皮 / 型 / 神"
+meaning = "四个互不打架的维度，分别管外轮廓、五官浓度、五官排布、脸部线条"
+[[course.glossary]]
+term = "修 / 敦"
+meaning = "骨架的窄长内收 / 宽厚外扩，分别主导权威感与亲近感"
+[[course.glossary]]
+term = "浓颜 / 淡颜"
+meaning = "五官占比大、边界清、对比强 / 五官占比小、边界弱、对比低"
+[[course.glossary]]
+term = "聚 / 散"
+meaning = "五官向面中集中、两边留白大 / 五官舒展、眼距偏宽"
+[[course.glossary]]
+term = "冷 / 暖"
+meaning = "脸偏骨感、线条锐利 / 脸偏肉感、线条柔和"
+[[course.glossary]]
+term = "三庭五眼"
+meaning = "纵向三等份、横向五等份的传统比例基准"
+[[course.glossary]]
+term = "折叠度"
+meaning = "眼眶、眉弓、鼻额角等位置的夹角，夹角越小越深邃"
+[[course.glossary]]
+term = "海鸥线"
+meaning = "鼻底的形状，鼻孔微露、鼻尖适中"
+[[course.glossary]]
+term = "特征融合法"
+meaning = "TapNow 工作流，指定图一上庭加图二下庭做部件级融合"
+[[course.glossary]]
+term = "生物学融合法"
+meaning = "TapNow 工作流，用 Biological offspring 让两张脸整体融成「后代」"
+[[course.glossary]]
+term = "TapNow"
+meaning = "承载两条数字人融合工作流的平台"
+[[course.glossary]]
+term = "场景一致性"
+meaning = "同一场景在不同镜头、角度下保持空间结构、光线、材质与关键元素稳定"
+[[course.glossary]]
+term = "视觉资产"
+meaning = "可被反复调用、修改、复用的视觉元素，包括人物、服装、道具和场景"
+[[course.glossary]]
+term = "定调图"
+meaning = "为一个场景定下风格基调的全景或中全景图，是后续分镜的主要参考"
+[[course.glossary]]
+term = "情绪板（Mood Board）"
+meaning = "开工前收集的一组参考图，用来收敛方向、辅助取舍"
+[[course.glossary]]
+term = "直接开稿"
+meaning = "把参考图和一段描述直接交给多模态模型出图，不做逐层控制"
+[[course.glossary]]
+term = "多模态"
+meaning = "模型能同时读文字和图片，并把图片当作生成条件"
+[[course.glossary]]
+term = "Low Angle"
+meaning = "低角度，约 -45° 到 -30°"
+[[course.glossary]]
+term = "High Angle"
+meaning = "高角度，约 45°"
+[[course.glossary]]
+term = "Top Down"
+meaning = "从拍摄对象头顶垂直向下拍"
+[[course.glossary]]
+term = "Straight On"
+meaning = "与拍摄对象平视"
+[[course.glossary]]
+term = "相似转场"
+meaning = "两个构图和姿势一致、场景不同的镜头对接，制造衔接的爽感"
+[[course.glossary]]
+term = "三颗星"
+meaning = "作者给镜头难度的分级，也是他建议的投入上限"
+[[course.glossary]]
+term = "反差"
+meaning = "把两个相反的元素放进同一画面或同一段落，让观众产生违和与不安"
+[[course.glossary]]
+term = "视听错位"
+meaning = "听到的内容和看到的内容不一致，本片用甜美童谣配失踪案"
+[[course.glossary]]
+term = "概念反差"
+meaning = "故事层面的对立，如活人→死人、失踪→被找到、瞬间→永恒"
+[[course.glossary]]
+term = "符号"
+meaning = "借观众脑中已有的意义讲故事，基本结构是能指加所指"
+[[course.glossary]]
+term = "图像符号"
+meaning = "用构图、色彩、光影传递意义，如暖色指向安全、冷白指向不安"
+[[course.glossary]]
+term = "物件符号"
+meaning = "用具体物品指代身份或时间，如红围巾配绿毛衣"
+[[course.glossary]]
+term = "行为符号"
+meaning = "同一个动作在不同语境下意义不同，如抽烟"
+[[course.glossary]]
+term = "九宫格分镜"
+meaning = "一次让模型输出 9 张分镜图，再从中挑选可用镜头"
+[[course.glossary]]
+term = "风格编辑"
+meaning = "在保留造型和服饰的前提下，把角色换成另一种材质或画风"
+[[course.glossary]]
+term = "多轮编辑"
+meaning = "在前一张图的基础上继续下指令，逐步换角色、换场景"
+[[course.glossary]]
+term = "刹车感"
+meaning = "一镜到底时镜头衔接处的停顿感，本片初剪版始终没能消除"
+[[course.glossary]]
+term = "拉姆斯菲尔德矩阵"
+meaning = "按\"是否察觉\"与\"是否知道\"分成四个象限的认知模型"
+[[course.glossary]]
+term = "Banana Pro"
+meaning = "即 Nano Banana Pro，本集用来直出的生图模型，也是几位老师前面课程的主力工具。"
+[[course.glossary]]
+term = "直接生成"
+meaning = "只给提示词，由模型重新画一张，不读取原图像素。"
+[[course.glossary]]
+term = "编辑路径"
+meaning = "在同一张图上局部圈改，本质是图生图，多轮之后必然降质。"
+[[course.glossary]]
+term = "反推（Image to Prompt）"
+meaning = "把一张图转换成结构化提示词的过程。"
+[[course.glossary]]
+term = "JSON 提示词"
+meaning = "按字段分段的提示词，主体、动作、服装、环境、镜头各占一段。"
+[[course.glossary]]
+term = "智能拆解（AI Split）"
+meaning = "把一整段 JSON 拆成可单独编辑的模块卡片。"
+[[course.glossary]]
+term = "系统提示词"
+meaning = "约束反推输出格式与颗粒度的指令，本集这套只针对人像。"
+[[course.glossary]]
+term = "创意发散"
+meaning = "在某个模块下让工具一次给出三个备选描述。"
+[[course.glossary]]
+term = "垫脸"
+meaning = "只上传一张脸部参考图控制五官，其余全部交给提示词。"
+[[course.glossary]]
+term = "写真母版"
+meaning = "跑通后固定下来的一套提示词模板，可反复套用。"
+[[course.glossary]]
+term = "数字人"
+meaning = "前几节课做的个人形象，用来承载这套写真模板。"
+[[course.glossary]]
+term = "近大远小"
+meaning = "广角镜头的透视夸张效果，不写就出不来。"
+[[course.glossary]]
+term = "所听即所见"
+meaning = "听到的声音必须与看到的画面互相印证，观众才会相信并代入"
+[[course.glossary]]
+term = "声音设计"
+meaning = "为画面设计、合成、组织声音的工作，包括拟音、混音与母带"
+[[course.glossary]]
+term = "拟音（Foley Sound）"
+meaning = "对着画面用道具演出来的声音，名字来自录音师 Jack Foley 的姓"
+[[course.glossary]]
+term = "环境音"
+meaning = "交代空间、天气与场所的声音，如风声、鸟叫、电流声"
+[[course.glossary]]
+term = "主体声"
+meaning = "画面里主要动作与角色发出的声音，如脚步、喘气、吼叫"
+[[course.glossary]]
+term = "底噪"
+meaning = "任何环境里持续存在的本底震动声，人耳全天都在听，缺了反而假"
+[[course.glossary]]
+term = "特效声（FX）"
+meaning = "强调动作、转场与冲击的短促声音，如\"嘶—嘣\""
+[[course.glossary]]
+term = "画外音"
+meaning = "画面外加入的广播、无线电、旁白等声音，按表达需要决定加不加"
+[[course.glossary]]
+term = "鸡尾酒效应"
+meaning = "人耳会自动把注意力放在当前关注的那一路声音上"
+[[course.glossary]]
+term = "混音"
+meaning = "让声音变成它应该听起来的样子，核心是响度调整与效果处理"
+[[course.glossary]]
+term = "母带"
+meaning = "拟音、混音之后的最后一道整体处理，本集只交代它在流程中的位置"
+[[course.glossary]]
+term = "响度 / 0dB"
+meaning = "数字环境里的音量上限，超过 0dB 就会失真、炸麦"
+[[course.glossary]]
+term = "音色库"
+meaning = "可检索、可拖拽使用的音效集合，分免费与付费两类"
+[[course.glossary]]
+term = "混叠（Aliasing）"
+meaning = "采样率不足时高频丢失或失真，听感发闷、发糊"
+[[course.glossary]]
+term = "复合片段"
+meaning = "剪映里把多段素材打包成一个片段，让声音效果有更长的作用范围"
+[[course.glossary]]
+term = "C Dance"
+meaning = "抖音系的视频模型，界面显示 Seedance 2.0，单条最长直出 15 秒"
+[[course.glossary]]
+term = "多条抽卡"
+meaning = "同一提示词连着生成多条，再从里面挑能用的分镜"
+[[course.glossary]]
+term = "踩节拍（踩二）"
+meaning = "剪映的自动打点功能，\"踩二\"比默认更细，方便逐拍卡镜头"
+[[course.glossary]]
+term = "智能镜头分割"
+meaning = "剪映一键按镜头切换点把长素材切成段"
+[[course.glossary]]
+term = "闪进"
+meaning = "变速预设，快速推入后接慢动作"
+[[course.glossary]]
+term = "智能补帧"
+meaning = "给放慢的镜头补中间帧，减少卡顿"
+[[course.glossary]]
+term = "高清增强"
+meaning = "滤镜里带房子图标的那款，加锐明显，用前要压强度"
+[[course.glossary]]
+term = "烹燃心动 / 雨梦 / 私语 / 月银"
+meaning = "本集依次试的四款滤镜，分别给光感、梦幻、偏紫、降饱和"
+[[course.glossary]]
+term = "数字资产"
+meaning = "可反复复用的角色图；脸是 ID，身材和服装可以换"
+[[course.glossary]]
+term = "涂脸"
+meaning = "把参考图的人脸涂掉再喂视频模型，避免模型复刻原脸，也省掉换脸"
+[[course.glossary]]
+term = "千禧年街头"
+meaning = "在 Pinterest 找街头参考图时用的搜索词"
+[[course.glossary]]
+term = "状态"
+meaning = "某个时间点的人物处境切片，有张力但没有长度，比如\"杀人犯潜逃前找半仙算命\""
+[[course.glossary]]
+term = "故事"
+meaning = "有长度、有起因经过结果、能被看见和听见的一系列变化"
+[[course.glossary]]
+term = "戏剧动作"
+meaning = "有目的的追求，同时带欲望和紧迫性，是故事最小的组成单位"
+[[course.glossary]]
+term = "戏剧冲突"
+meaning = "欲望撞上阻碍。分内部（人与自我）和外部（人与人、环境、社会）"
+[[course.glossary]]
+term = "起承转合"
+meaning = "起因、发展、高潮、结局的结构，一场戏能用，整部电影也能用，还能往下分"
+[[course.glossary]]
+term = "常态 / 新常态"
+meaning = "开场建立的处境，和\"转\"之后人物被迫进入的新处境"
+[[course.glossary]]
+term = "破题"
+meaning = "从零决定一个故事从哪里长出来，本集给了主题、人物、场景、矛盾关系四条路径"
+[[course.glossary]]
+term = "want / need"
+meaning = "角色以为自己想要的 / 内心真正需要的"
+[[course.glossary]]
+term = "中间人"
+meaning = "给一组对立人物设计共同目标、让两人命运交集的第三方"
+[[course.glossary]]
+term = "斩杀线"
+meaning = "课上播放的三分钟原创短片，城市里出现一条随时间不断升高的线"
+[[course.glossary]]
+term = "视频转会"
+meaning = "拿一段真人或实拍视频做动作参考，把角色换掉重跑；同一段参考跑多次，动势能保持一致。"
+[[course.glossary]]
+term = "动接动、静接静、远接远、方接方"
+meaning = "剪辑基础；上下镜头的运动状态、景别、形状要接得上，画面才不跳。"
+[[course.glossary]]
+term = "视频模仿"
+meaning = "同一段动作视频换不同服装或角色重跑，再剪成\"一个人变装\"的效果。"
+[[course.glossary]]
+term = "变速卡点"
+meaning = "把偏慢的 AI 素材整体提速或分段变速，让动作落在音乐重音上。"
+[[course.glossary]]
+term = "拟人化"
+meaning = "把文物做成有人格、有表情的角色；本集结尾所有文物一起抬头看烟花。"
+[[course.glossary]]
+term = "苏诺（Suno）"
+meaning = "本集两首歌的生成工具；先写词、找韵脚，再生成。"
+[[course.glossary]]
+term = "即梦 2.0"
+meaning = "本集反复对比的新版模型；一张图可直接出片，单段最长 15 秒。"
+[[course.glossary]]
+term = "乔小子"
+meaning = "本集案例里的 AI 虚拟脱口秀演员，作者酒鬼乔（邱沛乔）用它讲原创段子"
+[[course.glossary]]
+term = "情感链接"
+meaning = "角色灵感的来源，必须是跟自己有强精神羁绊的物件、记忆或人"
+[[course.glossary]]
+term = "精调"
+meaning = "用 Stable Diffusion 换发型、衣服、动作，把角色调到能长期使用的状态"
+[[course.glossary]]
+term = "C dance 2.0"
+meaning = "即梦的视频生成模型（转写为 Cdance 2.0），本集成片都用它"
+[[course.glossary]]
+term = "五行提示词"
+meaning = "把需求压到五行内的写法，依次写参考、角色与风格、场景、机位与灯光、动作与台词"
+[[course.glossary]]
+term = "负面提示词"
+meaning = "写「不要出现什么」的提示方式，他实测 C dance 理解偏弱"
+[[course.glossary]]
+term = "AI 声明"
+meaning = "发布时勾选 AI 生成/娱乐演绎、简介注明、画面加水印这三道标注"
+[[course.glossary]]
+term = "作品登记"
+meaning = "把角色形象作为美术作品在国家版权保护中心注册"
+[[course.glossary]]
+term = "区块链存证"
+meaning = "把创作过程截图、录屏上传到有法律效力的存证平台"
+[[course.glossary]]
+term = "三级响应"
+meaning = "侵权处理的三步，24 小时警告、平台举报、找律师"
+[[course.glossary]]
+term = "目的"
+meaning = "角色在这一场里想拿到的东西，要具体到能拆成动作"
+[[course.glossary]]
+term = "阻碍"
+meaning = "挡住目的的具体力量，目的与阻碍都具体，故事才不单薄"
+[[course.glossary]]
+term = "常态"
+meaning = "故事开始时角色的日常，故事往往从常态被打破的那一刻开始"
+[[course.glossary]]
+term = "欲望"
+meaning = "角色表面上自己以为在追求的东西"
+[[course.glossary]]
+term = "需求"
+meaning = "角色内心真正需要、往往自己没意识到的东西"
+[[course.glossary]]
+term = "人物小传"
+meaning = "把角色的过去写清楚，用来解释他现在为什么这样"
+[[course.glossary]]
+term = "三层暗线"
+meaning = "童年阴影、自己都不知道的坏习惯、秘密的欲望，用来避免纸片人"
+[[course.glossary]]
+term = "四段式"
+meaning = "起因、发展、高潮、结局，对应\"凤头、猪肚、豹尾\""
+[[course.glossary]]
+term = "激励事件"
+meaning = "打破主角日常平衡、把他推进新局面的那件事"
+[[course.glossary]]
+term = "救猫咪节拍表"
+meaning = "布莱克·斯奈德提出的 15 拍结构，按 110 分钟电影拆分"
+[[course.glossary]]
+term = "副线"
+meaning = "帮助英雄完成转型的人物线，在节拍表第 7 拍启动"
+[[course.glossary]]
+term = "一切尽失"
+meaning = "主角跌到谷底、被迫面对失败的低点"
+[[course.glossary]]
+term = "视觉化写作"
+meaning = "只写镜头能拍出来的动作与画面，不写心理和解释"
+[[course.glossary]]
+term = "目的先行"
+meaning = "先定这一场要完成的具体目的，再写动作，而不是先立一个抽象\"意义\""
+[[course.glossary]]
+term = "出走"
+meaning = "本集拆解的 6 分钟短片，讲一位老太太拉着陌生老头去纽约，完成一本愿望清单"
+[[course.glossary]]
+term = "黄金三秒"
+meaning = "短视频开头决定观众是否划走的三秒，本集用来解释为什么要砍掉开场长镜头"
+[[course.glossary]]
+term = "长镜头"
+meaning = "一个镜头内连续完成走位与调度的拍法，本片开场用了二十多秒"
+[[course.glossary]]
+term = "镜头续写"
+meaning = "拿上一个镜头继续往下生成，优点是快，代价是画质会掉"
+[[course.glossary]]
+term = "场景图"
+meaning = "先把最关键、看得最全的那张环境图做出来，其余角度都从它派生"
+[[course.glossary]]
+term = "动式转场"
+meaning = "借手里同一个动作换掉物件来完成转场，本片是墨镜变假发"
+[[course.glossary]]
+term = "数字人计划"
+meaning = "按人物性格反推外观与衣着，让观众看打扮就懂人设"
+[[course.glossary]]
+term = "人设"
+meaning = "角色的性格、脾气与外在符号，全片剧情都为它服务"
+[[course.glossary]]
+term = "彩蛋"
+meaning = "藏在片尾或画面里的隐藏信息，本片是帽子和\"林森的愿望清单\""
+[[course.glossary]]
+term = "callback"
+meaning = "前后呼应，同一场景、同一构图再演一次，只改该改的部分"
 
 [draft]
 max_steps = 80
@@ -231,11 +1506,11 @@ topic = "10月10日直播课"
 series = "直播课"
 level = "入门"
 source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/13【风变 x 麦橘】直播课10月10日（周五）.mp4"
-purpose = "10 月第二期（恢复周五档）。"
+purpose = "LoRA 炼丹全流程——数据集打标、过拟合判断与 XY 测试"
 keypoints = [
-  "工具链更新",
-  "项目案例拆解",
-  "学员实操答疑",
+  "在魔搭建一个图片数据集，并在 LiblibAI 完成上传与自动打标",
+  "判断打标预值高低带来的覆盖率与错标差异",
+  "按训练目的删改标注，补齐景别、身位、视角等常漏信息",
 ]
 
 [[episodes]]
@@ -246,11 +1521,11 @@ topic = "10月16日直播课"
 series = "直播课"
 level = "入门"
 source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/14【风变 x 麦橘】直播课10月16日（周四）.mp4"
-purpose = "10 月中旬加场（周四）。"
+purpose = "作业复盘 —— M 构图、镜头不听话、提示词与配音的修法"
 keypoints = [
-  "加场补讲",
-  "风格控制进阶",
-  "实操演示",
+  "用\"创意 / 构图 / 画面\"三条标准，给自己的作业做一次体检",
+  "判断起始视角能不能转到背面，并用摇镜、重出、先转再截三种办法补救",
+  "写出不带时间码、一条只做一件事的提示词",
 ]
 
 [[episodes]]
@@ -261,11 +1536,11 @@ topic = "10月24日直播课"
 series = "直播课"
 level = "进阶"
 source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/15【风变 x 麦橘】直播课10月24日（周五）.mp4"
-purpose = "10 月末直播课——进入进阶阶段。"
+purpose = "从灵感到成片，怪诞美学 AIMV（音乐 / 提示词 / 图生视频 / 卡点）"
 keypoints = [
-  "风格一致性控制",
-  "多工具协同",
-  "长流程项目管理",
+  "说清 AIMV 三种音乐做法（原曲 / cover / 融合新曲），按片子选一种",
+  "用「参考曲 + 视频用途」让 Gemini 写出 5 版 Suno 提示词与歌词，再逐版试听挑出最对位的一版",
+  "用「具体画种 + 三张参考图 + 固定关键词骨架」把模糊风格稳定复现成一批角色",
 ]
 
 [[episodes]]
@@ -276,11 +1551,11 @@ topic = "11月7日直播课"
 series = "直播课"
 level = "进阶"
 source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/16【风变 x 麦橘】直播课11月7日（周五）.mp4"
-purpose = "11 月首期直播课。"
+purpose = "作业构图复盘 + 15 拍剧本 + 《至暗时刻》拉片与五步剪辑"
 keypoints = [
-  "11 月主题发布",
-  "工具栈深化",
-  "项目展示",
+  "用三条标准给自己的作业打分，先修掉构图偏离再谈创意",
+  "用一句话写出故事骨架，并把它填进 15 拍表格",
+  "用「救猫咪」设计主角的好感时刻，知道反英雄该把它放在哪",
 ]
 
 [[episodes]]
@@ -291,11 +1566,11 @@ topic = "11月14日直播课"
 series = "直播课"
 level = "进阶"
 source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/17【风变 x 麦橘】直播课11月14日（周五）.mp4"
-purpose = "11 月第二期直播课。"
+purpose = "从个人短片到商单：选题、风格一致性、预期管理与创意种子库"
 keypoints = [
-  "进阶提示词工程",
-  "风格迁移与融合",
-  "作品精修",
+  "从自己的生活里提炼一个能拍成短片的主题",
+  "用一张定调图和一套风格预设，把多镜头画风统一",
+  "用主体参考、模糊风格、转绘处理人物一致性",
 ]
 
 [[episodes]]
@@ -306,11 +1581,11 @@ topic = "11月21日直播课"
 series = "直播课"
 level = "进阶"
 source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/18【风变 x 麦橘】直播课11月21日（周五）.mp4"
-purpose = "11 月第三期直播课。"
+purpose = "Gemini 3 + Nano Banana Pro 做 VJ 工具"
 keypoints = [
-  "复杂场景处理",
-  "角色一致性",
-  "多人协作流程",
+  "分清 Gemini 3 与 Nano Banana Pro 各自擅长的活，按交付物选模型",
+  "用官网、X、社区三条渠道找到一手案例，而不是只看二手总结",
+  "把参考产品拆成功能块，写出第一轮能直接发给 AI 的需求",
 ]
 
 [[episodes]]
@@ -321,11 +1596,11 @@ topic = "11月28日直播课"
 series = "直播课"
 level = "进阶"
 source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/19【风变 x 麦橘】直播课11月28日（周五）.mp4"
-purpose = "11 月末收官直播课。"
+purpose = "比赛短片拿奖法 —— 评委评分表、赛道拆解、AI 剧本与海报"
 keypoints = [
-  "月度复盘",
-  "Q4 收官规划",
-  "下月主题预告",
+  "用评委视角拆解一场比赛，判断该投哪个赛道",
+  "按 30/20/50 的权重分配完成度、可看性、独特性的精力",
+  "用两种提示词和 AI 一起把一句话磨成剧本",
 ]
 
 [[episodes]]
@@ -336,11 +1611,11 @@ topic = "12月5日直播课"
 series = "直播课"
 level = "进阶"
 source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/20【风变 x 麦橘】直播课12月05日（周五）.mp4"
-purpose = "12 月首期直播课。"
+purpose = "用 Nano Banana Pro 把街机 GIF 改成自己的雪碧图表情包"
 keypoints = [
-  "12 月主题",
-  "年终项目启动",
-  "工具栈总结",
+  "讲清四个概念：帧、帧率、雪碧图、扫描线，并能用\"帧数 ÷ 时长\"算出素材帧率",
+  "找到可用素材：在街机资料站翻到角色的 Animation 页，右键存下单段动作 GIF",
+  "切出雪碧图：用 Sprite Remixer 的 Slice 把 GIF 自动切成平铺序列图，并读出 Frame Info",
 ]
 
 [[episodes]]
@@ -351,11 +1626,11 @@ topic = "12月12日直播课"
 series = "直播课"
 level = "进阶"
 source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/21【风变 x 麦橘】直播课12月12日（周五）.mp4"
-purpose = "12 月第二期直播课。"
+purpose = "从商单需求到成片，参考、脚本、Suno 配乐与剪映卡点"
 keypoints = [
-  "项目进展展示",
-  "技术难点突破",
-  "学员答疑",
+  "拆解一条商单，按「需求 → 解决方案 → 执行预估」写出可执行方案",
+  "提炼参考片，把「直观、快节奏、动静结合、叙事」变成脚本里的具体要求",
+  "搭出一张分镜表，用镜号、画面、备注、参考图、静帧、视频六列对齐团队",
 ]
 
 [[episodes]]
@@ -366,11 +1641,11 @@ topic = "12月19日直播课"
 series = "直播课"
 level = "进阶"
 source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/22【风变 x 麦橘】直播课12月19日（周五）.mp4"
-purpose = "12 月第三期直播课（年终冲刺）。"
+purpose = "24 小时短片全流程——拆题、一致性出图、声画直出与包装"
 keypoints = [
-  "年终项目重点推进",
-  "复盘与沉淀",
-  "下年规划",
+  "拿到三元素题目，拆出能拍且有反转的剧本方向",
+  "用 MJ 定影调、Banana Pro 改图与批量出分镜，锁住人物、场景、空间一致性",
+  "按镜头需求选择 Veo 3.1、可灵 O1、海螺等视频模型，把台词和情绪写进提示词",
 ]
 
 [[episodes]]
@@ -381,11 +1656,11 @@ topic = "12月26日直播课"
 series = "直播课"
 level = "进阶"
 source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/23【风变 x 麦橘】直播课12月26日（周五）.mp4"
-purpose = "12 月末收官直播课。"
+purpose = "万相2.6角色定制 + 智能多镜，穿越短片与风格PPT全流程"
 keypoints = [
-  "年终总结",
-  "Q1 规划",
-  "学员年度作品汇总",
+  "对照 Wan Muse「入戏」双赛道要求，定下片子的时长、画幅和交付格式",
+  "用万相 2.6 的角色定制，让同一个角色演完一条穿越短片",
+  "用智能多镜把一张图拆成 4-5 个能用的分镜，并按景别重排",
 ]
 
 [[episodes]]
@@ -396,11 +1671,11 @@ topic = "1月9日直播课"
 series = "直播课"
 level = "进阶"
 source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/24【风变 x 麦橘】直播课1月9日（周五）.mp4"
-purpose = "2025 年首期直播课。"
+purpose = "数字人捏脸 —— 骨皮型神四维定位 + TapNow 双脸融合"
 keypoints = [
-  "新年规划",
-  "工具栈新版本",
-  "Q1 主题发布",
+  "用比例尺、体积感、三庭五眼检查一张脸是否站得住",
+  "把一张脸拆成骨、皮、型、神四个维度，报出它在 16 款里的坐标",
+  "用四个二选一问题，把「大气、冷艳」这类模糊需求翻译成可执行方案",
 ]
 
 [[episodes]]
@@ -411,11 +1686,11 @@ topic = "1月16日直播课"
 series = "直播课"
 level = "进阶"
 source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/25【风变 x 麦橘】直播课1月16日（周五）.mp4"
-purpose = "1 月第二期直播课。"
+purpose = "用 Nano Banana Pro 做场景一致性与 MV 分镜"
 keypoints = [
-  "项目实战",
-  "技术深化",
-  "学员共创",
+  "把人物、服装、道具和场景整理成可复用的视觉资产",
+  "用情绪板和参考图把模糊想法收敛成可执行的场景方案",
+  "写清每张参考图的分工，稳定延展同一场景的不同景别",
 ]
 
 [[episodes]]
@@ -426,11 +1701,11 @@ topic = "1月23日直播课"
 series = "直播课"
 level = "进阶"
 source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/26【风变 x 麦橘】直播课1月23日（周五）.mp4"
-purpose = "1 月第三期直播课。"
+purpose = "30 秒反转短片的三层反差与符号，从剧本拆到九宫格分镜"
 keypoints = [
-  "风格控制成熟期",
-  "流程模板化",
-  "学员答疑",
+  "用三层反差拆解一个 30 秒反转短片，并说出每一层对应的具体手法",
+  "用符号压缩信息，让一张寻人启事同时交代人物、地点与时间",
+  "把一段不到 100 字的剧本拆成关键词，定下角色品类与整体风格",
 ]
 
 [[episodes]]
@@ -441,11 +1716,11 @@ topic = "1月30日直播课"
 series = "直播课"
 level = "进阶"
 source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/27【风变 x 麦橘】直播课1月30日（周五）.mp4"
-purpose = "1 月末收官直播课。"
+purpose = "反推提示词 + 智能拆解 + 垫脸直出，做一套数字人写真母版"
 keypoints = [
-  "月度复盘",
-  "Q1 中期规划",
-  "下月主题预告",
+  "判断一张图该走垫图编辑还是纯提示词直出，不再越改越糊",
+  "用反推工具把一张人像拆成可逐段编辑的结构化提示词",
+  "只改必要模块，把动作、道具、前景、机位写到模型能执行的精度",
 ]
 
 [[episodes]]
@@ -456,11 +1731,11 @@ topic = "2月6日直播课"
 series = "直播课"
 level = "进阶"
 source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/28【风变 x 麦橘】直播课2月6日（周五）.mp4"
-purpose = "2 月首期（春节后）直播课。"
+purpose = "AI视频声音设计——环境音、拟音与混音做减法"
 keypoints = [
-  "春节后启动",
-  "新工具引入",
-  "项目重启",
+  "用 A/B 对比判断声画是否匹配，指出不同步、音色、音量三类问题",
+  "按环境、主体、特效、话外音四层，给一个画面列出声音清单",
+  "在剪映音效库里按需求、音质、滥用度筛掉不能用的音色",
 ]
 
 [[episodes]]
@@ -471,11 +1746,11 @@ topic = "2月27日直播课（delogo）"
 series = "直播课"
 level = "进阶"
 source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/29【风变 x 麦橘】直播课2月27日（周五）（delogo） .mp4"
-purpose = "2 月末直播课（春节后恢复节奏）。"
+purpose = "C Dance 人像短片——提示词、踩点剪辑与叠滤镜"
 keypoints = [
-  "项目推进",
-  "技术沉淀",
-  "学员作品集中点评",
+  "用 C Dance 把一张人像图扩成 10–15 秒、带多个分镜的短片",
+  "写出\"主体 + 关系 + 运镜 + 氛围\"的提示词，并用多条抽卡攒够可用镜头",
+  "在剪映里完成配乐踩点、智能分割、变速补帧，把碎片接成有前后逻辑的片子",
 ]
 
 [[episodes]]
@@ -486,11 +1761,11 @@ topic = "3月6日直播课"
 series = "直播课"
 level = "进阶"
 source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/30【风变 x 麦橘】直播课3月6日（周五）.mp4"
-purpose = "3 月首期直播课。"
+purpose = "从一句话到一场戏——状态、戏剧动作、起承转合与四种破题"
 keypoints = [
-  "3 月主题发布",
-  "项目收官预热",
-  "工具栈最终化",
+  "判断一句话是\"状态\"还是\"故事\"，并用\"欲望 + 紧迫性\"补成戏剧动作",
+  "用起承转合拆一场十分钟的戏，说清每段在建立什么常态、交代什么信息",
+  "从主题、人物、场景、矛盾关系四条路径里挑一条破题",
 ]
 
 [[episodes]]
@@ -501,11 +1776,11 @@ topic = "3月11日加餐直播"
 series = "加餐"
 level = "进阶"
 source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/31加餐【风变 x 麦橘】直播课3月11日.mp4"
-purpose = "31 期前的临时加餐——补充关键内容。"
+purpose = "两支商单 AI 短片拆解——情绪结构、遮挡转场、分镜与音效"
 keypoints = [
-  "加餐补讲",
-  "关键技术要点",
-  "为 31 期做铺垫",
+  "拆解一条 1–2 分钟 AI 短片的情绪结构，判断哪一段该压、哪一段该放",
+  "按歌词或剧本写出可执行的画面清单，把出图、出视频分给不同的人",
+  "用遮挡物配合线性蒙版关键帧，把多段生成视频接成一个长镜头",
 ]
 
 [[episodes]]
@@ -516,11 +1791,11 @@ topic = "3月13日直播课"
 series = "直播课"
 level = "进阶"
 source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/31【风变 x 麦橘】直播课3月13日（周五）.mp4"
-purpose = "3 月中旬直播课。"
+purpose = "两条 AI 商单的剪辑与出片——遮挡转场、变速卡点、音效叠层"
 keypoints = [
-  "承接加餐内容",
-  "项目推进",
-  "学员答疑",
+  "拆解一条 1–2 分钟 AI 商单的三段结构与情绪曲线",
+  "用遮挡物、线性蒙版和关键帧把多段素材接成穿越长镜头",
+  "用提速、分段变速和闪屏把偏慢素材卡进音乐重音",
 ]
 
 [[episodes]]
@@ -531,11 +1806,11 @@ topic = "3月20日直播课"
 series = "直播课"
 level = "进阶"
 source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/32【风变 x 麦橘】直播课3月20日（周五）.mp4"
-purpose = "3 月第三期直播课。"
+purpose = "AI 虚拟角色从灵感到确权——夹克原型、五行提示词、即梦出片"
 keypoints = [
-  "技术深化",
-  "复盘与沉淀",
-  "学员作品点评",
+  "从一个有情感链接的物件里，提炼出别人抄不走的角色识别点",
+  "走通「概念图 → 精调 → 修图 → 出片」的虚拟角色制作链路",
+  "用五行结构写出视频模型能执行的提示词，删掉比喻、选项和主观解释",
 ]
 
 [[episodes]]
@@ -546,11 +1821,11 @@ topic = "3月27日直播课"
 series = "直播课"
 level = "进阶"
 source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/33【风变 x 麦橘】直播课3月27日（周五）.mp4"
-purpose = "3 月末收官直播课。"
+purpose = "从角色欲望到四段式与 15 节拍，把大纲写成能拍的动作"
 keypoints = [
-  "Q2 收官准备",
-  "项目终稿",
-  "学员答疑",
+  "用\"目的 + 阻碍\"判断一个故事开头是否立得住",
+  "用欲望与需求、人物小传给角色补出反差和三层暗线",
+  "把故事搭成四段式骨架，再扩成 15 个节拍",
 ]
 
 [[episodes]]
@@ -561,11 +1836,11 @@ topic = "4月3日直播课（delogo）"
 series = "直播课"
 level = "进阶"
 source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/34【风变 x 麦橘】直播课4月3日（周五）（delogo）.mp4"
-purpose = "系列收官直播课（最后一期）。"
+purpose = "《出走》6 分钟 AI 短片全流程拆解——剧本减法、场景图、续写与蒙太奇"
 keypoints = [
-  "系列总结",
-  "完结项目展示",
-  "学员长期支持安排",
+  "用一个\"人设 + 彩蛋\"的剧本结构，把 6 分钟短片压到只讲一件事",
+  "按\"关键场景图 → 镜头续写 → 小物件特写\"的顺序排制作，少返工",
+  "用两份素材解决\"在纸上划字\"这类文字类镜头",
 ]
 
 [[episodes]]
@@ -576,11 +1851,11 @@ topic = "风变x麦橘公开课 day1"
 series = "公开课"
 level = "入门"
 source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/风变 x 麦橘公开课 day1.mp4"
-purpose = "面向大众的 3 天公开课 Day 1——AI 审美创作入门与工具地图。"
+purpose = "从 20 张照片到一张 AI 人像：脸模训练、即梦出图、PS 换脸与调色"
 keypoints = [
-  "AI 审美创作全景",
-  "工具栈总览（生图/生视频/后期）",
-  "学习路径建议",
+  "用 10–20 张照片在魔搭社区训练一个自己的脸模",
+  "用 JoyCaption 打标，并逐张删改错误描述",
+  "在即梦生成一张露全脸、适合换脸的底图",
 ]
 
 [[episodes]]
@@ -591,11 +1866,11 @@ topic = "风变x麦橘公开课 day2"
 series = "公开课"
 level = "入门"
 source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/风变 x 麦橘公开课 day2.mp4"
-purpose = "公开课 Day 2——生图工具与风格控制。"
+purpose = "换脸底图 + 主体场景 + 视角景别 + 色彩光影的四层提示词"
 keypoints = [
-  "Midjourney / SD 实战",
-  "SREF 风格锁定",
-  "提示词工程基础",
+  "选出能稳定换脸的正脸底图，避开侧脸、小脸和怼脸",
+  "用「谁 + 在哪 + 做什么」把一句话扩成有叙事感的提示词",
+  "用视角和景别控制画面的压迫感、信息量与用途",
 ]
 
 [[episodes]]
@@ -606,11 +1881,11 @@ topic = "风变x麦橘公开课 day3"
 series = "公开课"
 level = "入门"
 source_video = "D:/002-AIGC/002 风变麦橘-AI审美创作课/风变 x 麦橘公开课 day3.mp4"
-purpose = "公开课 Day 3——生视频与项目级工作流。"
+purpose = "用评审视角练审美，用 sref 风格种子混出自己的图"
 keypoints = [
-  "AI 生视频工具",
-  "剪辑与后期",
-  "完整项目从 0 到 1 演示",
+  "用「第一名 5 分、第二名 3 分、第三名 1 分」的评审标准拆解一张作品",
+  "从构图、光影、色彩、信息量四个角度指出一张图的问题并给出改法",
+  "在 Midjourney 用 `--sref random` 挖出陌生风格，并把那串数字记下来复用",
 ]
 
 # ---- 参考文档 ----
