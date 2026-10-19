@@ -18,6 +18,7 @@
 
 | 文档 | 状态 | 摘要 |
 |---|---|---|
+| [P8-notes-html.md](./P8-notes-html.md) | ✅ 已落地（模板化补齐） | **三栏笔记浏览器 `notes.html`**：单文件预渲染 SPA（左导航 / 中正文 / 右「内嵌播放器 + 时间轴」），零 `fetch` / 零 CDN / 双击 `file://` 可用。本文档补两件事：① 把原先硬编码在 `notes_view.py` 的骨架（f-string）、`_CSS`（63 行）、`_JS`（90 行）外置为 `templates/notes_view.{html,css,js}`，`.css/.js` 走新增的 `templates.raw()`（内部 `$` 不能被当占位符）；② 把 P6「模板真接代码」门禁从 `curate/index` 扩到 `notes_view` + 5 个模板文件。**验收硬指标：重构前后 `notes.html` md5 逐字节一致** |
 | [P9-on-demand-frames.md](./P9-on-demand-frames.md) | ✅ 已落地（v2） | **按需抽帧**：全量抽帧每集 171 s / 459 张 / 305 MB，最终只引用约 10 张（利用率 2%）。改为「字幕 → draft 步骤时间点 → 只对这些点 `ffmpeg -ss` 精确抽帧」，单集 12 s（14.6× 快）、19 集省 50 min + 5.6 GB。**两条关键纠正**：① 粒度须为 **draft 步骤（250 个）** 而非字幕条（5,517 条，反而慢 1.5×）；② 抽帧须**独立成 L0.5 层 `toolkit/frames.py`**，不能塞进 `draft.build()`（否则纯函数变副作用，破坏 verify 回归）。`release_check` 加 1 项兜底：subprocess 隔离 + frames/ 帧数异常 |
 
 ## 命名与结构约定
@@ -38,6 +39,7 @@
 ├── VIDEONOTES-KIT_ROADMAP.md   # 阶段进度（§12 每行指向 docs/ 内对应方案）
 └── docs/
     ├── README.md               # 本索引
+    ├── P8-notes-html.md        # 三栏笔记浏览器 notes.html（含模板化）
     └── P9-on-demand-frames.md  # 按需抽帧方案
 ```
 

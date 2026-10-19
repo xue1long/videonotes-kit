@@ -17,6 +17,7 @@
      不会区分反引号里的 $，会把里面的 $xxx 也当占位符替换
   3) 控制流（if/for/loop）由 Python 处理；模板里只放 $block 占位 + 文字说明
   4) 模板顶部可用 HTML 注释 <!-- ... --> 写渲染约定文档
+  5) 静态资源（.css / .js）走 raw() 读原文，不经占位符替换——它们内部的 $ 不能动
 
 修改方式（最重要）：
   - 改模板外观 / 加新段落：只改 templates/*.md + 跑 build，toolkit/*.py 不动
@@ -35,21 +36,40 @@ class TemplateError(Exception):
 
 
 def render(name: str, **kw) -> str:
-    """读 templates/<name>.md，用 kw 填占位符；未填占位符保留为 $xxx。
+    """读 templates/<name>（省略扩展名时按 .md），用 kw 填占位符；未填占位符保留为 $xxx。
 
     Args:
-        name: 模板文件名（不含 .md 后缀），如 "steps_pro" / "index"
+        name: 模板文件名，如 "steps_pro" / "index" / "notes_view.html"
         **kw: 占位符名 → 值。值可以是 str / int / list，由 string.Template
               内部调用 str()；因此预先在调用方拼好字符串最稳。
 
     Returns:
-        渲染后的 Markdown 文本。
+        渲染后的文本（Markdown 或 HTML，取决于模板文件）。
     """
     path = _resolve(name)
     if not path.is_file():
         raise TemplateError(f"模板文件不存在: {path}")
     src = path.read_text(encoding="utf-8")
     return Template(src).safe_substitute(**kw)
+
+
+def raw(name: str) -> str:
+    """读模板原文，**不做占位符替换**。
+
+    用于 .css / .js 这类静态资源：它们内部可能含 `$` 或 `${}`（JS 模板字符串、
+    CSS 变量），过一遍 string.Template 会被误当占位符。调用方读进来后作为
+    普通字符串塞给 render() 的占位符即可（值不会被二次扫描）。
+
+    Args:
+        name: 含扩展名的文件名，如 "notes_view.css" / "notes_view.js"
+
+    Returns:
+        文件原文（UTF-8）。
+    """
+    path = _resolve(name)
+    if not path.is_file():
+        raise TemplateError(f"模板文件不存在: {path}")
+    return path.read_text(encoding="utf-8")
 
 
 def path(name: str) -> Path:
@@ -61,7 +81,7 @@ def path(name: str) -> Path:
 
 
 def _resolve(name: str) -> Path:
-    """统一解析：允许 'steps_pro' / 'steps_pro.md' 两种传入。"""
-    if not name.endswith(".md"):
+    """统一解析：'steps_pro' → steps_pro.md；带扩展名（.md/.html/.css/.js）原样解析。"""
+    if not Path(name).suffix:
         name = name + ".md"
     return _DIR / name

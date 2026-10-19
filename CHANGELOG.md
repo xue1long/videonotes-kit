@@ -44,6 +44,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 >
 > 关键时间锚：P1=骨架去硬编码；P2=图片自包含；P3=精校提效；P4=教程化；P5=视频+时间轴；P6=模板真接代码；P7=路径迁移；P8=三栏笔记浏览器。
 
+## [2026-10-19 · notes.html 模板化 + 规范文档 (P8 补)]
+
+**动机**：P6「模板真接代码」只接了 `curate` / `index`，`notes_view.py` 的骨架（f-string）、`_CSS`（63 行）、`_JS`（90 行）全是 Python 常量——改 notes.html 任何外观都必须改源码，且 `_check_templates_runtime` 的模块清单不含 `notes_view.py`，这项门禁对它完全无效。P8 也没有方案文档（`docs/` 只有 P9）。
+
+### Changed
+
+- 新增 `templates/notes_view.html`（25 行，7 个占位符）、`templates/notes_view.css`（59 行）、`templates/notes_view.js`（86 行）
+- `toolkit/notes_view.py`：删除 `_CSS` / `_JS` 常量与内联 f-string 骨架，改 `T.render("notes_view.html", ...)` + `T.raw(...)`（645 → 491 行）
+- `toolkit/templates.py`：
+  - `_resolve()` 后缀判断由 `endswith(".md")` 改为 `Path(name).suffix`——原实现会把 `notes_view.html` 拼成 `notes_view.html.md`
+  - 新增 `raw(name)`：只读原文不做占位符替换，供 `.css` / `.js` 使用（内部的 `$` 不能被当占位符）
+- `toolkit/release.py::_check_templates_runtime`：模块清单 `curate/index` → `curate/index/**notes_view**`；模板清单 2 个 `.md` → 5 个文件（含 `notes_view.html/css/js`）
+
+### Added
+
+- `docs/P8-notes-html.md`：构建规范（摘要 / 背景 / 方案 / ADR×5 / 风险 / 验收 / 实施 / 回滚 / 与 P5-P6-P9 边界）
+- `docs/README.md` 索引表与目录树补 P8；`VIDEONOTES-KIT_ROADMAP.md` P8 行补整改说明与文档链接
+- `templates/README.md`：生产者表加 3 行（含 `render()` / `raw()` 区别）、新增 `notes_view.html` 占位符清单、红线加「`.css/.js` 不能写占位符」
+- `README.notes.md` 目录树与 §14 补模板位置；`AGENT.md` §6 两行同步
+
+### 验收
+
+- **重构前后 `notes.html` md5 逐字节一致**：`49eaecb875b88617b35798857b94a4ba`（768 KB / 38 集）
+- A5 实测：只改 `templates/notes_view.css` 的 `body` 背景色 → 重 build → 产物变色 → 还原后 md5 回到原值，全程未动 Python
+- `release_check`：0 FAIL / 40 WARN（与整改前一致，无新增回归）
+- `notes.html` 三条门禁：存在 ✅ / 38 集 label 全含 ✅ / 无 `fetch(` ✅ / 无外链 CDN ✅
+
+
 ## [2026-10-19 · 三栏笔记浏览器 notes.html (P8)]
 
 **动机**：直接看 `steps_pro/*.md` 要人肉在 19 篇之间切换、点不开图片与时间轴链接。做一个双击即可用的本地笔记阅读页。

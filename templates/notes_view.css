@@ -1,0 +1,59 @@
+:root { color-scheme: light; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+       background: #f7f7f5; color: #1a1a1a; height: 100vh; overflow: hidden; }
+header.topbar { display: flex; align-items: center; padding: 10px 20px; background: #1a1a1a; color: #f5f5f5;
+                border-bottom: 1px solid #333; }
+header.topbar h1 { margin: 0; font-size: 16px; font-weight: 500; }
+header.topbar .sub { margin-left: auto; color: #999; font-size: 12px; }
+main.three { display: grid; grid-template-columns: var(--w-left, 240px) 4px 1fr 4px var(--w-right, 280px);
+             height: calc(100vh - 42px); }
+aside.left { background: #fafaf7; border-right: 1px solid #e5e5e5; overflow-y: auto; }
+aside.right { background: #fafaf7; border-left: 1px solid #e5e5e5; overflow-y: auto; padding: 12px 16px; }
+section.middle { overflow-y: auto; padding: 24px 36px; background: #fff; }
+/* 可拖分割条 */
+.splitter { background: #e5e5e5; cursor: col-resize; position: relative; transition: background .15s; }
+.splitter:hover, .splitter.dragging { background: #4338ca; }
+.splitter::before { content: ""; position: absolute; inset: 0 -3px; } /* 加宽命中区 */
+nav ul { list-style: none; margin: 0; padding: 0; }
+nav .group { padding: 6px 16px 4px; font-size: 11px; text-transform: uppercase;
+             color: #888; letter-spacing: 0.5px; font-weight: 600; margin-top: 8px; }
+nav li a { display: block; padding: 6px 16px 6px 24px; color: #333; text-decoration: none;
+          font-size: 14px; border-left: 3px solid transparent; }
+nav li a:hover { background: #efefef; }
+nav li a.active { background: #eef2ff; border-left-color: #4338ca; color: #1e1b4b; font-weight: 500; }
+article > h1 { font-size: 24px; margin-top: 0; }
+article > h2 { font-size: 19px; border-bottom: 1px solid #e5e5e5; padding-bottom: 6px; margin-top: 28px; }
+article > h3 { font-size: 16px; margin-top: 24px; }
+article p { line-height: 1.7; font-size: 15px; }
+article ul, article ol { padding-left: 24px; line-height: 1.7; }
+article li { margin: 4px 0; }
+article blockquote { border-left: 3px solid #cbd5e1; padding: 6px 14px; margin: 12px 0;
+                     color: #475569; background: #f1f5f9; border-radius: 0 4px 4px 0; }
+article table { border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+article th, article td { border: 1px solid #ddd; padding: 6px 10px; text-align: left; }
+article th { background: #f5f5f5; }
+article pre { background: #1e1e1e; color: #d4d4d4; padding: 12px; border-radius: 4px;
+              overflow-x: auto; font-size: 13px; line-height: 1.5; }
+article code { background: #f1f5f9; padding: 1px 4px; border-radius: 3px; font-size: 13px;
+               font-family: ui-monospace, Consolas, monospace; }
+article pre code { background: transparent; color: inherit; padding: 0; }
+article img { max-width: 100%; border-radius: 4px; margin: 12px 0; border: 1px solid #e5e5e5; }
+article hr { border: none; border-top: 1px dashed #ddd; margin: 28px 0; }
+aside.right h3 { font-size: 13px; text-transform: uppercase; color: #666; margin: 14px 0 10px; font-weight: 600; }
+aside.right .empty { color: #999; font-size: 13px; padding: 12px 0; }
+aside.right video.player { width: 100%; border-radius: 6px; background: #000; display: block;
+                            aspect-ratio: 16/9; }
+aside.right button.step { display: block; width: 100%; text-align: left; padding: 8px 10px;
+                          margin-bottom: 6px; background: #fff; border: 1px solid #e5e5e5;
+                          border-radius: 4px; font: inherit; font-size: 13px; cursor: pointer;
+                          transition: all .15s; }
+aside.right button.step:hover { border-color: #2563eb; background: #f0f6ff; transform: translateY(-1px); }
+aside.right button.step.playing { border-color: #2563eb; background: #eef2ff; }
+aside.right button.step .time { font-weight: 600; color: #2563eb; font-family: ui-monospace, Consolas, monospace; }
+aside.right button.step .topic { color: #555; margin-top: 2px; font-size: 12px; display: block;
+                                 line-height: 1.45; }
+aside.right button.step .topic.muted { color: #bbb; }
+header.course-banner { padding: 12px 36px 0; background: #fff; }
+header.course-banner h2 { margin: 0; font-size: 18px; }
+header.course-banner .meta { color: #888; font-size: 12px; margin-top: 4px; }

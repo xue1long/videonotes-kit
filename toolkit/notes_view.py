@@ -9,6 +9,10 @@
 
 为什么不用 jinja2 / marked：因为本项目"纯本地、零第三方"。`_safe_html` 用 bleach 无依赖替代
 （自写白名单过滤）。
+
+模板（P8-A/B 整改后）：HTML 骨架 / CSS / JS 都外置到 `templates/`，本模块只负责把
+三栏内容拼成字符串再交给 `templates.render()`。改外观 = 改 `templates/notes_view.{html,css,js}`，
+不需要碰 Python。`.css` / `.js` 走 `templates.raw()` 读原文（它们内部的 `$` 不能被当占位符）。
 """
 import html as _html
 import os
@@ -17,6 +21,7 @@ import urllib.parse
 from pathlib import Path
 
 from . import manifest as M
+from . import templates as T
 
 # 模块级上下文：build_notes_view 写入，_right_panel_for_article 读取
 _SRC_ROOT = [None]   # steps_pro/source（相对 notes_root 的相对串，或 None）
@@ -300,68 +305,11 @@ def extract_play_links_inline(md_text: str) -> int:
 
 
 # ---- HTML 包装 ----
-
-_CSS = """
-:root { color-scheme: light; }
-* { box-sizing: border-box; }
-body { margin: 0; font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-       background: #f7f7f5; color: #1a1a1a; height: 100vh; overflow: hidden; }
-header.topbar { display: flex; align-items: center; padding: 10px 20px; background: #1a1a1a; color: #f5f5f5;
-                border-bottom: 1px solid #333; }
-header.topbar h1 { margin: 0; font-size: 16px; font-weight: 500; }
-header.topbar .sub { margin-left: auto; color: #999; font-size: 12px; }
-main.three { display: grid; grid-template-columns: var(--w-left, 240px) 4px 1fr 4px var(--w-right, 280px);
-             height: calc(100vh - 42px); }
-aside.left { background: #fafaf7; border-right: 1px solid #e5e5e5; overflow-y: auto; }
-aside.right { background: #fafaf7; border-left: 1px solid #e5e5e5; overflow-y: auto; padding: 12px 16px; }
-section.middle { overflow-y: auto; padding: 24px 36px; background: #fff; }
-/* 可拖分割条 */
-.splitter { background: #e5e5e5; cursor: col-resize; position: relative; transition: background .15s; }
-.splitter:hover, .splitter.dragging { background: #4338ca; }
-.splitter::before { content: ""; position: absolute; inset: 0 -3px; } /* 加宽命中区 */
-nav ul { list-style: none; margin: 0; padding: 0; }
-nav .group { padding: 6px 16px 4px; font-size: 11px; text-transform: uppercase;
-             color: #888; letter-spacing: 0.5px; font-weight: 600; margin-top: 8px; }
-nav li a { display: block; padding: 6px 16px 6px 24px; color: #333; text-decoration: none;
-          font-size: 14px; border-left: 3px solid transparent; }
-nav li a:hover { background: #efefef; }
-nav li a.active { background: #eef2ff; border-left-color: #4338ca; color: #1e1b4b; font-weight: 500; }
-article > h1 { font-size: 24px; margin-top: 0; }
-article > h2 { font-size: 19px; border-bottom: 1px solid #e5e5e5; padding-bottom: 6px; margin-top: 28px; }
-article > h3 { font-size: 16px; margin-top: 24px; }
-article p { line-height: 1.7; font-size: 15px; }
-article ul, article ol { padding-left: 24px; line-height: 1.7; }
-article li { margin: 4px 0; }
-article blockquote { border-left: 3px solid #cbd5e1; padding: 6px 14px; margin: 12px 0;
-                     color: #475569; background: #f1f5f9; border-radius: 0 4px 4px 0; }
-article table { border-collapse: collapse; margin: 12px 0; font-size: 14px; }
-article th, article td { border: 1px solid #ddd; padding: 6px 10px; text-align: left; }
-article th { background: #f5f5f5; }
-article pre { background: #1e1e1e; color: #d4d4d4; padding: 12px; border-radius: 4px;
-              overflow-x: auto; font-size: 13px; line-height: 1.5; }
-article code { background: #f1f5f9; padding: 1px 4px; border-radius: 3px; font-size: 13px;
-               font-family: ui-monospace, Consolas, monospace; }
-article pre code { background: transparent; color: inherit; padding: 0; }
-article img { max-width: 100%; border-radius: 4px; margin: 12px 0; border: 1px solid #e5e5e5; }
-article hr { border: none; border-top: 1px dashed #ddd; margin: 28px 0; }
-aside.right h3 { font-size: 13px; text-transform: uppercase; color: #666; margin: 14px 0 10px; font-weight: 600; }
-aside.right .empty { color: #999; font-size: 13px; padding: 12px 0; }
-aside.right video.player { width: 100%; border-radius: 6px; background: #000; display: block;
-                            aspect-ratio: 16/9; }
-aside.right button.step { display: block; width: 100%; text-align: left; padding: 8px 10px;
-                          margin-bottom: 6px; background: #fff; border: 1px solid #e5e5e5;
-                          border-radius: 4px; font: inherit; font-size: 13px; cursor: pointer;
-                          transition: all .15s; }
-aside.right button.step:hover { border-color: #2563eb; background: #f0f6ff; transform: translateY(-1px); }
-aside.right button.step.playing { border-color: #2563eb; background: #eef2ff; }
-aside.right button.step .time { font-weight: 600; color: #2563eb; font-family: ui-monospace, Consolas, monospace; }
-aside.right button.step .topic { color: #555; margin-top: 2px; font-size: 12px; display: block;
-                                 line-height: 1.45; }
-aside.right button.step .topic.muted { color: #bbb; }
-header.course-banner { padding: 12px 36px 0; background: #fff; }
-header.course-banner h2 { margin: 0; font-size: 18px; }
-header.course-banner .meta { color: #888; font-size: 12px; margin-top: 4px; }
-"""
+#
+# 骨架在 templates/notes_view.html（占位符 $title/$count/$left/$middle/$right/$css/$js），
+# 样式在 templates/notes_view.css，脚本在 templates/notes_view.js。
+# 本节只负责拼三栏内容；改外观请改模板，不要改本文件。
+#
 
 
 def _index_panel(mf, vfiles) -> str:
@@ -449,94 +397,6 @@ def _right_panel_for_article(md_text: str, ep_label: str, ep: dict | None = None
 
 # ---- JS：导航联动 + 右栏随之变化 ----
 
-_JS = """
-const LEFT_LINKS = document.querySelectorAll('aside.left a[data-target]');
-const ARTICLES = document.querySelectorAll('article.pane');
-const RIGHT_CONTENT = document.querySelector('aside.right .content');
-const ALL_RIGHT_PANES = {};
-const PLAYER_KEY = 'vn_left', PLAYERR_KEY = 'vn_right';
-const main = document.querySelector('main.three');
-
-document.querySelectorAll('article.pane').forEach(a => {
-  ALL_RIGHT_PANES[a.id] = a.querySelector('.right-pane-content')?.innerHTML || '';
-});
-
-// ---- 笔记切换 ----
-LEFT_LINKS.forEach(a => {
-  a.addEventListener('click', e => {
-    e.preventDefault();
-    const t = a.dataset.target;
-    LEFT_LINKS.forEach(x => x.classList.toggle('active', x === a));
-    ARTICLES.forEach(art => { art.style.display = (art.id === 'file_' + t) ? '' : 'none'; });
-    RIGHT_CONTENT.innerHTML = ALL_RIGHT_PANES['file_' + t] || '<div class="empty">本集没有时间轴链接</div>';
-    bindRightPane();
-    document.querySelector('section.middle').scrollTop = 0;
-  });
-});
-
-// ---- 右栏：时间轴点击 → 播放器 seek + 播放（不跳页）----
-function bindRightPane() {
-  const v = RIGHT_CONTENT.querySelector('video.player');
-  if (!v) return;
-  RIGHT_CONTENT.querySelectorAll('button.step').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const t = parseFloat(btn.dataset.t);
-      if (v.readyState >= 1) {          // 元数据已加载
-        v.currentTime = t;
-        v.play();
-      } else {                          // 首次点击，等 loadedmetadata 再 seek
-        v.addEventListener('loadedmetadata', () => { v.currentTime = t; v.play(); }, { once: true });
-      }
-      RIGHT_CONTENT.querySelectorAll('button.step').forEach(x => x.classList.remove('playing'));
-      btn.classList.add('playing');
-    });
-  });
-}
-
-// ---- 分割条拖动（三栏宽度可调 + localStorage 持久化）----
-function setW(side, px) {
-  if (side === 'l') main.style.setProperty('--w-left', px + 'px');
-  else main.style.setProperty('--w-right', px + 'px');
-}
-function loadW() {
-  const l = localStorage.getItem(PLAYER_KEY), r = localStorage.getItem(PLAYERR_KEY);
-  if (l) setW('l', l);
-  if (r) setW('r', r);
-}
-document.querySelectorAll('.splitter').forEach(sp => {
-  sp.addEventListener('mousedown', e => {
-    e.preventDefault();
-    sp.classList.add('dragging');
-    const side = sp.dataset.side;
-    const mainR = main.getBoundingClientRect();
-    const move = ev => {
-      let px;
-      if (side === 'l') { px = ev.clientX - mainR.left; px = Math.max(150, Math.min(px, 460)); }
-      else              { px = mainR.right - ev.clientX; px = Math.max(200, Math.min(px, 560)); }
-      setW(side, px);
-    };
-    const up = () => {
-      sp.classList.remove('dragging');
-      document.removeEventListener('mousemove', move);
-      document.removeEventListener('mouseup', up);
-      const cur = side === 'l'
-        ? getComputedStyle(main).getPropertyValue('--w-left')
-        : getComputedStyle(main).getPropertyValue('--w-right');
-      localStorage.setItem(side === 'l' ? PLAYER_KEY : PLAYERR_KEY, parseInt(cur) || '');
-    };
-    document.addEventListener('mousemove', move);
-    document.addEventListener('mouseup', up);
-  });
-  // 双击重置默认
-  sp.addEventListener('dblclick', () => {
-    const side = sp.dataset.side;
-    if (side === 'l') { setW('l', 240); localStorage.removeItem(PLAYER_KEY); }
-    else              { setW('r', 280); localStorage.removeItem(PLAYERR_KEY); }
-  });
-});
-loadW();
-bindRightPane();
-"""
 
 
 def build_notes_view(mf, notes_root=None):
@@ -598,30 +458,18 @@ def build_notes_view(mf, notes_root=None):
     )
 
     title = f"{mf['course']['name']} · 笔记浏览器"
-    html = f"""<!doctype html>
-<html lang="zh-CN">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{_esc(title)}</title>
-<style>{_CSS}</style>
-</head>
-<body>
-<header class="topbar">
-  <h1>📚 {_esc(title)}</h1>
-  <div class="sub">{len(vfiles)} 篇 · 双击 file:// 即可在浏览器中查看</div>
-</header>
-<main class="three">
-  <aside class="left">{left_html}</aside>
-  <div class="splitter" data-side="l" title="拖动调整左栏宽度 · 双击复位"></div>
-  <section class="middle">{middle_html}</section>
-  <div class="splitter" data-side="r" title="拖动调整右栏宽度 · 双击复位"></div>
-  <aside class="right">{default_right}</aside>
-</main>
-<script>{_JS}</script>
-</body>
-</html>
-"""
+    # 骨架 / 样式 / 脚本全部来自 templates/：notes_view.html + notes_view.css + notes_view.js
+    # css / js 用 raw() 读原文（它们的 $ 不能被当占位符），再作为普通值塞进 render()
+    html = T.render(
+        "notes_view.html",
+        title=_esc(title),
+        count=len(vfiles),
+        left=left_html,
+        middle=middle_html,
+        right=default_right,
+        css=T.raw("notes_view.css"),
+        js=T.raw("notes_view.js"),
+    )
     out = notes_root_p / "notes.html"
     out.write_text(html, encoding="utf-8")
     print(f"notes.html -> {out}")

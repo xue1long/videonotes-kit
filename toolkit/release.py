@@ -202,7 +202,8 @@ def _check_p5_redlines(mf, base):
 def _check_templates_runtime(mf, base):
     """模板是否被代码实际使用（验证 templates/ 不是 dead code）。
 
-    校验：toolkit/templates.py 存在 + curate.py + index.py 都 import 该模块。
+    校验：toolkit/templates.py 存在 + curate/index/**notes_view** 都 import 该模块
+    + 模板目录里 5 个文件齐全（3 个 .md 产物模板 + notes.html 的 html/css/js 三件套）。
     """
     issues = []
     tp = os.path.join(base, "toolkit", "templates.py")
@@ -220,12 +221,14 @@ def _check_templates_runtime(mf, base):
             or _re.search(r"\bimport\s+templates\b", body)
         )
 
-    for mod in ("curate.py", "index.py"):
+    for mod in ("curate.py", "index.py", "notes_view.py"):
         body = _read(os.path.join(base, "toolkit", mod))
         if not _imported(body):
-            issues.append(("FAIL", f"toolkit/{mod}", "未导入 toolkit/templates（模板未真正接 curate/index）"))
-    # 模板目录至少要有 steps_pro.md 和 index.md
-    for name in ("steps_pro.md", "index.md"):
+            issues.append(("FAIL", f"toolkit/{mod}",
+                           f"未导入 toolkit/templates（模板未真正接 {mod}）"))
+    # 模板文件必须齐全：产物模板 2 个 + notes.html 三件套
+    for name in ("steps_pro.md", "index.md", "notes_view.html",
+                 "notes_view.css", "notes_view.js"):
         p = os.path.join(base, "templates", name)
         if not os.path.isfile(p):
             issues.append(("FAIL", p, f"templates/{name} 不存在"))

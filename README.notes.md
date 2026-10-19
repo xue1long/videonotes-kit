@@ -43,7 +43,7 @@ E:/002-Pr/videonotes-kit/                # 工具链根
 ├── projects/           # 一门课一个文件夹（数据驱动）
 │   └── 沐北AICG/
 │       └── manifest.toml   # 课程/集/文档清单 + 索引增强文案 + [llm] 开关
-├── templates/          # steps_pro.md / index.md 模板（由 toolkit/templates.py 渲染；详见 templates/README.md）
+├── templates/          # steps_pro.md / index.md / notes_view.{html,css,js}（由 toolkit/templates.py 渲染；详见 templates/README.md）
 ├── out/<课程>/         # 产物（vidwise 原始产物 + _curated + <notes_subdir>/）
 │   ├── <集>.mp4/       #   vidwise 原始产物：transcript.json + steps_v2.md（P9 起 frames/ 不再由 vidwise 产出）
 │   ├── _curated/<集>/  #   人工精校金标准 steps_pro.md（curate 生成的骨架为 .skeleton.md）
@@ -344,6 +344,7 @@ source_video = "D:/002-AIGC/沐北AICG/基础/1.mp4"   # 必填
 ### 实现要点（`toolkit/notes_view.py`）
 
 - **预渲染 + 内联**：全部笔记 + 总索引的 HTML 在生成时一次内联进单文件（约 450–500 KB）。切换笔记是纯 DOM 显隐，**零网络请求**——所以 `file://` 双击可用（浏览器对 `fetch(file://)` 会拦截，这是选预渲染的原因）。
+- **外观外置**：骨架 / CSS / JS 分别在 `templates/notes_view.html`（7 个 `$` 占位符）、`notes_view.css`、`notes_view.js`；后两者由 `templates.raw()` 读原文（内部 `$` 不当占位符）。改配色/布局只需改模板。
 - **零第三方依赖**：markdown 渲染是自写 mini renderer（标准库 `re`）：标题 / 段落 / 有序列 / 无序列（含 2 空格缩进嵌套）/ 表格（跳过 `---` 分隔行）/ 代码块 / 引用块 / 分割线 / 图片 / 链接 / 行内粗体与代码。
 - **时间轴链接识别**：`[▶ m:ss](play.html?ep=…&t=N)` 兼容半角/全角冒号，渲染为 `.play-link` 按钮，同时在右栏聚合。
 - **图片**：`assets/<集标签>/frame_x.png` 相对路径引用，与笔记同目录，随包移动不丢。

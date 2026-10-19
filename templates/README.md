@@ -1,18 +1,26 @@
 # templates/ · 模板约定
 
-> 本目录的 .md 文件**不是只读文档**——它们由 `toolkit/templates.py:render(name, **kw)` 配合 `toolkit/curate.py` / `toolkit/index.py` 渲染，生成 `_curated/<ep>/steps_pro.skeleton.md` 与 `<notes_root>/总索引.md`。
+> 本目录的文件**不是只读文档**——它们由 `toolkit/templates.py:render(name, **kw)` / `raw(name)` 配合
+> `toolkit/curate.py` / `toolkit/index.py` / `toolkit/notes_view.py` 渲染，生成
+> `_curated/<ep>/steps_pro.skeleton.md`、`<notes_root>/总索引.md` 与 `<notes_root>/notes.html`。
 >
-> 改动本目录内的 .md = 改产物外观，无需碰 toolkit/。
+> 改动本目录内的文件 = 改产物外观，无需碰 toolkit/。
 
 ---
 
 ## 1. 文件清单与生产者
 
-| 模板 | 生产者 | 渲染产物 |
-|---|---|---|
-| `steps_pro.md` | `toolkit/curate.py:gen_skeleton` | `_curated/<ep>/steps_pro.skeleton.md` |
-| `index.md` | `toolkit/index.py:build_index` | `<notes_root>/总索引.md` |
-| `steps_pro_tutorial.md` | **当前未连接**（P5 教程体规范，留作历史参考与未来切档）| —（见文件顶部注释） |
+| 模板 | 生产者 | 渲染产物 | 走哪个函数 |
+|---|---|---|---|
+| `steps_pro.md` | `toolkit/curate.py:gen_skeleton` | `_curated/<ep>/steps_pro.skeleton.md` | `render()` |
+| `index.md` | `toolkit/index.py:build_index` | `<notes_root>/总索引.md` | `render()` |
+| `notes_view.html` | `toolkit/notes_view.py:build_notes_view` | `<notes_root>/notes.html` 骨架 | `render()` |
+| `notes_view.css` | 同上 | 内联进 `notes.html` 的 `<style>` | `raw()` |
+| `notes_view.js` | 同上 | 内联进 `notes.html` 的 `<script>` | `raw()` |
+| `steps_pro_tutorial.md` | **当前未连接**（P5 教程体规范，留作历史参考与未来切档）| —（见文件顶部注释） | — |
+
+> `raw()` 与 `render()` 的区别：`raw()` 只读原文、**不做占位符替换**。`.css` / `.js`
+> 内部有 `$`（CSS 变量、JS 模板字符串）必须走 `raw()`，否则会被当成占位符吞掉。
 
 ---
 
@@ -60,6 +68,22 @@
 | `$glossary` | `index.py` 术语对照表 |
 | `$doc_details` | `index.py` 按类别分组的补充文档说明 |
 
+### `notes_view.html`
+
+| 名称 | 来源 | 用途 |
+|---|---|---|
+| `$title` | `manifest.course.name` + ` · 笔记浏览器` | `<title>` 与顶栏 `<h1>` |
+| `$count` | 实际渲染的笔记篇数 | 顶栏右侧「N 篇」 |
+| `$left` | `notes_view._index_panel()` | 左栏导航（总索引 + 按 series 分组） |
+| `$middle` | 各篇 `render_md()` 结果拼接 | 中栏全部 `<article>`（非当前篇 `display:none`） |
+| `$right` | 默认右栏占位 | 右栏初始内容，切换笔记时由 JS 替换 |
+| `$css` | `raw("notes_view.css")` | 内联 `<style>` |
+| `$js` | `raw("notes_view.js")` | 内联 `<script>` |
+
+> ⚠️ `notes_view.html` 里不能出现除上述 7 个以外的裸 `$`；确需字面 `$` 请写 `$$`。
+> 三栏结构的类名（`main.three` / `aside.left` / `section.middle` / `aside.right` / `.splitter`）
+> 与 `notes_view.js` 强耦合，改结构必须同步改 JS 的选择器。
+
 ---
 
 ## 4. 改模板的最佳实践
@@ -76,3 +100,4 @@
 1. **不要改占位符名称**：`$label` 不能改成 `$集标签`（约定全英文）
 2. **不要在模板里加反引号 + `$` 的组合**：` `$label` ` 会被原样替换
 3. **不要把 `## H2` 改成 `# H1`**：被渲染产物的 Markdown 结构是固定的
+4. **不要给 `.css` / `.js` 加占位符**：它们由 `raw()` 读取，占位符不会被替换，会原样留在产物里

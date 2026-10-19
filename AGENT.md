@@ -181,9 +181,9 @@ export VIDEONOTES_OUT_ROOT=/data/videonotes/out     # macOS / Linux
 | `toolkit/index.py` | 扫描 notes/ 自动生成总索引（改由 `templates/index.md` 渲染，6 个动态块预拼后整段替换） | `build_index(mf)` |
 | `toolkit/branding.py` | **项目级品牌文单一引用源**（NAME/TAGLINE/INDEX_BANNER 等）。下次更名只改本文件 + build 即可全工程更新 | 常量 |
 | `toolkit/release.py` | release_check 子命令：检查项目内 9 处"我忘了同步"点（整改方案 P* / verify 产物覆盖 / 总索引 banner / README banner / AGENT 模块地图 / manifest 必填字段 / **source_video 路径存在** / **templates 真接代码** / **P5 教程体红线**） | `run(mf, base)` / `main(args)` |
-| `toolkit/templates.py` | **模板渲染层**（零第三方依赖，仅 `string.Template`）。`curate` + `index` 都通过它读 `templates/*.md`；改模板外观 = 改 .md，无需碰代码 | `render(name, **kw)` / `path(name)` |
+| `toolkit/templates.py` | **模板渲染层**（零第三方依赖，仅 `string.Template`）。`curate` + `index` + `notes_view` 都通过它读 `templates/`；改外观 = 改模板，无需碰代码。`.css/.js` 走 `raw()` 读原文（内部 `$` 不当占位符） | `render(name, **kw)` / `raw(name)` / `path(name)` |
 | `toolkit/frames.py` | **L0.5 按需抽帧层**（P9，唯一允许调 `ffmpeg`/`subprocess` 的模块）。`draft.derive_steps` 给出步骤时间点 → 对每个 t 精确 `-ss` 抽帧。`draft.build` **签名不变**（纯函数）；`release_check` 兜底「subprocess 隔离」+「frames/ 帧数 ≫ 步骤数」 | `ensure(mf, ep, follow_up=0)` / `extract_at(video, t, dst_dir)` / `available()` / `resolve_video(mf, ep)` |
-| `toolkit/notes_view.py` | **三栏笔记浏览器**（左导航 / 中正文 / 右时间轴）。把全部笔记 + 总索引预渲染内联成单个 `notes.html`，零 fetch / 零 CDN，双击 `file://` 可用；`build` 末尾自动调用 | `build_notes_view(mf)` / `render_md(text)` / `extract_play_links(text, label)` |
+| `toolkit/notes_view.py` | **三栏笔记浏览器**（左导航 / 中正文 / 右时间轴）。把全部笔记 + 总索引预渲染内联成单个 `notes.html`，零 fetch / 零 CDN，双击 `file://` 可用；`build` 末尾自动调用。骨架/CSS/JS 在 `templates/notes_view.{html,css,js}` | `build_notes_view(mf)` / `render_md(text)` / `extract_play_links(text, label)` |
 | `toolkit/cli.py` | 入口路由 + verify 非破坏回归 + P5 校验 | `cmd_draft/cmd_build/cmd_verify/cmd_curate/...` |
 
 ## 7. 加新课程的标准流程
