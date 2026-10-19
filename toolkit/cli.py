@@ -17,7 +17,7 @@ import argparse
 import filecmp
 import shutil
 
-BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # D:/000/vidwise
+BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # 工具链根（自动推导 = <项目根>）
 PROJECTS = os.path.join(BASE, "projects")
 sys.path.insert(0, BASE)
 
@@ -78,11 +78,26 @@ def _check_subtitle(mf, ep):
     return True, ""
 
 
+def _ensure_frames(mf, ep):
+    """P9 编排点：draft.build 之前确保 frames/ 已就位。失败仅 WARN。"""
+    from . import frames as F
+    if mf["draft"].get("frame_mode", "on_demand") != "on_demand":
+        return                              # 兼容：full 模式由 L0 负责
+    stat = F.ensure(mf, ep, follow_up=mf["draft"].get("frame_follow_up", 0))
+    if "skipped" in stat:
+        print(f"  FRAMES skip {ep['ep_dir']}: {stat['skipped']}")
+        return
+    print(f"  FRAMES {ep['ep_dir']}: "
+          f"times={stat.get('times', 0)} made={stat.get('made', 0)} "
+          f"fail={stat.get('fail', 0)} <- {os.path.basename(stat.get('video', ''))}")
+
+
 def _draft_all(mf):
     for ep in mf["episodes"]:
         _sync_subtitle(mf, ep)
         out = os.path.join(mf["course"]["out_root"], ep["ep_dir"])
         if os.path.isfile(os.path.join(out, "transcript.json")):
+            _ensure_frames(mf, ep)                # P9: frames.ensure 在 draft 前
             draft.build(out, max_steps=mf["draft"].get("max_steps", 80))
         else:
             print("SKIP (无 transcript.json):", ep["ep_dir"])
@@ -238,6 +253,24 @@ def cmd_verify(mf, args):
             print("  play.html 缺集 label:", missing_eps)
         else:
             print(f"  play.html 存在，含 {len(mf['episodes'])} 集 label")
+
+    # ---- P8 校验：notes.html 三栏笔记浏览器存在 + 含全部集 label + 无外部 CDN ----
+    view_path = os.path.join(live, "notes.html")
+    view_ok = os.path.isfile(view_path) and os.path.getsize(view_path) > 0
+    if not view_ok:
+        source_ok = False
+        print("  MISSING notes.html（跑 notes build 生成）")
+    else:
+        body = open(view_path, encoding="utf-8").read()
+        missing_eps = [ep["label"] for ep in mf["episodes"] if ep["label"] not in body]
+        if missing_eps:
+            source_ok = False
+            print("  notes.html 缺集 label:", missing_eps)
+        elif "fetch(" in body:
+            source_ok = False
+            print("  notes.html 含 fetch( —— 会破坏 file:// 双击可用性")
+        else:
+            print(f"  notes.html 存在（{os.path.getsize(view_path)//1024} KB），含 {len(mf['episodes'])} 集 label")
 
     ok = draft_ok and sub_ok and not issues and asset_missing == 0 and fragile == 0 and source_ok
     print("VERIFY", "PASS" if ok else "FAIL（详见上方）")

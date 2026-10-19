@@ -10,12 +10,18 @@
   - docs[].note / docs[].detail          ：文档目录表与文末说明
 
 注意：各集概要**不再**从笔记正文抽取，改由 manifest 的 purpose/keypoints 提供，
-避免「索引重复贴全文步骤」的体例不一致（09/10 不再特殊）。
+避免「索引重复贴全文步骤」的体例不一致。
+
+模板层：本模块只拼装动态块（分组表/各集概要/术语表），模板 templates/index.md
+  只放静态骨架（H1/banner/章节标题）。改外观 = 改 templates/index.md；
+  改动态行为 = 改本模块。
 """
 import os
 import re
-from . import manifest as M, branding
+from . import manifest as M, branding, templates as T
 
+
+# ---- 文件名/序号 helper ----
 
 def _ext(s: str) -> str:
     i = s.rfind(".")
@@ -43,6 +49,154 @@ def _group_level(vfiles, series: str) -> str:
     return " / ".join(sorted(levels)) if levels else ""
 
 
+# ---- 6 个动态块生成器（拼好后整体替换模板中的同名占位符）----
+
+def _block_reading_order(vfiles) -> str:
+    lines = []
+    for fn, ep, _ in vfiles:
+        lv = _level(ep)
+        tag = f"（{lv}）" if lv else ""
+        lines.append(f"{ep['seq']}. [{ep['topic']}]({fn}){tag}")
+    return "\n".join(lines)
+
+
+def _block_groups(vfiles) -> str:
+    """目录按 series 分组：H3 + 4 列表。"""
+    # 维持原出现顺序
+    groups = []
+    for _, ep, _ in vfiles:
+        s = ep.get("series", "其他")
+        if s not in groups:
+            groups.append(s)
+
+    out = []
+    for g in groups:
+        glv = _group_level(vfiles, g)
+        head = f"### {g}系列"
+        if glv:
+            head += f"（{glv}）"
+        out.append(head)
+        out.append("")
+        out.append("| 集 | 主题 | 步数 | 精校笔记 |")
+        out.append("|----|------|------|----------|")
+        for fn, ep, sc in vfiles:
+            if ep.get("series", "其他") != g:
+                continue
+            out.append(f"| 第{_n(ep['seq'])}集 | {ep['topic']} | {sc} | [{fn[:-3]}]({fn}) |")
+        out.append("")
+    return "\n".join(out).rstrip()
+
+
+def _block_doc_intro(course: dict) -> str:
+    return (course.get("doc_intro", "") or "").strip()
+
+
+def _block_doc_table(mf, dfiles) -> str:
+    lines = [
+        "| 类别 | 文件 | 说明 |",
+        "|------|------|------|",
+    ]
+    for d in dfiles:
+        name = _name_no_ext(d["dest"])
+        lines.append("| %s | [%s](%s/%s) | %s |" % (
+            d["category"], name, mf["course"]["refdoc_subdir"], d["dest"], d.get("note", "")
+        ))
+    return "\n".join(lines)
+
+
+def _block_doc_variant_note(course: dict) -> str:
+    return (course.get("doc_variant_note", "") or "").strip()
+
+
+def _block_ep_summaries(vfiles) -> str:
+    out = []
+    for fn, ep, sc in vfiles:
+        lv = _level(ep)
+        title = f"第{_n(ep['seq'])}集 · {ep['topic']}（{sc} 步）"
+        if lv:
+            title = title[:-1] + f" · {lv}）"
+        out.append(f"### {title}")
+        out.append("")
+        pur = ep.get("purpose", "")
+        if pur:
+            out.append(pur)
+            out.append("")
+        kps = ep.get("keypoints") or []
+        for k in kps:
+            out.append(f"- {k}")
+        if kps:
+            out.append("")
+        out.append(f"> 笔记：[{fn[:-3]}]({fn})")
+        out.append("")
+    return "\n".join(out).rstrip()
+
+
+GLOSSARY_INLINE_MAX = 80   # 术语 ≤ 80 条直接内联；超过则另存 术语总表.md，索引只留入口
+
+
+def _block_glossary(course: dict) -> str:
+    gl = course.get("glossary") or []
+    if not gl:
+        return ""
+    if len(gl) > GLOSSARY_INLINE_MAX:
+        return (f"共 **{len(gl)}** 条，完整表格见 **[术语总表.md](术语总表.md)**；"
+                "每集自己的关键术语见各篇笔记的「关键术语」段。")
+    lines = [
+        "| 黑话 | 含义 |",
+        "|------|------|",
+    ]
+    for g in gl:
+        lines.append(f"| {g.get('term', '')} | {g.get('meaning', '')} |")
+    return "\n".join(lines)
+
+
+def write_glossary_table(course: dict, notes_root: str):
+    """术语超过内联阈值时，把全表另存 术语总表.md（中文优先排序），索引只留入口。
+
+    返回写出的路径；未超阈值或没有术语则返回 None。
+    """
+    gl = course.get("glossary") or []
+    if len(gl) <= GLOSSARY_INLINE_MAX:
+        return None
+    top = sorted(gl, key=lambda g: (not (g.get("term") or "")[:1].isascii(),
+                                    (g.get("term") or "").lower()))
+    rows = [
+        "# 术语总表",
+        "",
+        f"> 共 {len(gl)} 条，由 manifest `course.glossary` 生成（源：各集精校笔记「关键术语」段）",
+        "",
+        "| 术语 | 含义 |",
+        "|------|------|",
+    ]
+    for g in top:
+        rows.append(f"| {g.get('term', '')} | {g.get('meaning', '')} |")
+    rows.append("")
+    p = os.path.join(notes_root, "术语总表.md")
+    open(p, "w", encoding="utf-8").write("\n".join(rows))
+    return p
+
+
+def _block_doc_details(mf, dfiles) -> str:
+    out = []
+    cats = []
+    for d in dfiles:
+        if d["category"] not in cats:
+            cats.append(d["category"])
+    for cat in cats:
+        out.append(f"### {cat}类")
+        out.append("")
+        for d in dfiles:
+            if d["category"] != cat:
+                continue
+            name = _name_no_ext(d["dest"])
+            detail = d.get("detail", d.get("note", ""))
+            out.append(f"- **{d['code']} {name}**：{detail}")
+        out.append("")
+    return "\n".join(out).rstrip()
+
+
+# ---- 主入口 ----
+
 def build_index(mf, notes_root=None):
     notes_root = notes_root or M.notes_root(mf)
     ref = os.path.join(notes_root, mf["course"]["refdoc_subdir"])
@@ -59,113 +213,26 @@ def build_index(mf, notes_root=None):
 
     dfiles = [d for d in mf["docs"] if os.path.isfile(os.path.join(ref, d["dest"]))]
 
-    L = []
-    L.append(f"# {mf['course']['name']} 图文笔记 · 总索引\n")
-    L.append("> " + branding.INDEX_BANNER)
-    L.append("> 本文件夹为**自包含图文笔记包**：笔记配图已内嵌于 `assets/<集标签>/`，源视频已复制于 `source/<系列>/`，步骤时间轴链接跳转到 `play.html`。整体可移动 / 打包分发，图片与视频都不丢。\n")
-    L.append("> 🎬 **快速开始**：双击打开 [play.html](play.html) 即可在浏览器内看视频、跳转到任意步骤时间。\n")
-
-    # ---- 如何使用本教程 ----
-    L.append("## 如何使用本教程\n")
-    if mf["course"].get("learning_path"):
-        L.append(mf["course"]["learning_path"] + "\n")
-    if mf["course"].get("series_note"):
-        L.append("### 系列说明\n")
-        L.append(mf["course"]["series_note"] + "\n")
-    if vfiles:
-        L.append("### 推荐阅读顺序\n")
-        for fn, ep, sc in vfiles:
-            lv = _level(ep)
-            tag = f"（{lv}）" if lv else ""
-            L.append(f"{ep['seq']}. [{ep['topic']}]({fn}){tag}")
-        L.append("")
-
-    # ---- 目录（按系列分组） ----
-    L.append("## 目录（按系列分组）\n")
-    groups = []
-    for _, ep, _ in vfiles:
-        s = ep.get("series", "其他")
-        if s not in groups:
-            groups.append(s)
-    for g in groups:
-        glv = _group_level(vfiles, g)
-        head = f"### {g}系列"
-        if glv:
-            head += f"（{glv}）"
-        L.append(head + "\n")
-        L.append("| 集 | 主题 | 步数 | 精校笔记 |")
-        L.append("|----|------|------|----------|")
-        for fn, ep, sc in vfiles:
-            if ep.get("series", "其他") != g:
-                continue
-            L.append(f"| 第{_n(ep['seq'])}集 | {ep['topic']} | {sc} | [{fn[:-3]}]({fn}) |")
-        L.append("")
-
-    # ---- 补充参考文档（目录表） ----
-    L.append("## 补充参考文档（课程 Prompt / SKILL / 资料库）\n")
-    if mf["course"].get("doc_intro"):
-        L.append(mf["course"]["doc_intro"] + "\n")
-    L.append("| 类别 | 文件 | 说明 |")
-    L.append("|------|------|------|")
-    for d in dfiles:
-        name = _name_no_ext(d["dest"])
-        L.append("| %s | [%s](%s/%s) | %s |" % (
-            d["category"], name, mf["course"]["refdoc_subdir"], d["dest"], d.get("note", "")))
-    L.append("")
-    if mf["course"].get("doc_variant_note"):
-        L.append("> " + mf["course"]["doc_variant_note"] + "\n")
-
-    # ---- 各集概要（manifest 驱动，统一体例：1 句话定位 + 要点） ----
-    L.append("## 各集概要\n")
-    for fn, ep, sc in vfiles:
-        lv = _level(ep)
-        title = f"第{_n(ep['seq'])}集 · {ep['topic']}（{sc} 步）"
-        if lv:
-            title = title[:-1] + f" · {lv}）"
-        L.append(f"### {title}\n")
-        pur = ep.get("purpose", "")
-        if pur:
-            L.append(pur + "\n")
-        kps = ep.get("keypoints") or []
-        if kps:
-            for k in kps:
-                L.append(f"- {k}")
-            L.append("")
-        L.append(f"> 笔记：[{fn[:-3]}]({fn})\n")
-
-    # ---- 术语对照（黑话 → 真实含义）：全文另存 术语总表.md，索引只做入口 ----
-    gl = mf["course"].get("glossary") or []
-    if gl:
-        L.append("## 术语对照（黑话 → 真实含义）\n")
-        L.append(f"共 **{len(gl)}** 条，完整表格见 **[术语总表.md](术语总表.md)**；"
-                 "每集自己的关键术语见各篇笔记的「关键术语」段。\n")
-        top = sorted(gl, key=lambda g: (not g.get("term", "")[:1].isascii(),
-                                        g.get("term", "").lower()))
-        rows = ["# 术语总表\n", f"> 共 {len(gl)} 条，由 manifest `course.glossary` 生成（源：各集精校笔记「关键术语」段）\n",
-                "| 术语 | 含义 |", "|------|------|"]
-        for g in top:
-            rows.append(f"| {g.get('term', '')} | {g.get('meaning', '')} |")
-        rows.append("")
-        gp = os.path.join(notes_root, "术语总表.md")
-        open(gp, "w", encoding="utf-8").write("\n".join(rows))
-        print("glossary ->", gp)
-
-    # ---- 补充参考文档说明（按类别分组） ----
-    L.append("## 补充参考文档说明\n")
-    cats = []
-    for d in dfiles:
-        if d["category"] not in cats:
-            cats.append(d["category"])
-    for cat in cats:
-        L.append(f"### {cat}类\n")
-        for d in dfiles:
-            if d["category"] != cat:
-                continue
-            name = _name_no_ext(d["dest"])
-            detail = d.get("detail", d.get("note", ""))
-            L.append(f"- **{d['code']} {name}**：{detail}\n")
-        L.append("")
+    # 模板渲染
+    out = T.render(
+        "index",
+        course_name=mf["course"]["name"],
+        banner=branding.INDEX_BANNER,
+        learning_path=(mf["course"].get("learning_path", "") or "").rstrip(),
+        series_note=(mf["course"].get("series_note", "") or "").rstrip(),
+        reading_order=_block_reading_order(vfiles),
+        groups=_block_groups(vfiles),
+        doc_intro=_block_doc_intro(mf["course"]),
+        doc_table=_block_doc_table(mf, dfiles),
+        doc_variant_note=_block_doc_variant_note(mf["course"]),
+        ep_summaries=_block_ep_summaries(vfiles),
+        glossary=_block_glossary(mf["course"]),
+        doc_details=_block_doc_details(mf, dfiles),
+    )
 
     idx = os.path.join(notes_root, "总索引.md")
-    open(idx, "w", encoding="utf-8").write("\n".join(L))
+    open(idx, "w", encoding="utf-8").write(out)
     print("index ->", idx)
+    gt = write_glossary_table(mf["course"], notes_root)
+    if gt:
+        print("glossary ->", gt)

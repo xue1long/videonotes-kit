@@ -1,6 +1,6 @@
 # videonotes-kit · 使用手册
 
-> 本文是 `D:/000/vidwise` 下「视频 + 文档 → 图文笔记」管线的使用手册。
+> 本文是 `E:/002-Pr/videonotes-kit` 下「视频 + 文档 → 图文笔记」管线的使用手册。
 > 上游 vidwise 本体文档见同目录 `README.md`（未改动）。
 > 本手册面向：**把本地课程视频 + 配套文档，整理成可独立分发、图片不丢、带总索引的图文笔记包**。
 
@@ -23,28 +23,37 @@
 ## 2. 目录结构
 
 ```
-D:/000/vidwise/                         # 工具链根
+E:/002-Pr/videonotes-kit/                # 工具链根
 ├── notes.py            # 唯一入口：notes <课程> <子命令>
 ├── README.md           # 上游 vidwise 文档（未改）
 ├── README.notes.md     # 本文（项目手册）
+├── docs/               # 阶段性方案/设计文档（索引见 docs/README.md）
+│   └── P9-on-demand-frames.md   #   按需抽帧方案（替代全量抽帧）
 ├── toolkit/            # 本地管线（零硬编码，全部读 manifest）
 │   ├── cli.py          #   CLI 路由 + verify 非破坏回归
 │   ├── manifest.py     #   读 projects/<课>/manifest.toml
-│   ├── draft.py        #   = v2tutorial：全量帧对齐 + 聚合 + 简繁 → steps_v2.md
-│   ├── curate.py       #   Tier1：draft → steps_pro.skeleton.md 骨架 + Tier2 LLM 接口
+│   ├── draft.py        #   字幕 → 步骤聚合 + 简繁 → steps_v2.md（纯函数；P9 抽出 derive_steps() 公开复用）
+│   ├── frames.py       #   L0.5 按需抽帧层（**唯一** import subprocess 的模块；与 draft.derive_steps 同源 → 抽帧点 = 笔记引用点）
+│   ├── curate.py       #   Tier1：draft → steps_pro.skeleton.md 骨架 + Tier2 LLM 接口（改由 templates/steps_pro.md 渲染）
 │   ├── consolidate.py  #   汇集笔记 + 复制被引帧到 assets/ + 改写图链（自包含）
 │   ├── docs.py         #   读 manifest 归档参考文档
-│   └── index.py        #   扫描 notes/ 自动生成 总索引.md
+│   ├── index.py        #   扫描 notes/ 自动生成 总索引.md（改由 templates/index.md 渲染）
+│   ├── templates.py    #   模板渲染层（标准库 string.Template；零第三方依赖）
+│   └── release.py      #   release_check 子命令（**9 项**同步点检查：P* / verify / 总索引 / README / AGENT / manifest / 模板真接 / P5 红线 / **P9 抽帧契约**）
 ├── projects/           # 一门课一个文件夹（数据驱动）
 │   └── 沐北AICG/
 │       └── manifest.toml   # 课程/集/文档清单 + 索引增强文案 + [llm] 开关
-├── templates/          # steps_pro.md 模板（含半成品说明）
+├── templates/          # steps_pro.md / index.md 模板（由 toolkit/templates.py 渲染；详见 templates/README.md）
 ├── out/<课程>/         # 产物（vidwise 原始产物 + _curated + <notes_subdir>/）
-│   ├── <集>.mp4/       #   vidwise 原始产物：transcript.json + frames/ + steps_v2.md
+│   ├── <集>.mp4/       #   vidwise 原始产物：transcript.json + steps_v2.md（P9 起 frames/ 不再由 vidwise 产出）
 │   ├── _curated/<集>/  #   人工精校金标准 steps_pro.md（curate 生成的骨架为 .skeleton.md）
 │   └── <notes_subdir>/ #   最终交付（默认 steps_pro/）：NN_标签_主题.md + 总索引.md
 │       ├── assets/<标签>/   # 各集被引帧副本（自包含，可整体移动）
-│       └── 参考文档/         # Rxx_类别_主题
+│       ├── source/<系列>/   # 源 mp4（copy_source 自动复制）
+│       ├── frames/          # P9 按需抽帧产物（≤ 步骤数 × 3 张；可由 mp4 重建）
+│       ├── 参考文档/         # Rxx_类别_主题
+│       ├── play.html         # 单页播放器
+│       └── notes.html        # 三栏笔记浏览器
 └── VIDEONOTES-KIT_ROADMAP.md  # 方案与验收（含 P1→P5 进度 + 6 条验收对照）
 ```
 
@@ -56,16 +65,18 @@ D:/000/vidwise/                         # 工具链根
 ## 3. 环境要求
 
 - **Python 3.11+**（用标准库 `tomllib` 读 TOML，无需装 PyYAML）。
-- **无第三方依赖**：Tier2 LLM 接口用标准库 `urllib`，不引入 `requests`。
+- **无第三方 Python 依赖**：Tier2 LLM 接口用标准库 `urllib`，不引入 `requests`。
 - **无需 API key**：默认 Tier0（draft）+ Tier1（人工精校）。Tier2 本地 LLM 默认关闭。
 - vidwise 本地转写依赖本机已缓存的 faster-whisper medium 模型（`HF_HUB_OFFLINE=1` 强制离线）。
+- **依赖安装**：`pip install -e .` 仅装工具链必需的 5 个（click / openai-whisper / yt-dlp / numpy / pillow）。`anthropic` / `openai` 已移到 `[project.optional-dependencies].guide` extras；上游 `--guide` 路径要用就 `pip install -e ".[guide]"`。本工具链不需要。
+- **可选外部二进制：`ffmpeg`**（P9 按需抽帧）。**缺失时 build 仍能完成**（用已有 `frames/`，仅 WARN 跳过抽帧）—— 但新建课程首次 build 必须装（`where ffmpeg` 或 `brew install ffmpeg`）。
 
 ---
 
 ## 4. 快速开始（以现有沐北AICG 为例）
 
 ```bash
-cd D:/000/vidwise
+cd E:/002-Pr/videonotes-kit
 
 # ① 重新生成各集 draft 草稿（确定性，可复现）
 python notes.py 沐北AICG draft
@@ -92,13 +103,14 @@ python notes.py 沐北AICG verify
 
 | 子命令 | 作用 | 说明 |
 |---|---|---|
-| `draft` | 重生成各集 `steps_v2.md` | draft 引擎，确定性，可复现 |
+| `draft` | 重生成各集 `steps_v2.md`（+ 按需抽帧入 `frames/`） | draft 引擎，确定性，可复现；P9 自动对每集按步骤时间点精确抽帧 |
 | `curate [--overwrite]` | 生成 `_curated/<集>/steps_pro.skeleton.md` | Tier1 半成品骨架；不覆盖 `steps_pro.md`；`--overwrite` 仅重写骨架 |
-| `build` | 跑 `draft` + 汇集 + 文档 + 索引 | 重建自包含 `notes/` 包 |
+| `build` | 跑 `draft` + 汇集 + 文档 + 索引 + **按需抽帧** + notes_view | 重建自包含 `notes/` 包（含 play.html + notes.html） |
 | `verify` | 非破坏回归 + 图片自包含校验 | draft 重生成比对 + notes 重生成到 `_staging` diff + assets 校验 |
 | `docs` | 仅归档参考文档 | 读 manifest docs 段 |
 | `index` | 仅重新生成总索引 | 全部文案由 manifest 驱动 |
 | `consolidate` | 仅汇集视频笔记 | 不含文档/索引 |
+| `release_check` | **9 项**同步点自动检查 | P* 阶段覆盖 / verify 产物覆盖 / 总索引 banner / README banner / AGENT 模块地图 / manifest 必填字段 / **模板真接代码** / **P5 教程体红线** / **P9 抽帧契约（subprocess 隔离 + frames/ 帧数回归）** |
 
 ---
 
@@ -109,7 +121,7 @@ python notes.py 沐北AICG verify
 name = "沐北AICG"                 # 课程名（用于总索引标题）
 video_root = "D:/002-AIGC/..."    # 源视频根（仅记录，vidwise 已跑过）
 doc_root   = "D:/002-AIGC/.../文档"  # 源文档根
-out_root   = "D:/000/vidwise/out/沐北AICG"  # 产物根
+out_root   = "E:/002-Pr/videonotes-kit/out/沐北AICG"  # 产物根
 notes_subdir   = "steps_pro"     # 最终交付子目录名
 curated_subdir = "_curated"      # 人工金标准源
 refdoc_subdir  = "参考文档"       # 文档归档子目录
@@ -119,6 +131,8 @@ doc_variant_note = "..."         # 总索引·同源变体提示
 
 [draft]
 max_steps = 80                   # draft 单集最大步数
+frame_mode = "on_demand"         # 抽帧模式：on_demand（默认，按需）| full（旧全量，由 vidwise 提供）
+frame_follow_up = 0              # 0 = 只抽步骤点 t；2 = 额外抽 t+2 作为备选
 
 [[episodes]]                     # 每集一条
 seq = "01"                       # 两位序号
@@ -146,11 +160,13 @@ timeout = 60
 
 ## 7. 新增一门课程（换课不改代码）
 
-1. 建 `projects/<新课>/manifest.toml`，填 `[course]` + 各 `[[episodes]]` + 各 `[[docs]]`。
-2. 把源视频放到对应 `ep_dir`（先用 vidwise 本地 `--no-guide` 跑转写，得到 transcript.json + frames/）。
-3. `python notes.py <新课> draft` → 生成 `steps_v2.md`。
+1. 建 `projects/<新课>/manifest.toml`，填 `[course]` + 各 `[[episodes]]` + 各 `[[docs]]`，确认 `[draft]` 默认值即可。
+2. 准备转写 + 源视频：
+   - **B 站官方字幕直通（推荐）**：把 `*.srt` 放到 `ep_dir` 同级目录，build 时自动生成 `transcript.json`（免 Whisper 转写数小时）。
+   - **本地 Whisper 转写**：用 vidwise `--no-guide` 跑，得到 `transcript.json`；源 mp4 放在 `ep_dir` 某处（manifest `source_video` 指向或放在 `steps_pro/source/<series>/` 自动识别）。
+3. `python notes.py <新课> build` → 一条命令产出：按需抽帧 + 草稿 + 汇集 + 总索引 + `play.html` + `notes.html`。
 4. `python notes.py <新课> curate` → 生成骨架；人工润色成 `steps_pro.md`。
-5. `python notes.py <新课> build` → 出自包含图文笔记包。
+5. `python notes.py <新课> release_check` → 9 项同步点全 PASS。
 
 **全程不碰 `toolkit/` 任何代码。**
 
@@ -200,6 +216,7 @@ subtitle = "字幕/1.md"       # 相对 video_root；绝对路径也行。声明
 - 长视频转写耗时：medium 模型跑 8 小时音视频需数小时，断点续跑已支持。
 - `manifest` 的 `topic` 需人工定（或从 draft 推断候选）。
 - 旧散脚本 `v2tutorial.py` / `consolidate_steps.py` / `consolidate_docs.py` / `v2notes_builder.py` / `v2step_builder.py` / `run_series.py` 已于 2026-10 清理（被本 toolkit 完全取代）。算法思路保留在 `toolkit/draft.py` 注释中。
+- **模板真接代码**：`templates/steps_pro.md` 由 `toolkit/curate.py` 通过 `toolkit/templates.py` 渲染；`templates/index.md` 由 `toolkit/index.py` 同路渲染。改模板外观 = 改 .md，无需碰 toolkit/。详见 `templates/README.md`。
 
 ---
 
@@ -234,8 +251,9 @@ subtitle = "字幕/1.md"       # 相对 video_root；绝对路径也行。声明
 
 ```
 <notes_subdir>/
+├── notes.html            # ★ 三栏笔记浏览器（左导航 / 中正文 / 右时间轴；双击即用）
 ├── play.html             # 单页播放器（HTML5 video + JS 解析 URL 参数）
-├── total_index.md
+├── 总索引.md
 ├── 01_…_剪映剪辑基础.md  # 笔记内截图后追加 [▶ m:ss](play.html?ep=...&t=N)
 ├── 02_…_…
 ├── …
@@ -249,7 +267,7 @@ subtitle = "字幕/1.md"       # 相对 video_root；绝对路径也行。声明
 
 ### manifest 字段
 
-`[[episodes]]` 每集加 `source_video`（绝对路径）：
+`[[episodes]]` 每集加 `source_video`（**绝对路径，或相对 `course.video_root` 的相对路径**——两者都支持；推荐相对路径，换机器只改 `video_root`）：
 
 ```toml
 [[episodes]]
@@ -285,4 +303,66 @@ source_video = "D:/002-AIGC/沐北AICG/基础/1.mp4"   # 必填
 2. 双击 `play.html` → 默认浏览器打开 → 选集 → 播放
 3. 在任何笔记里点 `▶ 0:00` 链接 → 自动跳到该步骤
 
+---
+
+## 13. P6 模板真正接入代码
+
+2026-10-19 整改：
+
+- **痛点**：`templates/steps_pro.md` 与 `templates/index.md` 在文档（AGENT.md / README.notes.md / VIDEONOTES-KIT_ROADMAP.md）里被列为项目骨架，但代码从未读它们——curate / index 全用 Python 字符串直接拼。改产物外观必须改 .py。
+- **改造**：新建 `toolkit/templates.py`（标准库 `string.Template`，零第三方依赖），把 curate 骨架与 index 总索引改为「读 templates/*.md + safe_substitute 填占位符」。控制流（if/for）仍由 Python for 循环预拼成块整体替换。
+- **效果**：改产物外观 = 改 templates/*.md，无需碰 toolkit/。
+- **配套**：`toolkit/release.py` 增加 2 项检查（`_check_templates_runtime` + `_check_p5_redlines`），同步点从 6 → 8（另加 `_check_source_video_paths` 后共 9 项）。模板契约详见 `templates/README.md`。
+- **约束**：
+  - 占位符 `$name`（全英文），禁止反引号包裹 `$xxx`（会被替换）
+  - `templates/steps_pro_tutorial.md`（P5 体例）当前**未连接代码**，留作历史参考与未来切档
+  - `release_check` 警告 ≠ 阻塞，但模板层 FAIL 必须修
+
 > 注意：`source/` 是**冗余副本**（4.8 GB）。如需减重，删除 `source/` 后 `play.html` 仍会工作但视频无法播放——笔记可读、跳转链接仍可点（浏览器会报"无法加载视频"）。
+
+---
+
+## 14. 三栏笔记浏览器 `notes.html`
+
+`build` 末尾自动生成 `<notes_subdir>/notes.html`——**双击即可在浏览器里读全部笔记**，不需要起 HTTP 服务。
+
+### 三栏布局
+
+| 栏 | 内容 |
+|---|---|
+| **左** | 总索引入口 + 各集按 `series` 分组；当前集高亮 |
+| **中** | 渲染后的笔记正文：标题 / 表格 / 代码块 / 引用 / 嵌套列表 / 截图；`**粗体**` 与 `` `行内代码` `` 正常显示 |
+| **右** | **顶部内嵌 `<video>` 播放器** + **时间轴按钮列表**（每条带标题）：点击 → 播放器直接 seek 到该秒播放，不跳二级页 |
+
+### 交互特性
+
+- **分割条可拖动**：左右两条 `grid` 分割条支持鼠标拖拽调宽（左 150–460px / 右 200–560px），宽度写 `localStorage` 持久化，**双击分割条恢复默认**（240 / 280）。
+- **右栏内嵌播放器**：`src="source/<系列>/<原名>.mp4"`（包内自包含副本，相对路径 `file://` 可用）；点时间轴 `▶ 9:56` 按钮 → `video.currentTime = 596; play()`，当前条目高亮 `.playing`；首次点击若元数据未加载则等 `loadedmetadata` 再 seek。
+- **时间轴标题**：从笔记图链 `![步骤 N 截图 XmYYs · 描述](…)` 的 `·` 后半段描述提取，按时间戳匹配（取首次出现）；无描述显示灰色 `—`。
+- 正文内 `▶ m:ss` 跳 `play.html` 的链接**按原设计保留**（只有右栏改为内嵌播放）。
+
+### 实现要点（`toolkit/notes_view.py`）
+
+- **预渲染 + 内联**：全部笔记 + 总索引的 HTML 在生成时一次内联进单文件（约 450–500 KB）。切换笔记是纯 DOM 显隐，**零网络请求**——所以 `file://` 双击可用（浏览器对 `fetch(file://)` 会拦截，这是选预渲染的原因）。
+- **零第三方依赖**：markdown 渲染是自写 mini renderer（标准库 `re`）：标题 / 段落 / 有序列 / 无序列（含 2 空格缩进嵌套）/ 表格（跳过 `---` 分隔行）/ 代码块 / 引用块 / 分割线 / 图片 / 链接 / 行内粗体与代码。
+- **时间轴链接识别**：`[▶ m:ss](play.html?ep=…&t=N)` 兼容半角/全角冒号，渲染为 `.play-link` 按钮，同时在右栏聚合。
+- **图片**：`assets/<集标签>/frame_x.png` 相对路径引用，与笔记同目录，随包移动不丢。
+
+### 流程固化（三门课通用）
+
+| 环节 | 行为 |
+|---|---|
+| `notes build` | `consolidate.build_all()` 末尾调用 `notes_view.build_notes_view()`，**必然**产出 `notes.html`（与 `play.html` 同级） |
+| `notes verify` | 校验 notes.html 存在 + 含全部集 label + 无 `fetch(`（防破坏 file:// 可用性） |
+| `notes release_check` | 产物清单含 `notes.html`，缺失报 WARN |
+| 新增课程 | **无需额外配置**，`build` 自动带出该课的 notes.html |
+
+### 用法
+
+```bash
+python notes.py <课程> build     # 生成 notes.html（含在内）
+# 然后直接双击 out/<课程>/<notes_subdir>/notes.html
+```
+
+> 已知限制：只有 `steps_pro/` 内已存在的笔记会被收录（依赖 build 先跑 `collect`）；某集缺金标准时该集在左侧不可见——与「10 集金标准」一致。
+

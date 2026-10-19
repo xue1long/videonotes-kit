@@ -1,17 +1,17 @@
 # AGENT.md · 面向 AI Agent 的项目操作手册
 
 > 你是被叫来继续开发这个项目的 AI Agent。本文件给出 **30 秒理解 + 关键约束 + 可执行命令**。
-> 上游文档：`README.md`（vidwise 原始）。人类使用手册：`README.notes.md`。方案与验收：`VIDEONOTES-KIT_ROADMAP.md`。
+> 上游文档：`README.md`（vidwise 原始）。人类使用手册：`README.notes.md`。方案与验收：`VIDEONOTES-KIT_ROADMAP.md`。**阶段性方案/设计文档在 `docs/`**（索引见 `docs/README.md`；当前含 `docs/P9-on-demand-frames.md` 按需抽帧）。
 
 ---
 
 ## 1. 这是什么
 
-`D:/000/vidwise` 是被整改过的「**视频 + 文档 → 自包含图文笔记包**」项目。
+`E:/002-Pr/videonotes-kit` 是被整改过的「**视频 + 文档 → 自包含图文笔记包**」项目。
 - 入口：`python notes.py <课程> <子命令>`
 - 一条命令 `build` 即把课程视频 + 文档批量产出可独立分发的笔记包
 - **纯本地、零 API key**（默认不依赖任何 vision/LLM）
-- 已落地 P1→P5 全部整改（骨架去硬编码 / 图片自包含 / 教程化 / 视频打包+时间轴）
+- 已落地 P1→P6 全部整改（骨架去硬编码 / 图片自包含 / 教程化 / 视频打包+时间轴 / **模板真接代码**）
 
 ## 2. 30 秒架构
 
@@ -22,6 +22,7 @@
                                          ├─ assets/<集>/        (被引帧)
                                          ├─ source/<系列>/      (源 mp4)
                                          ├─ play.html           (单页播放器)
+                                         ├─ notes.html          (三栏笔记浏览器 ★ 首推入口)
                                          ├─ 参考文档/           (Rxx 文档)
                                          └─ 总索引.md
 ```
@@ -32,10 +33,11 @@
 
 | # | 约束 | 后果 |
 |---|---|---|
-| 1 | **纯本地、零 API key** | 不要主动加任何需要 KEY 的依赖；不要调用外部 LLM/vision |
+| 1 | **纯本地、零 API key** | 不要主动加任何需要 KEY 的依赖；不要调用外部 LLM/vision。`pyproject.toml` 已把 `anthropic` / `openai` 移到 `[guide]` extras，本工具链 `pip install -e .` 不会装；要用上游 `--guide` 路径请 `pip install -e ".[guide]"` |
 | 2 | **Tier1 精校需要人工** | 本机无 vision 模型，`steps_pro.md`（金标准）仍需人手写。Tier2 LLM 精校默认关（`[llm].enabled=false`） |
 | 3 | **图链用 `frames/` 在 _curated 源里** | 由 `consolidate.collect` 自动改写为 `assets/<集>/...` 并复制帧。**不要**在 _curated 源里直接写 `assets/...` |
 | 4 | **assets 清空必须用临时改名 + 后台 rmtree** | 直接 `shutil.rmtree(ep_assets)` 对 ≥50 文件目录会触发沙箱 `SAFE_DELETE_BULK_CONFIRM_REQUIRED` 死锁（已踩过坑） |
+| 5 | **subprocess / ffmpeg 仅允许在 `toolkit/frames.py`**（P9） | 其他模块 `import subprocess` → `release_check` 报 FAIL。让 `draft.build` 保持纯函数，verify 回归逻辑零改动 |
 | 5 | **总索引完全 manifest 驱动** | 改 `manifest.toml` 的 `course.learning_path` / `course.series_note` / `course.glossary` / `episodes[].purpose` / `episodes[].keypoints` / `docs[].note` / `docs[].detail` 即可改总索引文案，**不要手改 `总索引.md`** |
 | 6 | **不要在 tools 下写硬编码路径** | 全部读 manifest。历史硬编码版本已清掉（`v2tutorial.py` 等 6 个） |
 
@@ -48,7 +50,7 @@
 | `shutil.rmtree(目录)`（≥50 文件） | 触发 `SAFE_DELETE_BULK_CONFIRM_REQUIRED` 死锁 | 临时改名 + 后台线程 rmtree + 重建，参考 `toolkit/consolidate.collect` 实现 |
 | `rm -f` / `rm -rf` 大文件/用户目录 | 触发 `safe-delete` 批量保护 | 单文件用 `os.remove()`；用户目录永不删 |
 | `cat / head / tail` 大文件 | 输出可能 mojibake（GBK 误读 UTF-16/UTF-8） | 用 Read 工具读，或 `iconv -f UTF-16LE -t UTF-8` |
-| 在 `D:/000/vidwise` 顶层放临时文件 | 污染工程目录 | 放 `D:/000/.workbuddy/tmp/` 或工具用 `tempfile.gettempdir()` |
+| 在 `E:/002-Pr/videonotes-kit` 顶层放临时文件 | 污染工程目录 | 放 `%TEMP%` / `tempfile.gettempdir()` |
 
 **输出编码**（所有跑 Python 的命令加这两个）：
 
@@ -62,11 +64,12 @@ PYTHONIOENCODING=utf-8 PYTHONUTF8=1
 # 跑模块
 PYTHONIOENCODING=utf-8 "C:/Program Files/Python311/python.exe" -m toolkit.X
 
-# 跑内部命令
-PYTHONIOENCODING=utf-8 "C:/Program Files/Python311/python.exe" "D:/000/vidwise/notes.py" 沐北AICG build
+# 跑内部命令（cd 到工程根）
+cd E:/002-Pr/videonotes-kit
+PYTHONIOENCODING=utf-8 "C:/Program Files/Python311/python.exe" notes.py 沐北AICG build
 
 # 调试时单行内联
-PYTHONIOENCODING=utf-8 "C:/Program Files/Python311/python.exe" -c "import sys; sys.path.insert(0, r'D:/000/vidwise'); from toolkit.X import Y; print(Y(...))"
+PYTHONIOENCODING=utf-8 "C:/Program Files/Python311/python.exe" -c "import sys; sys.path.insert(0, r'E:/002-Pr/videonotes-kit'); from toolkit.X import Y; print(Y(...))"
 ```
 
 **长任务**：用 Bash 的 `run_in_background: true`（不要前台等），完成后会自动通知。
@@ -75,7 +78,7 @@ PYTHONIOENCODING=utf-8 "C:/Program Files/Python311/python.exe" -c "import sys; s
 
 - PowerShell `Out-File -Encoding utf8` 与 `Get-Content` 在 Windows 上对 UTF-16LE Python 输出乱码
 - `*>` 与 `2>&1` 在 PowerShell 与 Git Bash 行为不同
-- **最佳实践**：让 Python 直接写文件到 `D:/000/.workbuddy/tmp/<name>.txt`，再 Read 读
+- **最佳实践**：让 Python 直接写文件到 `%TEMP%/<name>.txt`，再 Read 读
 
 ## 4. 关键命令（Cheat Sheet）
 
@@ -100,7 +103,7 @@ python -m toolkit.sub <字幕.md> <ep_out_dir>   # 单独转字幕 → transcrip
 PYTHONIOENCODING=utf-8 "C:/Program Files/Python311/python.exe" <脚本>
 
 # 直接调模块
-python -m toolkit.curate "D:/000/vidwise/out/沐北AICG/基础_1.mp4"   # 解析单集 draft 打印步骤摘要
+python -m toolkit.curate "E:/002-Pr/videonotes-kit/out/沐北AICG/基础_1.mp4"   # 解析单集 draft 打印步骤摘要
 ```
 
 ## 5. manifest 字段速查（`projects/<课>/manifest.toml`）
@@ -108,9 +111,9 @@ python -m toolkit.curate "D:/000/vidwise/out/沐北AICG/基础_1.mp4"   # 解析
 ```toml
 [course]
 name                = "课名"                  # 用于标题
-video_root          = "D:/.../<课>"          # 源视频根目录
-doc_root            = "D:/.../<课>/文档"     # 源文档根目录
-out_root            = "D:/000/vidwise/out/<课>"  # 产物根目录
+video_root          = "E:/.../<课>"          # 源视频根目录（同时作为字幕相对基准）
+doc_root            = "E:/.../<课>/文档"     # 源文档根目录
+out_root            = "E:/002-Pr/videonotes-kit/out/<课>"  # 产物根目录
 notes_subdir        = "steps_pro"            # 合集目录名（默认 steps_pro/）
 curated_subdir      = "_curated"             # 精校源目录
 refdoc_subdir       = "参考文档"             # 文档归档子目录
@@ -161,12 +164,15 @@ timeout  = 60
 | `toolkit/manifest.py` | 读 TOML，提供 `notes_root` / `curated_root` / `refdoc_root` 路径助手 | `load(path)` |
 | `toolkit/draft.py` | Tier0 自动：全量帧对齐 + 语义聚合 + 简繁 → `steps_v2.md` | `build(out_dir, max_steps, out_name)` |
 | `toolkit/sub.py` | SRT（B 站官方 AI 字幕，可带 YAML frontmatter）→ `transcript.json`（whisper 结构）；确定性输出供 verify 校验 | `render(src)` / `convert(src, out_dir)` |
-| `toolkit/curate.py` | Tier1 骨架生成 + Tier2 LLM 接口 | `parse_draft(path)` / `gen_skeleton(mf, ep, overwrite)` / `llm_refine_step()` |
+| `toolkit/curate.py` | Tier1 骨架生成（改由 `templates/steps_pro.md` 渲染，动态步骤 for 循环预拼进 `$stages`） + Tier2 LLM 接口 | `parse_draft(path)` / `gen_skeleton(mf, ep, overwrite)` / `llm_refine_step()` |
 | `toolkit/consolidate.py` | 汇集笔记 + 复制被引帧到 assets/ + 复制源 mp4 + 改写图链 | `collect()` / `copy_source()` / `gen_play_page()` / `build_all()` |
 | `toolkit/docs.py` | 读 manifest 归档参考文档 | `import_docs(mf)` |
-| `toolkit/index.py` | 扫描 notes/ 自动生成总索引 | `build_index(mf)` |
+| `toolkit/index.py` | 扫描 notes/ 自动生成总索引（改由 `templates/index.md` 渲染，6 个动态块预拼后整段替换） | `build_index(mf)` |
 | `toolkit/branding.py` | **项目级品牌文单一引用源**（NAME/TAGLINE/INDEX_BANNER 等）。下次更名只改本文件 + build 即可全工程更新 | 常量 |
-| `toolkit/release.py` | release_check 子命令：检查项目内 6 处"我忘了同步"点（整改方案 P* / verify 产物覆盖 / 总索引 banner / README banner / AGENT 模块地图 / manifest 必填字段） | `run(mf, base)` / `main(args)` |
+| `toolkit/release.py` | release_check 子命令：检查项目内 9 处"我忘了同步"点（整改方案 P* / verify 产物覆盖 / 总索引 banner / README banner / AGENT 模块地图 / manifest 必填字段 / **source_video 路径存在** / **templates 真接代码** / **P5 教程体红线**） | `run(mf, base)` / `main(args)` |
+| `toolkit/templates.py` | **模板渲染层**（零第三方依赖，仅 `string.Template`）。`curate` + `index` 都通过它读 `templates/*.md`；改模板外观 = 改 .md，无需碰代码 | `render(name, **kw)` / `path(name)` |
+| `toolkit/frames.py` | **L0.5 按需抽帧层**（P9，唯一允许调 `ffmpeg`/`subprocess` 的模块）。`draft.derive_steps` 给出步骤时间点 → 对每个 t 精确 `-ss` 抽帧。`draft.build` **签名不变**（纯函数）；`release_check` 兜底「subprocess 隔离」+「frames/ 帧数 ≫ 步骤数」 | `ensure(mf, ep, follow_up=0)` / `extract_at(video, t, dst_dir)` / `available()` / `resolve_video(mf, ep)` |
+| `toolkit/notes_view.py` | **三栏笔记浏览器**（左导航 / 中正文 / 右时间轴）。把全部笔记 + 总索引预渲染内联成单个 `notes.html`，零 fetch / 零 CDN，双击 `file://` 可用；`build` 末尾自动调用 | `build_notes_view(mf)` / `render_md(text)` / `extract_play_links(text, label)` |
 | `toolkit/cli.py` | 入口路由 + verify 非破坏回归 + P5 校验 | `cmd_draft/cmd_build/cmd_verify/cmd_curate/...` |
 
 ## 7. 加新课程的标准流程
@@ -190,7 +196,7 @@ timeout  = 60
 
 | 现象 | 可能原因 | 排查 |
 |---|---|---|
-| `ModuleNotFoundError: No module named 'toolkit'` | 没在 `D:/000/vidwise` 目录跑 | `cd` 后再跑；或显式 `PYTHONPATH=D:/000/vidwise` |
+| `ModuleNotFoundError: No module named 'toolkit'` | 没在 `E:/002-Pr/videonotes-kit` 目录跑 | `cd` 后再跑；或显式 `PYTHONPATH=E:/002-Pr/videonotes-kit` |
 | `manifest 未找到` | `projects/<课>/manifest.toml` 不存在 | `ls projects/` 看现有课程名 |
 | `curated MISS` | `_curated/<集>/` 没有 `steps_pro.md` | 跑 `notes build`（会 bootstrap 从现状引导）或手写 |
 | `WARN 缺帧` | 源视频没有对应时刻的 2s 全量帧 | 重新跑 vidwise 抽帧（`vidwise --no-guide`） |
@@ -214,7 +220,9 @@ timeout  = 60
 - **旧散脚本已清** — 2026-10 清理 6 个（v2tutorial.py / v2step_builder.py / v2notes_builder.py / consolidate_steps.py / consolidate_docs.py / run_series.py），算法思路保留在 `toolkit/draft.py` 注释中
 - **双 README** — `README.md`（上游未改）+ `README.notes.md`（项目手册） + `AGENT.md`（本文件）
 - **Tier2 默认关** — 本机无对话生成模型，开了也用不到；纯本地链路不依赖
+- **模板用标准库 `string.Template`，不引入 jinja2** — `toolkit/templates.py` 仅 ~50 行；保留"零第三方依赖"承诺；占位符 `$name` 约定，详见 `templates/README.md`
+- **全量抽帧是待还的技术债（P9）** — 现状每集 `fps=1/2` 抽 459 张、只用约 10 张（利用率 2%）。实测按需 `-ss` 精确抽帧快 19.5×、小 44×。方案见 `docs/P9-on-demand-frames.md`（**已落地 v2**：新增 L0.5 `toolkit/frames.py` 抽帧层，`draft.build` 签名不变仍是纯函数；详见 P9 文档 §1.5 架构调研）
 
 ## 12. 紧急联络
 
-如需找历史决策依据：`D:/000/.workbuddy/memory/2026-10-18.md`（完整工作日志，含 P1→P5 + 同步盘点 + 沙箱坑的所有决策）。
+如需找历史决策依据：见 `VIDEONOTES-KIT_ROADMAP.md §11 实施进度`（P1→P6 同步盘点 + 沙箱坑的所有决策）。

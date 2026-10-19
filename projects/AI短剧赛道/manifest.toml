@@ -1,0 +1,348 @@
+# AI短剧赛道 · 全 19 集图文笔记（videonotes-kit 课程清单）
+# 源：B站 BV1WraR61EQP（即梦AI视频创作《全80集 AI短剧赛道》），视频+AI字幕由 bilibili-subtitle-fetch 下载。
+# 本文件由 gen_manifest.py 从 meta.json 生成，改内容请改 meta.json 再重新生成。
+docs = []
+
+[course]
+name = "AI短剧赛道"
+video_root = "E:/000/bilibili-subtitle-fetch/out"
+doc_root = "E:/000/bilibili-subtitle-fetch/out"
+out_root = "E:/002-Pr/videonotes-kit/out/AI短剧赛道"
+notes_subdir = "steps_pro"
+curated_subdir = "_curated"
+refdoc_subdir = "参考文档"
+assets_subdir = "assets"
+doc_intro = "本课程暂无独立参考文档，笔记全部来自视频 AI 字幕 + 关键帧（每 2 秒抽一帧）。"
+learning_path = "按 01→19 顺序学：先走完「AI 漫剧」全流程（剧本→分镜图→动态→配音→配乐→剪辑），再看「真人短剧」的剧本、人物设定、分镜、动态视频与后期，最后用 4 集实操案例串起来。"
+series_note = "源视频为「即梦AI视频创作」的《全80集 AI短剧赛道》B站合集，共 19 个分P（合计 3 小时 39 分）。本包把 19 个分P 全部转成图文步骤笔记，每集配关键帧截图与时间轴跳转。"
+
+[draft]
+max_steps = 80
+# P9 按需抽帧（可选字段，缺省 on_demand）
+frame_mode = "on_demand"   # on_demand | full（full 走旧 L0 vidwise 路径）
+frame_follow_up = 0        # 0 = 只抽 t；2 = 额外抽 t+2 作为备选
+
+[[episodes]]
+seq = "01"
+label = "第1P"
+ep_dir = "p01"
+topic = "剧本创作"
+series = "AI漫剧"
+level = "入门"
+purpose = "打通「AI 动画短片」的全流程地图，并用提问四要素驱动大语言模型写出可落地的故事剧本与分镜脚本。"
+keypoints = [
+    "AI 动画短片五步流程：写故事→出图→让画面动起来→做声音→后期合成",
+    "向大模型提问的四要素：角色设定 / 目标清晰 / 输出格式 / 结果质量",
+    "剧本先写、脚本后写：短剧本好改，避免返工",
+]
+source_video = "BV1WraR61EQP.mp4"
+subtitle = "BV1WraR61EQP.srt"
+
+[[episodes]]
+seq = "02"
+label = "第2P"
+ep_dir = "p02"
+topic = "AI生成分镜图"
+series = "AI漫剧"
+level = "入门"
+purpose = "把上集的分镜脚本变成一张张可用的分镜图，建立「角色先行 + 风格统一」的视觉地基。"
+keypoints = [
+    "先图后影：图生视频比文生视频可控得多，图片阶段决定成片成败",
+    "角色先行：先定死人物造型，再谈分镜",
+    "抄作业 + 洗词：拿优秀作品的原始提示词，让 AI 只留风格词",
+    "分镜要拆到「AI 能画出来」的粒度",
+]
+source_video = "BV1WraR61EQP_p2.mp4"
+subtitle = "BV1WraR61EQP_p2.srt"
+
+[[episodes]]
+seq = "03"
+label = "第3P"
+ep_dir = "p03"
+topic = "图生视频与运镜实战"
+series = "AI漫剧"
+level = "入门"
+purpose = "把静态分镜图变成动态视频：平台选择、文生/图生取舍、首帧与首尾帧、智能多帧、多模态编辑。"
+keypoints = [
+    "商业项目优先图生视频，确定性更高",
+    "首帧只描述运镜与变化，不要重复画面内容",
+    "首尾帧控制终点，智能多帧拼长镜头",
+    "可灵多模态编辑用于替换/增删元素，MJ 用于 loop 与延长",
+]
+source_video = "BV1WraR61EQP_p3.mp4"
+subtitle = "BV1WraR61EQP_p3.srt"
+
+[[episodes]]
+seq = "04"
+label = "第4P"
+ep_dir = "p04"
+topic = "AI生成视频配音"
+series = "AI漫剧"
+level = "入门"
+purpose = "给画面配上人声：剪映文本朗读、即梦/可灵配音、带情感的 TTS，最后用数字人对口型。"
+keypoints = [
+    "剪映「文本 → 添加口播稿」是最快的旁白方案，但情感平铺",
+    "即梦/可灵内置配音 + 情感朗读，音色有限",
+    "情感要求高的角色换专业 TTS 平台",
+    "收尾用数字人对口型：上传视频 + 本地音频",
+]
+source_video = "BV1WraR61EQP_p4.mp4"
+subtitle = "BV1WraR61EQP_p4.srt"
+
+[[episodes]]
+seq = "05"
+label = "第5P"
+ep_dir = "p05"
+topic = "AI生成视频配乐"
+series = "AI漫剧"
+level = "入门"
+purpose = "补齐声音的另一半：音效与配乐的平台选择、生成方式，以及和画面节奏的对齐。"
+keypoints = [
+    "可灵可「视频 + 描述」直接生成音效/配乐",
+    "即梦的配乐入口可指定场景、流派、情感、乐器",
+    "需要歌曲时用大模型 / MusicHero 生成，提示词建议英文",
+    "配乐要卡画面：音效对位、渐入渐出、避免硬切",
+]
+source_video = "BV1WraR61EQP_p5.mp4"
+subtitle = "BV1WraR61EQP_p5.srt"
+
+[[episodes]]
+seq = "06"
+label = "第6P"
+ep_dir = "p06"
+topic = "多画面视频剪辑合成"
+series = "AI漫剧"
+level = "入门"
+purpose = "用剪映把分镜片段、配音、音效拼成一条完整短片，掌握 AI 视频剪辑最常用的那批功能。"
+keypoints = [
+    "剪映四大区域：素材区 / 预览区 / 工具栏 / 轨道区",
+    "文本、特效、转场、音频四类素材是 AI 视频的主力",
+    "比例按发布平台选：抖音 9:16、B站/影视 16:9",
+    "分割、删除、撤销与吸附开关是最高频操作",
+]
+source_video = "BV1WraR61EQP_p6.mp4"
+subtitle = "BV1WraR61EQP_p6.srt"
+
+[[episodes]]
+seq = "07"
+label = "第7P"
+ep_dir = "p07"
+topic = "爆款短剧创作原理"
+series = "真人短剧"
+level = "进阶"
+purpose = "在动笔之前先搞懂短剧的生意逻辑：平台、情绪、结构，以及什么样的剧本才「AI 友好」。"
+keypoints = [
+    "爆款公式：平台 + 情绪 + 结构，情绪要工业化地给",
+    "不同平台受众与爽点不同（抖音/快手/小红书）",
+    "短剧不要长篇世界观，开局直接崩塌 + 高情绪回报",
+    "AI 友好型写作：精简场景人物、避免长对白与抽象心理描写",
+]
+source_video = "BV1WraR61EQP_p7.mp4"
+subtitle = "BV1WraR61EQP_p7.srt"
+
+[[episodes]]
+seq = "08"
+label = "第8P"
+ep_dir = "p08"
+topic = "剧本创作实操跟练"
+series = "真人短剧"
+level = "进阶"
+purpose = "把上一集的原理落成一次完整实操：用规范模板让大模型输出 8 个镜头的重生复仇短剧。"
+keypoints = [
+    "先给「爆款短剧剧本创作规范」，再让 AI 写",
+    "用 8 个镜头讲完一次重生 + 第一次反击 + 伏笔",
+    "剧本里必须写清人物性别、年龄、穿着、长相",
+    "剧本定稿后继续让 AI 出分镜表（镜号/景别/运镜/时长/画面/台词）",
+]
+source_video = "BV1WraR61EQP_p8.mp4"
+subtitle = "BV1WraR61EQP_p8.srt"
+
+[[episodes]]
+seq = "09"
+label = "第9P"
+ep_dir = "p09"
+topic = "AI主角人物形象设定"
+series = "真人短剧"
+level = "进阶"
+purpose = "把剧本里的人名变成一张固定可复用的定妆照，这是全片人物一致性的根。"
+keypoints = [
+    "人物信息只保留年龄、外貌、服装三类，其余全删",
+    "全身照 + 纯白背景 + 正面站立 + 无阴影，四个词排干扰",
+    "用工作流生成并关闭无关节点（Ctrl+B）省时间",
+    "生成后必须走高清放大，再存为参考图",
+]
+source_video = "BV1WraR61EQP_p9.mp4"
+subtitle = "BV1WraR61EQP_p9.srt"
+
+[[episodes]]
+seq = "10"
+label = "第10P"
+ep_dir = "p10"
+topic = "短剧分镜图片生成（上）"
+series = "真人短剧"
+level = "进阶"
+purpose = "按脚本逐镜生成关键帧：拆镜、定比例、控制情绪，把文字镜头变成可用画面。"
+keypoints = [
+    "关键帧 = 每个镜头的起始画面，是后续动态生成的输入",
+    "复杂画面必须拆成两个镜头（如「昏暗房间 + 手机特写」）",
+    "比例按投放平台定：16:9 影视 / 9:16 抖音",
+    "首次生成只当试探，靠多轮抽卡逼近预期",
+]
+source_video = "BV1WraR61EQP_p10.mp4"
+subtitle = "BV1WraR61EQP_p10.srt"
+
+[[episodes]]
+seq = "11"
+label = "第11P"
+ep_dir = "p11"
+topic = "短剧分镜图片生成（中）"
+series = "真人短剧"
+level = "进阶"
+purpose = "继续啃分镜：换模型救难镜头、改画面内容、按集归档素材，并处理动态镜头的拆法。"
+keypoints = [
+    "难镜头换模型救：Nano Banana / Gemini 做图片编辑",
+    "改局部内容用「改变图中 X，其余保持不变」句式",
+    "素材按「集 → 关键帧」两级文件夹 + 编号归档",
+    "动态画面（猛地睁眼）不能只做一张图，要拆两镜 + 剪辑转场",
+]
+source_video = "BV1WraR61EQP_p11.mp4"
+subtitle = "BV1WraR61EQP_p11.srt"
+
+[[episodes]]
+seq = "12"
+label = "第12P"
+ep_dir = "p12"
+topic = "短剧分镜图片生成（下）"
+series = "真人短剧"
+level = "进阶"
+purpose = "补上最后一块硬骨头：镜头角度控制、崩脸补救，以及镜头时长的节奏意识。"
+keypoints = [
+    "一个镜头拖到 10 秒就废，短剧要短促硬切",
+    "用角度工作流改俯视/平视，参数按近景/中景/特写调",
+    "改角度极易崩脸，用放大工作流（SeedVR2）补细节",
+    "先把关键帧做到位，再进动态生成",
+]
+source_video = "BV1WraR61EQP_p12.mp4"
+subtitle = "BV1WraR61EQP_p12.srt"
+
+[[episodes]]
+seq = "13"
+label = "第13P"
+ep_dir = "p13"
+topic = "动态视频生成"
+series = "真人短剧"
+level = "进阶"
+purpose = "把关键帧变成视频片段：提示词写法、逻辑坑、抽卡与补帧，以及镜头不够时的补拍。"
+keypoints = [
+    "图生视频提示词=自然语言：动作 + 运镜，不重复画面",
+    "先检查动作逻辑（已经睁眼就别再写睁眼）",
+    "不满意就改词抽卡，别指望一次过",
+    "镜头交代不清就补一个镜头（如床头柜上的手机）",
+]
+source_video = "BV1WraR61EQP_p13.mp4"
+subtitle = "BV1WraR61EQP_p13.srt"
+
+[[episodes]]
+seq = "14"
+label = "第14P"
+ep_dir = "p14"
+topic = "Seedance 2.0 生成多角色视频"
+series = "真人短剧"
+level = "进阶"
+purpose = "用 Seedance 2.0 一次生成带角色对话与镜头切换的复杂片段，解决多人物同框难题。"
+keypoints = [
+    "用「图一 / 图二」指代角色，靠上传素材建立指示关系",
+    "模型要手动切到「全能参考」",
+    "比例按平台定：9:16 抖音、16:9 影视",
+    "台词与标点要清洗，避免模型误读",
+]
+source_video = "BV1WraR61EQP_p14.mp4"
+subtitle = "BV1WraR61EQP_p14.srt"
+
+[[episodes]]
+seq = "15"
+label = "第15P"
+ep_dir = "p15"
+topic = "后期剪辑及音效合成"
+series = "真人短剧"
+level = "进阶"
+purpose = "把生成的片段剪成一条能播的短剧：节奏、倒放、变速、音效与混音。"
+keypoints = [
+    "素材按镜号入轨，先粗排再精修",
+    "过长镜头直接剪，闭眼/睁眼要分别处理",
+    "重复运镜用倒放/推进改造",
+    "音频分离去掉原声，再叠音效与配乐",
+]
+source_video = "BV1WraR61EQP_p15.mp4"
+subtitle = "BV1WraR61EQP_p15.srt"
+
+[[episodes]]
+seq = "16"
+label = "第16P"
+ep_dir = "p16"
+topic = "AI动画制作实操"
+series = "实操教学"
+level = "实战"
+purpose = "用一条完整案例串起动画类作品的制作路径，重点讲风格、参考图与首尾帧。"
+keypoints = [
+    "动画风格先定调：吉卜力 / 中国古风水墨 / 皮克斯 / 3D 国漫",
+    "参考图能让模型认识原创角色（游戏角色案例）",
+    "首尾帧逻辑要通，否则模型不知道中间怎么动",
+    "不建议纯文生图保一致性：先文生图→改图→图生视频",
+]
+source_video = "BV1WraR61EQP_p16.mp4"
+subtitle = "BV1WraR61EQP_p16.srt"
+
+[[episodes]]
+seq = "17"
+label = "第17P"
+ep_dir = "p17"
+topic = "AI广告制作实操"
+series = "实操教学"
+level = "实战"
+purpose = "以汽车广告为例，跑通产品类广告的脚本、图片与视频生成。"
+keypoints = [
+    "产品广告以实物为核心：车、手机、食品、饮料",
+    "脚本用模板，标红部分按项目替换",
+    "图片阶段可直接拖参考图 + 文本一起给",
+    "视频描述宜简单：汽车在公路行驶、镜头逐渐拉远",
+]
+source_video = "BV1WraR61EQP_p17.mp4"
+subtitle = "BV1WraR61EQP_p17.srt"
+
+[[episodes]]
+seq = "18"
+label = "第18P"
+ep_dir = "p18"
+topic = "AI短片制作实操"
+series = "实操教学"
+level = "实战"
+purpose = "用一部微电影案例讲清「长片怎么规划」：镜头数、工具分工与避开 AI 短板。"
+keypoints = [
+    "先按时长定镜头数：5 分钟 ≈ 90~110 个镜头",
+    "人物形象用智能体润色提示词统一风格",
+    "多工具组合：即梦/豆包/Midjourney/星流各有所长",
+    "AI 做不到的镜头（高空航拍）要换平台或用巧思绕开",
+]
+source_video = "BV1WraR61EQP_p18.mp4"
+subtitle = "BV1WraR61EQP_p18.srt"
+
+[[episodes]]
+seq = "19"
+label = "第19P"
+ep_dir = "p19"
+topic = "AI短剧制作实操"
+series = "实操教学"
+level = "实战"
+purpose = "以多集短剧为例，讲清长篇内容如何用上下文规划剧本、分集脚本与镜头衔接。"
+keypoints = [
+    "短剧＝1~3 分钟一集、几十到上百集的快餐剧",
+    "主流模型 128K 上下文≈10 万字，一集脚本约 5000 字",
+    "先出剧本大纲，再逐集扩写脚本，避免剧情混乱",
+    "画面衔接断层要补镜头，像实拍一样「补拍」",
+]
+source_video = "BV1WraR61EQP_p19.mp4"
+subtitle = "BV1WraR61EQP_p19.srt"
+
+[llm]
+enabled = false

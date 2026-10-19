@@ -170,9 +170,25 @@ def collect(mf, notes_root=None):
     return files
 
 
+def _resolve_source(mf, sv: str) -> str:
+    """解析 ep.source_video：绝对路径直接用；相对路径相对 course.video_root。
+
+    与 cli.py:_subtitle_src 完全平行：同套约定 = 绝对 OR 相对 video_root。
+    """
+    if not sv:
+        return sv
+    if not os.path.isabs(sv):
+        sv = os.path.join(mf["course"].get("video_root", ""), sv)
+    return sv
+
+
 def copy_source(mf, notes_root=None):
     """P5：把源 mp4 复制到 steps_pro/source/<series>/<原名>.mp4。
     A3 修复：幂等加强 — size + mtime 两项校验（防止「同名文件被替换」时漏更新）。
+
+    路径解析约定：
+      - 绝对路径：直接用
+      - 相对路径：相对 course.video_root（与 subtitle 解析一致）
     """
     notes_root = notes_root or M.notes_root(mf)
     source_root = os.path.join(notes_root, "source")
@@ -182,6 +198,7 @@ def copy_source(mf, notes_root=None):
         sv = ep.get("source_video", "")
         if not sv:
             print("  SKIP source (无 source_video):", ep["label"]); continue
+        sv = _resolve_source(mf, sv)
         if not os.path.isfile(sv):
             print("  WARN 源 mp4 不存在:", sv); continue
         series = ep.get("series", "其他")
@@ -302,7 +319,6 @@ def clean_intermediates(mf, notes_root=None, keep_frames_for_curated: bool = Tru
               f"staging={summary['staging']} frames_old={summary['frames_old']} "
               f"frames_kept={summary['frames_kept']} freed={summary['bytes_freed_MB']}MB")
     return summary
-
 
 def _play_html(episodes, source_root_rel: str, course_name: str = "课程") -> str:
     """生成 play.html：单页播放器，支持 ?ep=<label>&t=<秒>。"""
@@ -443,9 +459,11 @@ window.addEventListener('load', function() {
 def gen_play_page(mf, notes_root=None):
     """P5：生成 steps_pro/play.html 单页播放器（含集列表与跳转逻辑）。"""
     notes_root = notes_root or M.notes_root(mf)
-    html = _play_html(mf["episodes"], "source", mf["course"]["name"])
+    course_name = mf.get("course", {}).get("name", "课程")
+    html = _play_html(mf["episodes"], "source", course_name=course_name)
     # 替换品牌占位符（统一从 toolkit/branding.py 读）
     html = html.replace("__BRANDING_INDEX_BANNER_PLAY__", branding.INDEX_BANNER_PLAY)
+    html = html.replace("__COURSE_NAME__", course_name)
     out = os.path.join(notes_root, "play.html")
     open(out, "w", encoding="utf-8").write(html)
     print("play.html ->", out)
@@ -453,16 +471,18 @@ def gen_play_page(mf, notes_root=None):
 
 
 def build_all(mf, notes_root=None, auto_clean: bool = False, dry_run_clean: bool = False):
-    """build 全流程：docs → source → notes → index → play page。
+    """build 全流程：docs → source → notes → index → play page → notes_view (三栏笔记浏览器)。
 
     A5 增强：auto_clean=True 时在 build 末尾自动调 clean_intermediates 清 P3 中间产物
     （默认 False — 现有调用者不走这一步以避免破坏流程；scripts/post_build.sh 可显式开）。
     """
-    from . import docs as D, index as I
+    from . import docs as D, index as I, notes_view as V
     D.import_docs(mf, notes_root)
     copy_source(mf, notes_root)
     collect(mf, notes_root)
     I.build_index(mf, notes_root)
     gen_play_page(mf, notes_root)
+    # 三栏笔记浏览器（NV.1）：所有笔记预渲染内联，零 fetch/双击 file:// 可用
+    V.build_notes_view(mf, notes_root)
     if auto_clean:
         clean_intermediates(mf, notes_root=notes_root, dry_run=dry_run_clean)

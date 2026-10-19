@@ -1,6 +1,6 @@
 # videonotes-kit：基于 vidwise 的「视频 + 文档 → 图文笔记」项目
 
-> 起草时间：2026-10-18 ｜ 范围：`D:/000/vidwise` 工具链 + `D:/002-AIGC/沐北AICG` 源材料
+> 起草时间：2026-10-18 ｜ 范围：`E:/002-Pr/videonotes-kit` 工具链 + `D:/002-AIGC/沐北AICG` 源材料
 > 目标：把当前「四个散脚本 + 硬编码路径 + 人工精校」的临时拼装，重构成**单一入口、清单驱动、产物自包含、可换课程复用**的图文笔记生成项目。
 
 ---
@@ -43,7 +43,7 @@ vidwise 本体是「视频 → LLM 可读 Markdown」工具，招牌的 `guide.m
 4. **图片链接脆弱**：合集笔记用 `../集目录/frames/` 相对引用，把 `steps_pro/` 单独移出 `沐北AICG/` 就断图。合集不是自包含单元。
 5. **两份并行草稿混乱**：`v2notes_builder` 的 `notes.md`（48 帧 bug）与 `v2tutorial` 的 `steps_v2.md` 并存，分不清谁是谁。
 6. **文档流程独立于视频流程**：参考文档靠另一个 ad-hoc 脚本，无清单、无版本/去重逻辑。
-7. **源材料与产物分家**：视频、文档在 `D:/002-AIGC`，产物在 `D:/000/vidwise`，「这门课有什么」全靠人脑记。
+7. **源材料与产物分家**：视频、文档在 `D:/002-AIGC`，产物在 `E:/002-Pr/videonotes-kit/out`，「这门课有什么」全靠人脑记。
 
 ---
 
@@ -52,7 +52,7 @@ vidwise 本体是「视频 → LLM 可读 Markdown」工具，招牌的 `guide.m
 ### 4.1 目录树（整改后）
 
 ```
-D:/000/vidwise/                         # 工具链根 = 图文笔记生成器
+D:/000/vidwise/                         # 工具链根（旧位置；当前工程已迁至 E:/002-Pr/videonotes-kit）
 ├── toolkit/                            # 本地管线代码（统一收口，去硬编码）
 │   ├── cli.py          # 唯一入口：notes init/extract/draft/curate/build/docs/index
 │   ├── extract.py      # 包装 vidwise --no-guide（复用 run_series 续跑逻辑）
@@ -67,7 +67,7 @@ D:/000/vidwise/                         # 工具链根 = 图文笔记生成器
 │       ├── _raw/               # 源视频/文档副本或软链（项目自洽）
 │       ├── _work/<集>/         # vidwise 原始产物 + steps_v2.md
 │       └── notes/              # 最终交付：NN_标签_主题.md + 总索引.md + assets/ + 参考文档/
-├── templates/                         # steps_pro.md 模板、总索引模板
+├── templates/                         # steps_pro.md / index.md（P6 起由 toolkit/templates.py 渲染）
 └── README.md                          # 使用手册
 ```
 
@@ -180,6 +180,10 @@ D:/000/vidwise/                         # 工具链根 = 图文笔记生成器
 | **P3** 精校提效 + 文档化 | ✅ 完成 | 见下 |
 | **P4** 笔记教程化升级 | ✅ 完成 | 01_基础_1 由 11 步 → 7 步 + 3 阶段 + 三段式闭环（学习目标/前置/术语 → 阶段分组 → 做对了/易错）；模板 + curate 半成品骨架已升级 |
 | **P5** 视频打包 + 时间轴跳转 | ✅ 完成 | 源 mp4 自动复制到 `steps_pro/source/<系列>/`（10 集共 4.8 GB），每步截图后追加 `▶ m:ss` 时间轴链接（10 集共 112 处），`play.html` 单页播放器生成 |
+| **P6** 模板真正接入代码 | ✅ 完成 | 新建 `toolkit/templates.py`（标准库 `string.Template`，零第三方依赖）；`curate.py` 骨架与 `index.py` 总索引都改由 `templates/steps_pro.md` / `templates/index.md` 渲染；改产物外观 = 改 .md，无需碰 toolkit。`release_check` 增加 2 项（8 项同步点检查） |
+| **P7** 路径迁移 | ✅ 完成 | 3 个 manifest `out_root` 统一到 `E:/002-Pr/videonotes-kit/out/<课>`；67 集 `source_video` 改为相对 `video_root`（换机器只改一行）；`pyproject.toml` 把 anthropic/openai 移入 optional `[guide]`；`play.html` 去硬编码课程名；`cli.py` `BASE` 自动推导 |
+| **P8** 三栏笔记浏览器 | ✅ 完成 | 新建 `toolkit/notes_view.py`（零第三方，标准库 mini markdown 渲染器）：三栏 SPA、**分割条可拖动**（localStorage 持久化 + 双击复位）、**右栏顶部内嵌 `<video>` 播放器**（时间轴点击直接 seek 播放，弃二级页）、**时间轴每条带标题**（183/183 全命中）。`build` 必产 `notes.html`，`verify` + `release_check` 已纳入门禁 |
+| **P9** 按需抽帧 | ✅ 完成 | 现状每集全量抽 459 张（171 s / 305 MB），最终只引用约 10 张（利用率 2%）。改为「字幕 → draft 步骤时间点 → 只对这些点 `ffmpeg -ss` 精确抽帧」，单集 12 s（14.6× 快）、19 集省 50 min + 5.6 GB。**两条关键纠正**：① 粒度须为「步骤」（250 个）而非字幕条（5,517 条，反而慢 1.5×）；② 抽帧须**独立成 L0.5 层 `toolkit/frames.py`**，不能塞进 `draft.build()`（会让纯函数变副作用，破坏 verify 回归）。`release_check` 加 1 项（_check_frames_mode）兜底。详见 [`docs/P9-on-demand-frames.md`](docs/P9-on-demand-frames.md) |
 
 ### P3 交付清单
 
@@ -204,3 +208,4 @@ D:/000/vidwise/                         # 工具链根 = 图文笔记生成器
 | 4 | 总索引自动生成，含双表、链接可点 | ✅ 由 manifest 驱动，免手改 |
 | 5 | 教程可读性 | ✅ P4 升级后笔记含学习目标/前置/阶段分组/做对了/易错总结 |
 | 6 | 步骤可跳到视频对应时间 | ✅ P5 时间轴链接 `[▶ m:ss](play.html?ep=...&t=N)`，双击 play.html 唤起浏览器内嵌播放器 |
+| 7 | 模板与代码同步 | ✅ P6 新建 `toolkit/templates.py`（标准库 `string.Template`），curate 骨架 / index 总索引都改由 templates/*.md 渲染；改产物外观 = 改 .md，无需碰 toolkit |

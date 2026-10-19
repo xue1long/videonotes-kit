@@ -6,7 +6,7 @@
 name = "沐北AICG"
 video_root = "D:/002-AIGC/沐北AICG"
 doc_root = "D:/002-AIGC/沐北AICG/文档"
-out_root = "D:/000/vidwise/out/沐北AICG"
+out_root = "E:/002-Pr/videonotes-kit/out/沐北AICG"
 notes_subdir = "steps_pro"
 curated_subdir = "_curated"
 refdoc_subdir = "参考文档"
@@ -74,6 +74,9 @@ meaning = "生视频工具（课程黑话，具体产品以视频为准）"
 
 [draft]
 max_steps = 80
+# P9 按需抽帧（可选字段，缺省 on_demand）
+frame_mode = "on_demand"
+frame_follow_up = 0
 gap = 45.0
 
 # ---- 视频集：seq=序号, label=集标签, ep_dir=vidwise 输出目录名, topic=主题
@@ -85,7 +88,7 @@ ep_dir = "基础_1.mp4"
 topic = "剪映剪辑基础"
 series = "基础"
 level = "入门"
-source_video = "D:/002-AIGC/沐北AICG/基础/1.mp4"
+source_video = "基础/1.mp4"
 purpose = "用剪映做「卡点混剪」的入门，建立「先想画面再剪、音效剥离重做」的剪辑直觉。"
 keypoints = [
   "抽卡阶段先在脑内预想画面组合，再拼片段",
@@ -100,7 +103,7 @@ ep_dir = "基础_2.mp4"
 topic = "小说转AI视频九宫阁流水线"
 series = "基础"
 level = "入门"
-source_video = "D:/002-AIGC/沐北AICG/基础/2.mp4"
+source_video = "基础/2.mp4"
 purpose = "把一段小说变成 AI 视频的「抄作业」流水线，重点理解每一步在干什么。"
 keypoints = [
   "风镜的风诀：小说→剧本→风镜脚本",
@@ -115,7 +118,7 @@ ep_dir = "基础_3.mp4"
 topic = "机械飞升流AI电影全流程"
 series = "基础"
 level = "入门"
-source_video = "D:/002-AIGC/沐北AICG/基础/3.mp4"
+source_video = "基础/3.mp4"
 purpose = "机械飞升流没有固定流程、产物皆来自大模型——建立「给好人设、说清要什么、反复改」的创作观。"
 keypoints = [
   "大模型写剧本 → 拆 40 个 15s bit 分镜",
@@ -130,7 +133,7 @@ ep_dir = "基础_4.mp4"
 topic = "生产组装站位首尾针超清"
 series = "基础"
 level = "入门"
-source_video = "D:/002-AIGC/沐北AICG/基础/4.mp4"
+source_video = "基础/4.mp4"
 purpose = "抽视频一次只 15 秒，讲清「生产/组装/站位/首尾针」四类人工控连贯性的手法。"
 keypoints = [
   "已有图时删题词里多余形象描述，避免与图「打架」",
@@ -145,7 +148,7 @@ ep_dir = "基础_5.mp4"
 topic = "MiniMax女巫配音"
 series = "基础"
 level = "入门"
-source_video = "D:/002-AIGC/沐北AICG/基础/5.mp4"
+source_video = "基础/5.mp4"
 purpose = "为角色选 TTS 音色：对比多款后选定 MiniMax 做「尖锐又沙哑的女巫声」。"
 keypoints = [
   "对话生成声音特质 → 音色设计建模",
@@ -160,7 +163,7 @@ ep_dir = "失焦一_1.mp4"
 topic = "剧本分镜抽卡改图"
 series = "失焦一"
 level = "进阶"
-source_video = "D:/002-AIGC/沐北AICG/失焦一/1.mp4"
+source_video = "失焦一/1.mp4"
 purpose = "以「失焦」电影为案例，走通 剧本→分镜→抽卡→改图 的落地链路。"
 keypoints = [
   "编剧工具(scale)出剧本；读剧本时脑海预演景别机位",
@@ -175,7 +178,7 @@ ep_dir = "失焦一_2.mp4"
 topic = "美术资产库调色LUT分镜衔接"
 series = "失焦一"
 level = "进阶"
-source_video = "D:/002-AIGC/沐北AICG/失焦一/2.mp4"
+source_video = "失焦一/2.mp4"
 purpose = "美术占成品 70%——讲清「固定画风、人物打光、洗图、调色 LUT、分镜衔接」五件事。"
 keypoints = [
   "画风对标电影（沙丘/降临），资产库 scale 提取全局基调约束全片",
@@ -190,7 +193,7 @@ ep_dir = "失焦一_3.mp4"
 topic = "剪辑实战飞机怪兽"
 series = "失焦一"
 level = "进阶"
-source_video = "D:/002-AIGC/沐北AICG/失焦一/3.mp4"
+source_video = "失焦一/3.mp4"
 purpose = "拿一段已剪好的飞机怪兽戏，逐镜讲「为什么这么剪」——画面好看容易，戏要「演」出来。"
 keypoints = [
   "音效最高点卡断点制造情绪；希区柯克变焦一句提示词",
@@ -205,7 +208,7 @@ ep_dir = "失焦二_1.mp4"
 topic = "AI电影美术实操"
 series = "失焦二"
 level = "进阶"
-source_video = "D:/002-AIGC/沐北AICG/失焦二/1.mp4"
+source_video = "失焦二/1.mp4"
 purpose = "完整 AI 电影美术实操：从工具准备到剧本、资产库、场景图、人物打光、机位识别。"
 keypoints = [
   "编剧一体化 Skill 写剧本（大纲→改→第二阶段出本）→ 读剧本赋灵魂",
@@ -220,7 +223,7 @@ ep_dir = "失焦二_2.mp4"
 topic = "美术收尾写Skill镜头衔接调色LUT"
 series = "失焦二"
 level = "进阶"
-source_video = "D:/002-AIGC/沐北AICG/失焦二/2.mp4"
+source_video = "失焦二/2.mp4"
 purpose = "美术收尾：巨物生图、写资产库 Skill、分镜提示词结构、剪辑衔接、一镜到底、调色 LUT。"
 keypoints = [
   "巨物生图（极低角仰拍+参照物+血肉感）；资产库 Skill 写成集合体（人物/场景/道具/巨物）",
