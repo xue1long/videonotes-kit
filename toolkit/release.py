@@ -15,7 +15,6 @@ README.md banner、AGENT.md toolkit 模块地图、toolkit 各模块注释」这
 import os
 import re
 import sys
-import tomllib
 
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -337,12 +336,12 @@ def main(args=None):
                                      description="检查项目内『我忘了同步』的 6+ 处文案")
         ap.add_argument("course")
         course = ap.parse_args().course
-    # 读 manifest
+    # 读 manifest（走 manifest.load，确保 VIDEONOTES_OUT_ROOT 等环境覆盖生效）
     mf_path = os.path.join(BASE, "projects", course, "manifest.toml")
     if not os.path.isfile(mf_path):
         print("[ERR] manifest 未找到:", mf_path); sys.exit(1)
-    with open(mf_path, "rb") as f:
-        mf = tomllib.load(f)
+    from toolkit import manifest as M
+    mf = M.load(mf_path)
     issues = run(mf, BASE)
 
     if not issues:

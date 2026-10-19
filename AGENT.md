@@ -157,6 +157,17 @@ model    = "qwen2.5:7b"
 timeout  = 60
 ```
 
+**换机器跑产物目录**：`out_root` 记的是某一台机器的绝对路径。换机器不必改 manifest，
+设环境变量 `VIDEONOTES_OUT_ROOT` 即可（只换父级前缀，末级课程目录名保持不变）：
+
+```bash
+set VIDEONOTES_OUT_ROOT=D:/000/vidwise/out          # Windows cmd
+export VIDEONOTES_OUT_ROOT=/data/videonotes/out     # macOS / Linux
+```
+
+传入完整课程目录（末级同名）也认，效果等同。实现见 `toolkit/manifest.py::_apply_env_overrides`，
+在 `manifest.load()` 里统一生效，`release_check` 也走同一入口。
+
 ## 6. toolkit 模块地图
 
 | 文件 | 职责 | 关键函数 |
