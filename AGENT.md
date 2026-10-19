@@ -37,6 +37,7 @@
 | 2 | **Tier1 精校需要人工** | 本机无 vision 模型，`steps_pro.md`（金标准）仍需人手写。Tier2 LLM 精校默认关（`[llm].enabled=false`） |
 | 3 | **图链用 `frames/` 在 _curated 源里** | 由 `consolidate.collect` 自动改写为 `assets/<集>/...` 并复制帧。**不要**在 _curated 源里直接写 `assets/...` |
 | 4 | **assets 清空必须用临时改名 + 后台 rmtree** | 直接 `shutil.rmtree(ep_assets)` 对 ≥50 文件目录会触发沙箱 `SAFE_DELETE_BULK_CONFIRM_REQUIRED` 死锁（已踩过坑） |
+| 5 | **subprocess / ffmpeg 仅允许在 `toolkit/frames.py`**（P9） | 其他模块 `import subprocess` → `release_check` 报 FAIL。让 `draft.build` 保持纯函数，verify 回归逻辑零改动 |
 | 5 | **总索引完全 manifest 驱动** | 改 `manifest.toml` 的 `course.learning_path` / `course.series_note` / `course.glossary` / `episodes[].purpose` / `episodes[].keypoints` / `docs[].note` / `docs[].detail` 即可改总索引文案，**不要手改 `总索引.md`** |
 | 6 | **不要在 tools 下写硬编码路径** | 全部读 manifest。历史硬编码版本已清掉（`v2tutorial.py` 等 6 个） |
 

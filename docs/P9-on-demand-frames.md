@@ -1,10 +1,12 @@
 # P9 方案：按需抽帧（字幕驱动 → 步骤驱动）
 
-> 状态：**方案已定（v2，含架构影响修订），待实施**
+> 状态：**✅ 已落地（v2 方案 + v3 实施完成）**
 > 提出：2026-10-19 · 目标：把「全量抽帧」改为「按步骤按需抽帧」
 > 关联：`VIDEONOTES-KIT_ROADMAP.md §12`（P9 行）· 新增 `toolkit/frames.py` · `toolkit/cli.py` · `toolkit/draft.py`（**不改签名**）
 >
-> **v2 修订（2026-10-19 架构调研后）**：原 v1 设计 `draft.build(video=...)` 被否决——那会让 `draft` 从纯函数变成有副作用（写 `frames/`），破坏 `verify` 的回归假设。改为**新增独立的抽帧层 `toolkit/frames.py`**，`draft` 签名不变。详见 §4.0。
+> **v2 修订（架构调研后）**：原 v1 设计 `draft.build(video=...)` 被否决——那会让 `draft` 从纯函数变成有副作用（写 `frames/`），破坏 `verify` 的回归假设。改为**新增独立的抽帧层 `toolkit/frames.py`**，`draft` 签名不变。详见 §4.0。
+>
+> **v3 实施（2026-10-19）**：commit `208da1e` 落地。`toolkit/draft.py` 抽出 `derive_steps()` 公开纯函数供 `frames.step_times()` 复用（D10 严格同源）；`toolkit/cli.py` 在 `_draft_all` 中 `draft.build` 之前调 `_ensure_frames(mf, ep)`；`toolkit/release.py` 新增 `_check_frames_mode`（subprocess 隔离 + frames/ 帧数 ≫ 步骤数 兜底）；3 个 manifest 加 `[draft] frame_mode="on_demand"` / `frame_follow_up=0`（可选字段）。实测 19 集 build 全成功，0 FAIL。
 
 ---
 
@@ -459,3 +461,4 @@ ffmpeg -v error -i <video> -vf "select='eq(n\,14900)+eq(n\,30000)'" -vsync 0 m_%
 |---|---|---|
 | v1 | 2026-10-19 | 初稿：粒度分析 + 实测基线 + `draft.build(video=...)` 接口设计 |
 | **v2** | 2026-10-19 | 架构调研后修订：<br>① **否决** v1 的 `draft.build(video=...)`——改为新增 L0.5 `toolkit/frames.py`（D4）；<br>② 新增 §1.5 架构影响调研（三条契约 C1/C2/C3 + 被否决方案）；<br>③ 新增 D7–D10（ffmpeg 降级 / manifest 字段 / frames 保留 / 步骤推导同源）；<br>④ 实施步骤从 6 项扩到 8 项，代码量估算 40 行 → **250 行级**；<br>⑤ 验收新增 V9–V11（draft 纯函数 / 时间点同源 / 无 ffmpeg 降级） |
+| **v3** | 2026-10-19 | 实施完成：<br>① `toolkit/draft.py` 抽出 `derive_steps()` 公开纯函数（**`build()` 签名不变**）；<br>② `toolkit/frames.py` 落地（~140 行，5 个公开函数：available/resolve_video/step_times/ensure/extract_at）；<br>③ `toolkit/cli.py` 新增 `_ensure_frames(mf, ep)` 编排点；<br>④ 3 个 manifest 加 `[draft] frame_mode="on_demand"` / `frame_follow_up=0`（可选字段）；<br>⑤ `toolkit/release.py` 新增 `_check_frames_mode`（subprocess 隔离 + frames/ 帧数 ≫ 步骤数 兜底）；<br>⑥ **实测 19 集 build 全成功**，0 FAIL，单集抽帧从 171 s → 5 s（19 集 250 帧）；<br>⑦ commit `208da1e` 推送 origin/main |

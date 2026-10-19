@@ -32,23 +32,28 @@ E:/002-Pr/videonotes-kit/                # 工具链根
 ├── toolkit/            # 本地管线（零硬编码，全部读 manifest）
 │   ├── cli.py          #   CLI 路由 + verify 非破坏回归
 │   ├── manifest.py     #   读 projects/<课>/manifest.toml
-│   ├── draft.py        #   = v2tutorial：全量帧对齐 + 聚合 + 简繁 → steps_v2.md
+│   ├── draft.py        #   字幕 → 步骤聚合 + 简繁 → steps_v2.md（纯函数；P9 抽出 derive_steps() 公开复用）
+│   ├── frames.py       #   L0.5 按需抽帧层（**唯一** import subprocess 的模块；与 draft.derive_steps 同源 → 抽帧点 = 笔记引用点）
 │   ├── curate.py       #   Tier1：draft → steps_pro.skeleton.md 骨架 + Tier2 LLM 接口（改由 templates/steps_pro.md 渲染）
 │   ├── consolidate.py  #   汇集笔记 + 复制被引帧到 assets/ + 改写图链（自包含）
 │   ├── docs.py         #   读 manifest 归档参考文档
 │   ├── index.py        #   扫描 notes/ 自动生成 总索引.md（改由 templates/index.md 渲染）
 │   ├── templates.py    #   模板渲染层（标准库 string.Template；零第三方依赖）
-│   └── release.py      #   release_check 子命令（8 项同步点检查：P* / verify / 总索引 / README / AGENT / manifest / 模板真接 / P5 红线）
+│   └── release.py      #   release_check 子命令（**9 项**同步点检查：P* / verify / 总索引 / README / AGENT / manifest / 模板真接 / P5 红线 / **P9 抽帧契约**）
 ├── projects/           # 一门课一个文件夹（数据驱动）
 │   └── 沐北AICG/
 │       └── manifest.toml   # 课程/集/文档清单 + 索引增强文案 + [llm] 开关
 ├── templates/          # steps_pro.md / index.md 模板（由 toolkit/templates.py 渲染；详见 templates/README.md）
 ├── out/<课程>/         # 产物（vidwise 原始产物 + _curated + <notes_subdir>/）
-│   ├── <集>.mp4/       #   vidwise 原始产物：transcript.json + frames/ + steps_v2.md
+│   ├── <集>.mp4/       #   vidwise 原始产物：transcript.json + steps_v2.md（P9 起 frames/ 不再由 vidwise 产出）
 │   ├── _curated/<集>/  #   人工精校金标准 steps_pro.md（curate 生成的骨架为 .skeleton.md）
 │   └── <notes_subdir>/ #   最终交付（默认 steps_pro/）：NN_标签_主题.md + 总索引.md
 │       ├── assets/<标签>/   # 各集被引帧副本（自包含，可整体移动）
-│       └── 参考文档/         # Rxx_类别_主题
+│       ├── source/<系列>/   # 源 mp4（copy_source 自动复制）
+│       ├── frames/          # P9 按需抽帧产物（≤ 步骤数 × 3 张；可由 mp4 重建）
+│       ├── 参考文档/         # Rxx_类别_主题
+│       ├── play.html         # 单页播放器
+│       └── notes.html        # 三栏笔记浏览器
 └── VIDEONOTES-KIT_ROADMAP.md  # 方案与验收（含 P1→P5 进度 + 6 条验收对照）
 ```
 
@@ -60,10 +65,11 @@ E:/002-Pr/videonotes-kit/                # 工具链根
 ## 3. 环境要求
 
 - **Python 3.11+**（用标准库 `tomllib` 读 TOML，无需装 PyYAML）。
-- **无第三方依赖**：Tier2 LLM 接口用标准库 `urllib`，不引入 `requests`。
+- **无第三方 Python 依赖**：Tier2 LLM 接口用标准库 `urllib`，不引入 `requests`。
 - **无需 API key**：默认 Tier0（draft）+ Tier1（人工精校）。Tier2 本地 LLM 默认关闭。
 - vidwise 本地转写依赖本机已缓存的 faster-whisper medium 模型（`HF_HUB_OFFLINE=1` 强制离线）。
 - **依赖安装**：`pip install -e .` 仅装工具链必需的 5 个（click / openai-whisper / yt-dlp / numpy / pillow）。`anthropic` / `openai` 已移到 `[project.optional-dependencies].guide` extras；上游 `--guide` 路径要用就 `pip install -e ".[guide]"`。本工具链不需要。
+- **可选外部二进制：`ffmpeg`**（P9 按需抽帧）。**缺失时 build 仍能完成**（用已有 `frames/`，仅 WARN 跳过抽帧）—— 但新建课程首次 build 必须装（`where ffmpeg` 或 `brew install ffmpeg`）。
 
 ---
 
@@ -97,14 +103,14 @@ python notes.py 沐北AICG verify
 
 | 子命令 | 作用 | 说明 |
 |---|---|---|
-| `draft` | 重生成各集 `steps_v2.md` | draft 引擎，确定性，可复现 |
+| `draft` | 重生成各集 `steps_v2.md`（+ 按需抽帧入 `frames/`） | draft 引擎，确定性，可复现；P9 自动对每集按步骤时间点精确抽帧 |
 | `curate [--overwrite]` | 生成 `_curated/<集>/steps_pro.skeleton.md` | Tier1 半成品骨架；不覆盖 `steps_pro.md`；`--overwrite` 仅重写骨架 |
-| `build` | 跑 `draft` + 汇集 + 文档 + 索引 | 重建自包含 `notes/` 包 |
+| `build` | 跑 `draft` + 汇集 + 文档 + 索引 + **按需抽帧** + notes_view | 重建自包含 `notes/` 包（含 play.html + notes.html） |
 | `verify` | 非破坏回归 + 图片自包含校验 | draft 重生成比对 + notes 重生成到 `_staging` diff + assets 校验 |
 | `docs` | 仅归档参考文档 | 读 manifest docs 段 |
 | `index` | 仅重新生成总索引 | 全部文案由 manifest 驱动 |
 | `consolidate` | 仅汇集视频笔记 | 不含文档/索引 |
-| `release_check` | 8 项同步点自动检查 | P* 阶段覆盖 / verify 产物覆盖 / 总索引 banner / README banner / AGENT 模块地图 / manifest 必填字段 / **模板真接代码** / **P5 教程体红线** |
+| `release_check` | **9 项**同步点自动检查 | P* 阶段覆盖 / verify 产物覆盖 / 总索引 banner / README banner / AGENT 模块地图 / manifest 必填字段 / **模板真接代码** / **P5 教程体红线** / **P9 抽帧契约（subprocess 隔离 + frames/ 帧数回归）** |
 
 ---
 
@@ -125,6 +131,8 @@ doc_variant_note = "..."         # 总索引·同源变体提示
 
 [draft]
 max_steps = 80                   # draft 单集最大步数
+frame_mode = "on_demand"         # 抽帧模式：on_demand（默认，按需）| full（旧全量，由 vidwise 提供）
+frame_follow_up = 0              # 0 = 只抽步骤点 t；2 = 额外抽 t+2 作为备选
 
 [[episodes]]                     # 每集一条
 seq = "01"                       # 两位序号
@@ -152,11 +160,13 @@ timeout = 60
 
 ## 7. 新增一门课程（换课不改代码）
 
-1. 建 `projects/<新课>/manifest.toml`，填 `[course]` + 各 `[[episodes]]` + 各 `[[docs]]`。
-2. 把源视频放到对应 `ep_dir`（先用 vidwise 本地 `--no-guide` 跑转写，得到 transcript.json + frames/）。
-3. `python notes.py <新课> draft` → 生成 `steps_v2.md`。
+1. 建 `projects/<新课>/manifest.toml`，填 `[course]` + 各 `[[episodes]]` + 各 `[[docs]]`，确认 `[draft]` 默认值即可。
+2. 准备转写 + 源视频：
+   - **B 站官方字幕直通（推荐）**：把 `*.srt` 放到 `ep_dir` 同级目录，build 时自动生成 `transcript.json`（免 Whisper 转写数小时）。
+   - **本地 Whisper 转写**：用 vidwise `--no-guide` 跑，得到 `transcript.json`；源 mp4 放在 `ep_dir` 某处（manifest `source_video` 指向或放在 `steps_pro/source/<series>/` 自动识别）。
+3. `python notes.py <新课> build` → 一条命令产出：按需抽帧 + 草稿 + 汇集 + 总索引 + `play.html` + `notes.html`。
 4. `python notes.py <新课> curate` → 生成骨架；人工润色成 `steps_pro.md`。
-5. `python notes.py <新课> build` → 出自包含图文笔记包（**同时自动生成 `play.html` 播放器 + `notes.html` 三栏笔记浏览器**，无需额外配置）。
+5. `python notes.py <新课> release_check` → 9 项同步点全 PASS。
 
 **全程不碰 `toolkit/` 任何代码。**
 
