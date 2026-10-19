@@ -1,7 +1,7 @@
 # AGENT.md · 面向 AI Agent 的项目操作手册
 
 > 你是被叫来继续开发这个项目的 AI Agent。本文件给出 **30 秒理解 + 关键约束 + 可执行命令**。
-> 上游文档：`README.md`（vidwise 原始）。人类使用手册：`README.notes.md`。方案与验收：`VIDEONOTES-KIT_ROADMAP.md`。
+> 上游文档：`README.md`（vidwise 原始）。人类使用手册：`README.notes.md`。方案与验收：`VIDEONOTES-KIT_ROADMAP.md`。待实施方案：`VIDEONOTES-KIT_P9_ONDEMAND_FRAMES.md`（按需抽帧）。
 
 ---
 
@@ -219,6 +219,7 @@ timeout  = 60
 - **双 README** — `README.md`（上游未改）+ `README.notes.md`（项目手册） + `AGENT.md`（本文件）
 - **Tier2 默认关** — 本机无对话生成模型，开了也用不到；纯本地链路不依赖
 - **模板用标准库 `string.Template`，不引入 jinja2** — `toolkit/templates.py` 仅 ~50 行；保留"零第三方依赖"承诺；占位符 `$name` 约定，详见 `templates/README.md`
+- **全量抽帧是待还的技术债（P9）** — 现状每集 `fps=1/2` 抽 459 张、只用约 10 张（利用率 2%）。实测按需 `-ss` 精确抽帧快 19.5×、小 44×。方案见 `VIDEONOTES-KIT_P9_ONDEMAND_FRAMES.md`（尚未实施，`draft.build(video=None)` 仍走旧全量路径）
 
 ## 12. 紧急联络
 
